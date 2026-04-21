@@ -37,7 +37,10 @@ def load_data() -> dict:
     team_rank = json.loads(team_rank_path.read_text()) if team_rank_path.exists() else {}
     hca_path = config.REPORTS_DIR / "hca_transitions.json"
     hca = json.loads(hca_path.read_text()) if hca_path.exists() else {}
-    return {"bars": bars, "concentration": conc, "team_rank": team_rank, "hca": hca}
+    big_path = config.REPORTS_DIR / "transitions_bigrams.json"
+    bigrams = json.loads(big_path.read_text()) if big_path.exists() else {}
+    return {"bars": bars, "concentration": conc, "team_rank": team_rank,
+            "hca": hca, "bigrams": bigrams}
 
 
 # %% template
@@ -174,13 +177,29 @@ HTML_TEMPLATE = r"""<!doctype html>
   </div>
   <div class="control">
     <label>Split</label>
-    <div class="pill-group" id="split-group">
-      <button class="pill active" data-split="all">All</button>
-      <button class="pill" data-split="home_acting">Home acting</button>
-      <button class="pill" data-split="away_acting">Away acting</button>
-      <button class="pill" data-split="open_doors">Open doors</button>
-      <button class="pill" data-split="closed_doors">Closed doors</button>
-    </div>
+    <select id="split-select" class="select">
+      <optgroup label="Overall">
+        <option value="all" selected>All</option>
+      </optgroup>
+      <optgroup label="Home / Away">
+        <option value="home_acting">Home acting</option>
+        <option value="away_acting">Away acting</option>
+      </optgroup>
+      <optgroup label="COVID experiment">
+        <option value="open_doors">Open doors</option>
+        <option value="closed_doors">Closed doors</option>
+      </optgroup>
+      <optgroup label="Phase">
+        <option value="reg_season">Regular season</option>
+        <option value="playoff">Playoffs / Final Four</option>
+      </optgroup>
+      <optgroup label="Period (regulation only)">
+        <option value="period_1">1st quarter</option>
+        <option value="period_2">2nd quarter</option>
+        <option value="period_3">3rd quarter</option>
+        <option value="period_4">4th quarter</option>
+      </optgroup>
+    </select>
   </div>
   <div class="control">
     <label>Bar value</label>
@@ -197,6 +216,7 @@ HTML_TEMPLATE = r"""<!doctype html>
       <button class="pill" data-view="multiples">Small multiples</button>
       <button class="pill" data-view="team">Per-team</button>
       <button class="pill" data-view="hca">HCA lens</button>
+      <button class="pill" data-view="bigrams">Storylines</button>
     </div>
   </div>
 </div>
@@ -373,6 +393,25 @@ HTML_TEMPLATE = r"""<!doctype html>
   </div>
 </div>
 
+<!-- Storylines view (second-order / bigram paths) -->
+<div id="view-bigrams" class="view hidden">
+  <div class="card full">
+    <div class="panel-head">
+      <div class="head-left">
+        <h3>Storylines -- what are the most common 3-event sequences?</h3>
+        <h2>Second-order Markov chains: P(action<sub>t+1</sub>, action<sub>t+2</sub> &vert; action<sub>t</sub>)</h2>
+      </div>
+      <span class="tag q2" style="background:rgba(110,176,255,0.15);color:var(--accent)">2nd-order</span>
+    </div>
+    <p class="sub" style="margin-bottom:20px">
+      For each of the top-6 source actions by volume, the most common two-step
+      continuations. Reads left-to-right. Top-K coverage = how much of the full
+      distribution these 5 paths cover (high = concentrated, low = disperse).
+    </p>
+    <div id="bigrams-grid" style="display:grid;gap:16px"></div>
+  </div>
+</div>
+
 <script>
 /* ====== data injected from Python ====== */
 const BARS = __BARS__;
@@ -382,6 +421,7 @@ const SOURCE_CATS = __SOURCE_CATS__;
 const PAIRED = __PAIRED__;
 const TEAM_RANK = __TEAM_RANK__;
 const HCA = __HCA__;
+const BIGRAMS = __BIGRAMS__;
 
 Chart.defaults.font.family = "'DM Sans', 'Axiforma', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
@@ -963,6 +1003,71 @@ function updateHcaView(){
   tbl.appendChild(tbody);
 }
 
+/* ---------- Bigrams (storylines) view ---------- */
+function updateBigramsView(){
+  const host = document.getElementById('bigrams-grid');
+  host.innerHTML = '';
+  if (!BIGRAMS || !BIGRAMS.bigrams || !BIGRAMS.bigrams.length){
+    host.innerHTML = '<p class="sub">Bigram data not available. Run scripts/12b_bigrams.py.</p>';
+    return;
+  }
+  BIGRAMS.bigrams.forEach(b => {
+    const panel = document.createElement('div');
+    panel.className = 'card';
+    panel.style.padding = '16px';
+
+    const header = `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;color:var(--fg-mute);letter-spacing:0.04em;text-transform:uppercase">Starting from</div>
+          <div style="font-size:18px;font-weight:600">${b.source} -- ${b.source_label}</div>
+        </div>
+        <div style="font-size:12px;color:var(--fg-mute);font-variant-numeric:tabular-nums">
+          n = ${b.n_source.toLocaleString()} &middot; top-5 covers ${(b.top_k_coverage*100).toFixed(0)}% of paths
+        </div>
+      </div>`;
+
+    const rows = b.paths.map((p, i) => {
+      const step0 = `<span class="bg-chip" style="background:rgba(110,176,255,0.15);color:var(--accent)">${b.source}</span>`;
+      const step1 = `<span class="bg-chip">${p.next_1}<span style="color:var(--fg-mute);margin-left:4px;font-weight:400">${PLAIN[p.next_1] || ''}</span></span>`;
+      const step2 = `<span class="bg-chip">${p.next_2}<span style="color:var(--fg-mute);margin-left:4px;font-weight:400">${PLAIN[p.next_2] || ''}</span></span>`;
+      const pct = (p.p * 100).toFixed(1);
+      const ci = (p.lo !== undefined && p.hi !== undefined)
+        ? `<span style="color:var(--fg-mute);font-size:11px;margin-left:6px">[${(p.lo*100).toFixed(1)}, ${(p.hi*100).toFixed(1)}]</span>`
+        : '';
+      const barWidth = Math.max(4, p.p * 100 * 3);   // scale so 33% fills the bar
+      return `
+        <div style="display:grid;grid-template-columns:24px 1fr 90px;gap:12px;align-items:center;padding:6px 0;border-top:${i===0?'0':'1px solid var(--border)'}">
+          <div style="color:var(--fg-mute);font-size:12px">#${i+1}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${step0}<span style="color:var(--fg-mute)">→</span>${step1}<span style="color:var(--fg-mute)">→</span>${step2}
+          </div>
+          <div style="text-align:right;font-variant-numeric:tabular-nums">
+            <div style="display:inline-block;width:${barWidth}px;max-width:60px;height:4px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-right:8px;opacity:.7"></div>
+            <span style="font-weight:600">${pct}%</span>${ci}
+          </div>
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = header + rows;
+    host.appendChild(panel);
+  });
+}
+
+/* small chip helper styles injected once */
+(function(){
+  if (document.getElementById('bg-chip-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'bg-chip-styles';
+  s.textContent = `
+    .bg-chip{display:inline-flex;align-items:center;gap:4px;
+      background:var(--panel-2);border:1px solid var(--border);
+      border-radius:6px;padding:4px 8px;font-size:12px;font-weight:600;
+      color:var(--fg);font-family:inherit}
+  `;
+  document.head.appendChild(s);
+})();
+
 /* ---------- CSV download ---------- */
 function downloadCSV(q){
   const src = state.source, split = state.split;
@@ -996,6 +1101,7 @@ function render(){
   else if (state.view === 'multiples') updateSmallMultiples();
   else if (state.view === 'team') updateTeamView();
   else if (state.view === 'hca') updateHcaView();
+  else if (state.view === 'bigrams') updateBigramsView();
   writeHash();
 }
 
@@ -1035,28 +1141,26 @@ function init(){
   const sources = sourcesAvailable('all');
   state.source = hash.source && sources.includes(hash.source) ? hash.source
                : (sources.includes('2FGM') ? '2FGM' : sources[0]);
-  state.split = ['all','home_acting','away_acting','open_doors','closed_doors'].includes(hash.split) ? hash.split : 'all';
-  state.view  = ['bars','heatmap','multiples','team','hca'].includes(hash.view) ? hash.view : 'bars';
+  const VALID_SPLITS = ['all','home_acting','away_acting','open_doors','closed_doors',
+    'reg_season','playoff','period_1','period_2','period_3','period_4'];
+  state.split = VALID_SPLITS.includes(hash.split) ? hash.split : 'all';
+  state.view  = ['bars','heatmap','multiples','team','hca','bigrams'].includes(hash.view) ? hash.view : 'bars';
   state.mode  = ['raw','lift'].includes(hash.mode) ? hash.mode : 'raw';
 
   document.getElementById('source-select').value = state.source;
-  document.querySelectorAll('#split-group .pill').forEach(b => b.classList.toggle('active', b.dataset.split === state.split));
+  document.getElementById('split-select').value = state.split;
   document.querySelectorAll('#view-group .pill').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
   document.querySelectorAll('#mode-group .pill').forEach(b => b.classList.toggle('active', b.dataset.mode === state.mode));
 
   document.getElementById('source-select').addEventListener('change', e => {
     state.source = e.target.value; render();
   });
-  document.querySelectorAll('#split-group .pill').forEach(btn =>
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#split-group .pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.split = btn.dataset.split;
-      const avail = sourcesAvailable(state.split);
-      if (!avail.includes(state.source)) { state.source = avail[0]; document.getElementById('source-select').value = state.source; }
-      render();
-    })
-  );
+  document.getElementById('split-select').addEventListener('change', e => {
+    state.split = e.target.value;
+    const avail = sourcesAvailable(state.split);
+    if (!avail.includes(state.source)) { state.source = avail[0]; document.getElementById('source-select').value = state.source; }
+    render();
+  });
   document.querySelectorAll('#mode-group .pill').forEach(btn =>
     btn.addEventListener('click', () => {
       document.querySelectorAll('#mode-group .pill').forEach(b => b.classList.remove('active'));
@@ -1100,6 +1204,7 @@ def main() -> None:
     conc_json = data["concentration"]
     team_rank = data["team_rank"]
     hca = data["hca"]
+    bigrams = data["bigrams"]
     plain_labels = bars_json.get("plain_labels", {})
     source_categories = bars_json.get("source_categories", {})
     paired_sources = bars_json.get("paired_sources", {})
@@ -1113,6 +1218,7 @@ def main() -> None:
         .replace("__PAIRED__", json.dumps(paired_sources, separators=(",", ":")))
         .replace("__TEAM_RANK__", json.dumps(team_rank, separators=(",", ":")))
         .replace("__HCA__", json.dumps(hca, separators=(",", ":")))
+        .replace("__BIGRAMS__", json.dumps(bigrams, separators=(",", ":")))
     )
 
     out = config.DASHBOARDS_DIR / "transitions.html"

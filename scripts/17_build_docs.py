@@ -53,6 +53,7 @@ def main() -> None:
         "transitions_concentration.json",
         "transitions_qa.json",
         "transitions_team_rank.json",
+        "transitions_bigrams.json",
         "hca_transitions.json",
         "final_report.md",
     ]

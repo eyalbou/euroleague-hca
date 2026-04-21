@@ -334,15 +334,33 @@ def _bootstrap_ci_for_topk(
 
 # %% baselines (marginal P(next) per split, per question)
 
-def _compute_baselines(events: pd.DataFrame) -> dict:
-    """Overall P(action) per (split, question) -- used for lift = p / baseline."""
-    splits = {
+def _build_splits(events: pd.DataFrame) -> dict:
+    """All split views on the event-level frame (shared between baseline + main pipeline).
+
+    Added in Phase D:
+      - reg_season / playoff  (from phase_code; RS/TS = regular, PO/FF/PI = playoff)
+      - period_1..4  (from period column; only in-regulation periods)
+    """
+    playoff_codes = {"PO", "FF", "PI"}
+    reg_codes = {"RS", "TS"}
+    return {
         "all":          events,
         "home_acting":  events[events["is_home"] == 1],
         "away_acting":  events[events["is_home"] == 0],
         "open_doors":   events[events["closed_doors"] == 0],
         "closed_doors": events[events["closed_doors"] == 1],
+        "reg_season":   events[events["phase_code"].isin(reg_codes)],
+        "playoff":      events[events["phase_code"].isin(playoff_codes)],
+        "period_1":     events[events["period"] == 1],
+        "period_2":     events[events["period"] == 2],
+        "period_3":     events[events["period"] == 3],
+        "period_4":     events[events["period"] == 4],
     }
+
+
+def _compute_baselines(events: pd.DataFrame) -> dict:
+    """Overall P(action) per (split, question) -- used for lift = p / baseline."""
+    splits = _build_splits(events)
     out: dict = {}
     for split, df in splits.items():
         out[split] = {}
@@ -406,13 +424,7 @@ def build_transitions(events: pd.DataFrame) -> dict:
     log.info("computing per-team rankings...")
     team_rankings = _compute_team_rankings(events)
 
-    splits = {
-        "all":          events,
-        "home_acting":  events[events["is_home"] == 1],
-        "away_acting":  events[events["is_home"] == 0],
-        "open_doors":   events[events["closed_doors"] == 0],
-        "closed_doors": events[events["closed_doors"] == 1],
-    }
+    splits = _build_splits(events)
 
     question_cols = {"q0": "next_q0", "q1": "next_q1", "q2": "next_q2"}
     time_cols = {"q1": "sec_q1", "q2": "sec_q2"}
