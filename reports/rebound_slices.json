@@ -10,7 +10,8 @@
       2021,
       2022,
       2023,
-      2024
+      2024,
+      2025
     ],
     "miss_types": [
       "3FGA",
@@ -18,7 +19,7 @@
       "FTA_terminal"
     ],
     "built_by": "scripts/23_rebound_rates.py",
-    "n_rows": 1080
+    "n_rows": 1200
   },
   "rows": [
     {
@@ -380,6 +381,66 @@
       "n_dreb": 30,
       "n_oreb": 7,
       "n_other": 0
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 332,
+      "n_dreb": 212,
+      "n_oreb": 114,
+      "n_other": 6
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 338,
+      "n_dreb": 223,
+      "n_oreb": 111,
+      "n_other": 4
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 352,
+      "n_dreb": 243,
+      "n_oreb": 89,
+      "n_other": 20
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 358,
+      "n_dreb": 228,
+      "n_oreb": 116,
+      "n_other": 14
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 38,
+      "n_dreb": 33,
+      "n_oreb": 3,
+      "n_other": 2
+    },
+    {
+      "team_id": "ASV",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 45,
+      "n_dreb": 35,
+      "n_oreb": 9,
+      "n_other": 1
     },
     {
       "team_id": "BAM",
@@ -1162,6 +1223,66 @@
       "n_other": 2
     },
     {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 321,
+      "n_dreb": 224,
+      "n_oreb": 90,
+      "n_other": 7
+    },
+    {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 335,
+      "n_dreb": 223,
+      "n_oreb": 107,
+      "n_other": 5
+    },
+    {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 301,
+      "n_dreb": 185,
+      "n_oreb": 105,
+      "n_other": 11
+    },
+    {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 311,
+      "n_dreb": 191,
+      "n_oreb": 107,
+      "n_other": 13
+    },
+    {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 39,
+      "n_dreb": 29,
+      "n_oreb": 9,
+      "n_other": 1
+    },
+    {
+      "team_id": "BAR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 32,
+      "n_dreb": 20,
+      "n_oreb": 9,
+      "n_other": 3
+    },
+    {
       "team_id": "BAS",
       "season": 2015,
       "miss_type": "2FGA",
@@ -1760,6 +1881,66 @@
       "n_dreb": 25,
       "n_oreb": 5,
       "n_other": 2
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 317,
+      "n_dreb": 204,
+      "n_oreb": 106,
+      "n_other": 7
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 264,
+      "n_dreb": 181,
+      "n_oreb": 75,
+      "n_other": 8
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 352,
+      "n_dreb": 238,
+      "n_oreb": 100,
+      "n_other": 14
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 350,
+      "n_dreb": 238,
+      "n_oreb": 100,
+      "n_other": 12
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 39,
+      "n_dreb": 33,
+      "n_oreb": 5,
+      "n_other": 1
+    },
+    {
+      "team_id": "BAS",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 44,
+      "n_dreb": 36,
+      "n_oreb": 7,
+      "n_other": 1
     },
     {
       "team_id": "BER",
@@ -2902,6 +3083,66 @@
       "n_other": 2
     },
     {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 334,
+      "n_dreb": 219,
+      "n_oreb": 103,
+      "n_other": 12
+    },
+    {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 349,
+      "n_dreb": 233,
+      "n_oreb": 109,
+      "n_other": 7
+    },
+    {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 296,
+      "n_dreb": 197,
+      "n_oreb": 81,
+      "n_other": 18
+    },
+    {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 288,
+      "n_dreb": 189,
+      "n_oreb": 87,
+      "n_other": 12
+    },
+    {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 40,
+      "n_dreb": 35,
+      "n_oreb": 5,
+      "n_other": 0
+    },
+    {
+      "team_id": "DUB",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 40,
+      "n_dreb": 30,
+      "n_oreb": 8,
+      "n_other": 2
+    },
+    {
       "team_id": "DYR",
       "season": 2019,
       "miss_type": "2FGA",
@@ -3198,6 +3439,66 @@
       "is_home": 1,
       "n_eligible": 11,
       "n_dreb": 6,
+      "n_oreb": 5,
+      "n_other": 0
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 302,
+      "n_dreb": 199,
+      "n_oreb": 98,
+      "n_other": 5
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 286,
+      "n_dreb": 200,
+      "n_oreb": 79,
+      "n_other": 7
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 291,
+      "n_dreb": 196,
+      "n_oreb": 78,
+      "n_other": 17
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 293,
+      "n_dreb": 209,
+      "n_oreb": 71,
+      "n_other": 13
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 40,
+      "n_dreb": 32,
+      "n_oreb": 5,
+      "n_other": 3
+    },
+    {
+      "team_id": "HTA",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 34,
+      "n_dreb": 29,
       "n_oreb": 5,
       "n_other": 0
     },
@@ -3800,6 +4101,66 @@
       "n_dreb": 14,
       "n_oreb": 7,
       "n_other": 3
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 307,
+      "n_dreb": 216,
+      "n_oreb": 85,
+      "n_other": 6
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 309,
+      "n_dreb": 215,
+      "n_oreb": 86,
+      "n_other": 8
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 327,
+      "n_dreb": 226,
+      "n_oreb": 87,
+      "n_other": 14
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 305,
+      "n_dreb": 207,
+      "n_oreb": 84,
+      "n_other": 14
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 32,
+      "n_dreb": 21,
+      "n_oreb": 8,
+      "n_other": 3
+    },
+    {
+      "team_id": "IST",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 33,
+      "n_dreb": 26,
+      "n_oreb": 7,
+      "n_other": 0
     },
     {
       "team_id": "KHI",
@@ -4822,6 +5183,66 @@
       "n_other": 5
     },
     {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 315,
+      "n_dreb": 192,
+      "n_oreb": 116,
+      "n_other": 7
+    },
+    {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 299,
+      "n_dreb": 182,
+      "n_oreb": 116,
+      "n_other": 1
+    },
+    {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 333,
+      "n_dreb": 192,
+      "n_oreb": 119,
+      "n_other": 22
+    },
+    {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 277,
+      "n_dreb": 176,
+      "n_oreb": 87,
+      "n_other": 14
+    },
+    {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 46,
+      "n_dreb": 39,
+      "n_oreb": 6,
+      "n_other": 1
+    },
+    {
+      "team_id": "MAD",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 45,
+      "n_dreb": 37,
+      "n_oreb": 6,
+      "n_other": 2
+    },
+    {
       "team_id": "MAL",
       "season": 2015,
       "miss_type": "2FGA",
@@ -5180,6 +5601,66 @@
       "n_dreb": 46,
       "n_oreb": 7,
       "n_other": 3
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 363,
+      "n_dreb": 244,
+      "n_oreb": 115,
+      "n_other": 4
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 319,
+      "n_dreb": 204,
+      "n_oreb": 112,
+      "n_other": 3
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 330,
+      "n_dreb": 228,
+      "n_oreb": 85,
+      "n_other": 17
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 288,
+      "n_dreb": 190,
+      "n_oreb": 84,
+      "n_other": 14
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 49,
+      "n_dreb": 38,
+      "n_oreb": 9,
+      "n_other": 2
+    },
+    {
+      "team_id": "MCO",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 36,
+      "n_dreb": 26,
+      "n_oreb": 9,
+      "n_other": 1
     },
     {
       "team_id": "MIL",
@@ -5782,6 +6263,66 @@
       "n_other": 1
     },
     {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 324,
+      "n_dreb": 224,
+      "n_oreb": 96,
+      "n_other": 4
+    },
+    {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 292,
+      "n_dreb": 190,
+      "n_oreb": 100,
+      "n_other": 2
+    },
+    {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 306,
+      "n_dreb": 202,
+      "n_oreb": 92,
+      "n_other": 12
+    },
+    {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 302,
+      "n_dreb": 208,
+      "n_oreb": 81,
+      "n_other": 13
+    },
+    {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 36,
+      "n_dreb": 30,
+      "n_oreb": 5,
+      "n_other": 1
+    },
+    {
+      "team_id": "MIL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 35,
+      "n_dreb": 27,
+      "n_oreb": 7,
+      "n_other": 1
+    },
+    {
       "team_id": "MUN",
       "season": 2015,
       "miss_type": "2FGA",
@@ -6260,6 +6801,66 @@
       "n_dreb": 21,
       "n_oreb": 2,
       "n_other": 3
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 324,
+      "n_dreb": 224,
+      "n_oreb": 93,
+      "n_other": 7
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 302,
+      "n_dreb": 204,
+      "n_oreb": 92,
+      "n_other": 6
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 334,
+      "n_dreb": 222,
+      "n_oreb": 92,
+      "n_other": 20
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 330,
+      "n_dreb": 218,
+      "n_oreb": 99,
+      "n_other": 13
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 36,
+      "n_dreb": 28,
+      "n_oreb": 7,
+      "n_other": 1
+    },
+    {
+      "team_id": "MUN",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 29,
+      "n_dreb": 19,
+      "n_oreb": 10,
+      "n_other": 0
     },
     {
       "team_id": "OLY",
@@ -6862,6 +7463,66 @@
       "n_other": 4
     },
     {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 293,
+      "n_dreb": 176,
+      "n_oreb": 113,
+      "n_other": 4
+    },
+    {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 254,
+      "n_dreb": 150,
+      "n_oreb": 97,
+      "n_other": 7
+    },
+    {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 338,
+      "n_dreb": 207,
+      "n_oreb": 112,
+      "n_other": 19
+    },
+    {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 344,
+      "n_dreb": 203,
+      "n_oreb": 124,
+      "n_other": 17
+    },
+    {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 40,
+      "n_dreb": 35,
+      "n_oreb": 4,
+      "n_other": 1
+    },
+    {
+      "team_id": "OLY",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 57,
+      "n_dreb": 47,
+      "n_oreb": 8,
+      "n_other": 2
+    },
+    {
       "team_id": "PAM",
       "season": 2017,
       "miss_type": "2FGA",
@@ -7159,6 +7820,66 @@
       "n_eligible": 35,
       "n_dreb": 25,
       "n_oreb": 8,
+      "n_other": 2
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 330,
+      "n_dreb": 200,
+      "n_oreb": 119,
+      "n_other": 11
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 264,
+      "n_dreb": 175,
+      "n_oreb": 81,
+      "n_other": 8
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 384,
+      "n_dreb": 231,
+      "n_oreb": 137,
+      "n_other": 16
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 382,
+      "n_dreb": 229,
+      "n_oreb": 134,
+      "n_other": 19
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 44,
+      "n_dreb": 33,
+      "n_oreb": 10,
+      "n_other": 1
+    },
+    {
+      "team_id": "PAM",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 62,
+      "n_dreb": 47,
+      "n_oreb": 13,
       "n_other": 2
     },
     {
@@ -7762,6 +8483,66 @@
       "n_other": 2
     },
     {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 339,
+      "n_dreb": 216,
+      "n_oreb": 115,
+      "n_other": 8
+    },
+    {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 352,
+      "n_dreb": 220,
+      "n_oreb": 129,
+      "n_other": 3
+    },
+    {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 299,
+      "n_dreb": 202,
+      "n_oreb": 86,
+      "n_other": 11
+    },
+    {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 305,
+      "n_dreb": 213,
+      "n_oreb": 80,
+      "n_other": 12
+    },
+    {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 35,
+      "n_dreb": 30,
+      "n_oreb": 5,
+      "n_other": 0
+    },
+    {
+      "team_id": "PAN",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 44,
+      "n_dreb": 35,
+      "n_oreb": 9,
+      "n_other": 0
+    },
+    {
       "team_id": "PAR",
       "season": 2022,
       "miss_type": "2FGA",
@@ -7942,6 +8723,66 @@
       "n_other": 4
     },
     {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 325,
+      "n_dreb": 212,
+      "n_oreb": 109,
+      "n_other": 4
+    },
+    {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 368,
+      "n_dreb": 245,
+      "n_oreb": 115,
+      "n_other": 8
+    },
+    {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 295,
+      "n_dreb": 207,
+      "n_oreb": 72,
+      "n_other": 16
+    },
+    {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 325,
+      "n_dreb": 222,
+      "n_oreb": 90,
+      "n_other": 13
+    },
+    {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 25,
+      "n_dreb": 22,
+      "n_oreb": 2,
+      "n_other": 1
+    },
+    {
+      "team_id": "PAR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 38,
+      "n_dreb": 31,
+      "n_oreb": 3,
+      "n_other": 4
+    },
+    {
       "team_id": "PRS",
       "season": 2024,
       "miss_type": "2FGA",
@@ -8000,6 +8841,66 @@
       "n_dreb": 41,
       "n_oreb": 6,
       "n_other": 3
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 316,
+      "n_dreb": 204,
+      "n_oreb": 106,
+      "n_other": 6
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 337,
+      "n_dreb": 205,
+      "n_oreb": 131,
+      "n_other": 1
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 389,
+      "n_dreb": 237,
+      "n_oreb": 136,
+      "n_other": 16
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 399,
+      "n_dreb": 259,
+      "n_oreb": 127,
+      "n_other": 13
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 35,
+      "n_dreb": 28,
+      "n_oreb": 7,
+      "n_other": 0
+    },
+    {
+      "team_id": "PRS",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 58,
+      "n_dreb": 52,
+      "n_oreb": 4,
+      "n_other": 2
     },
     {
       "team_id": "RED",
@@ -8540,6 +9441,66 @@
       "n_dreb": 36,
       "n_oreb": 5,
       "n_other": 3
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 323,
+      "n_dreb": 181,
+      "n_oreb": 129,
+      "n_other": 13
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 344,
+      "n_dreb": 212,
+      "n_oreb": 124,
+      "n_other": 8
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 329,
+      "n_dreb": 197,
+      "n_oreb": 116,
+      "n_other": 16
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 306,
+      "n_dreb": 171,
+      "n_oreb": 115,
+      "n_other": 20
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 45,
+      "n_dreb": 35,
+      "n_oreb": 10,
+      "n_other": 0
+    },
+    {
+      "team_id": "RED",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 59,
+      "n_dreb": 47,
+      "n_oreb": 12,
+      "n_other": 0
     },
     {
       "team_id": "SAS",
@@ -9262,6 +10223,66 @@
       "n_other": 1
     },
     {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 334,
+      "n_dreb": 207,
+      "n_oreb": 125,
+      "n_other": 2
+    },
+    {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 349,
+      "n_dreb": 209,
+      "n_oreb": 134,
+      "n_other": 6
+    },
+    {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 367,
+      "n_dreb": 242,
+      "n_oreb": 115,
+      "n_other": 10
+    },
+    {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 335,
+      "n_dreb": 221,
+      "n_oreb": 99,
+      "n_other": 15
+    },
+    {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 41,
+      "n_dreb": 25,
+      "n_oreb": 13,
+      "n_other": 3
+    },
+    {
+      "team_id": "TEL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 39,
+      "n_dreb": 29,
+      "n_oreb": 7,
+      "n_other": 3
+    },
+    {
       "team_id": "TIV",
       "season": 2015,
       "miss_type": "2FGA",
@@ -9922,6 +10943,66 @@
       "n_other": 0
     },
     {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 324,
+      "n_dreb": 219,
+      "n_oreb": 98,
+      "n_other": 7
+    },
+    {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 295,
+      "n_dreb": 191,
+      "n_oreb": 101,
+      "n_other": 3
+    },
+    {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 313,
+      "n_dreb": 192,
+      "n_oreb": 107,
+      "n_other": 14
+    },
+    {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 320,
+      "n_dreb": 198,
+      "n_oreb": 107,
+      "n_other": 15
+    },
+    {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 37,
+      "n_dreb": 27,
+      "n_oreb": 8,
+      "n_other": 2
+    },
+    {
+      "team_id": "ULK",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 37,
+      "n_dreb": 29,
+      "n_oreb": 7,
+      "n_other": 1
+    },
+    {
       "team_id": "UNK",
       "season": 2016,
       "miss_type": "2FGA",
@@ -10220,6 +11301,66 @@
       "n_dreb": 27,
       "n_oreb": 3,
       "n_other": 3
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 292,
+      "n_dreb": 193,
+      "n_oreb": 94,
+      "n_other": 5
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 319,
+      "n_dreb": 206,
+      "n_oreb": 109,
+      "n_other": 4
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 321,
+      "n_dreb": 217,
+      "n_oreb": 91,
+      "n_other": 13
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 314,
+      "n_dreb": 204,
+      "n_oreb": 99,
+      "n_other": 11
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 35,
+      "n_dreb": 30,
+      "n_oreb": 3,
+      "n_other": 2
+    },
+    {
+      "team_id": "VIR",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 38,
+      "n_dreb": 29,
+      "n_oreb": 4,
+      "n_other": 5
     },
     {
       "team_id": "ZAL",
@@ -10820,6 +11961,66 @@
       "n_dreb": 28,
       "n_oreb": 7,
       "n_other": 2
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 0,
+      "n_eligible": 328,
+      "n_dreb": 217,
+      "n_oreb": 107,
+      "n_other": 4
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "2FGA",
+      "is_home": 1,
+      "n_eligible": 358,
+      "n_dreb": 221,
+      "n_oreb": 126,
+      "n_other": 11
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 0,
+      "n_eligible": 266,
+      "n_dreb": 170,
+      "n_oreb": 85,
+      "n_other": 11
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "3FGA",
+      "is_home": 1,
+      "n_eligible": 296,
+      "n_dreb": 180,
+      "n_oreb": 107,
+      "n_other": 9
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 0,
+      "n_eligible": 50,
+      "n_dreb": 38,
+      "n_oreb": 8,
+      "n_other": 4
+    },
+    {
+      "team_id": "ZAL",
+      "season": 2025,
+      "miss_type": "FTA_terminal",
+      "is_home": 1,
+      "n_eligible": 52,
+      "n_dreb": 45,
+      "n_oreb": 6,
+      "n_other": 1
     }
   ]
 }

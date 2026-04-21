@@ -223,12 +223,12 @@ HTML = r"""<!doctype html>
       <br/><br/>
       <strong>Why terminal FT misses almost always go to the defense.</strong> Defensive players occupy the two box positions on the lane; the shooter is at the line and can't follow their own shot quickly; the ball trajectory is predictable. The 17% OREB rate is basically the rate at which the ball either bounces unpredictably off the rim or a defender loses positioning.
       <br/><br/>
-      <strong>A small home-court rebounding signal.</strong> Home shooters OREB their own misses 29.1% of the time (on 3PT) vs 27.7% when shooting on the road -- a 1.4 pp home edge. On 2PT misses the home-away gap is smaller (32.4% vs 31.9%). This is a minor contributor to the league-wide +3.88pt HCA, consistent with our mechanism decomposition finding that possession-level efficiency, not rebound margin, drives the bulk of home-court advantage.
+      <strong>A small home-court rebounding signal.</strong> Home shooters OREB their own misses 29.1% of the time (on 3PT) vs 27.7% when shooting on the road -- a 1.4 pp home edge. On 2PT misses the home-away gap is smaller (32.4% vs 31.9%). This is a minor contributor to the league-wide +3.73pt HCA, consistent with our mechanism decomposition finding that possession-level efficiency, not rebound margin, drives the bulk of home-court advantage.
     </div>
   </div>
 
   <footer>
-    Data: silver-layer PBP (<code>fact_game_event.parquet</code>), 1.51M events across 2,896 games and 10 EuroLeague seasons.
+    Data: silver-layer PBP (<code>fact_game_event.parquet</code>), 1.72M events across 3,277 games and 10 EuroLeague seasons.
     Methodology: terminal-FT detection via forward lookup, rebound outcome classified via 3-event forward window, Wilson 95% CIs, pooled two-proportion z-test for pairwise comparisons.
     <br/>Build <code>__SHA__</code> &middot; see <a href="reports/rebound_rates.json" style="color:var(--accent)">rebound_rates.json</a> for all 9 rows.
   </footer>

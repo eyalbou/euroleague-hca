@@ -76,7 +76,7 @@ def build() -> str:
     a = md.append
     a("# EuroLeague Home-Court Advantage -- final report")
     a("")
-    a(f"**Scope:** 10 seasons (2015-16 through 2024-25), {n_games or '~2900'} games, "
+    a(f"**Scope:** 11 seasons (2015-16 through 2025-26), {n_games or '~3300'} games, "
       f"{(n_events or 1_130_000):,} in-play play-by-play events.  ")
     a("**Data source:** live Swagger API (`api-live.euroleague.net` v2/v3) + live PBP "
       "(`live.euroleague.net/api/PlaybyPlay`), cached locally as gzipped JSON.  ")
@@ -106,7 +106,7 @@ def build() -> str:
     # -- Mechanisms --
     a("## 2. Where does HCA come from? (mechanism decomposition)")
     a("")
-    a("Paired-game analysis on 2,897 games. Each row = mean home minus mean away, "
+    a("Paired-game analysis on 3,278 games. Each row = mean home minus mean away, "
       "with 95% bootstrap CI.")
     a("")
     a("| Mechanism | Home | Away | Δ (home - away) | 95% CI | p |")
@@ -176,7 +176,7 @@ def build() -> str:
     if hca_trans:
         a("## 6. Play-by-play -- what follows what?")
         a("")
-        a("Three first-order Markov chains computed from 1.13M events:")
+        a("Three first-order Markov chains computed from 1.29M events:")
         a("")
         a("- **Q0** -- immediate next event (any team).")
         a("- **Q1** -- opponent's immediate response.")
@@ -196,7 +196,7 @@ def build() -> str:
         a("")
         a(f"We tested all **{rk.get('n_refs_eligible', 0)} referees** with at least "
           f"{rk.get('min_games_threshold', 30)} games (out of "
-          f"{rk.get('n_refs_total', 0)} total unique officials across 10 seasons) for "
+          f"{rk.get('n_refs_total', 0)} total unique officials across 11 seasons) for "
           "home-vs-away asymmetry in foul calls and free-throw attempts.")
         a("")
         a(f"- **Raw p < 0.05** (before correction): **{rk.get('n_significant_raw_pf', 0)}** refs on foul diff; "
@@ -212,7 +212,7 @@ def build() -> str:
         a("**Reading it:** home teams draw +1.1 more FTA per game and commit 0.5 fewer fouls "
           "league-wide -- but *no individual referee* is driving that skew. The small asymmetry "
           "is spread evenly across the entire referee pool. Combined with the mechanism-decomposition "
-          "finding that foul differential contributes only +0.05 pts of the +3.88 pt HCA (1.3%), "
+          "finding that foul differential contributes only +0.05 pts of the +3.73 pt HCA (1.3%), "
           "EuroLeague officiating is effectively neutral -- the opposite of Moskowitz & Wertheim's "
           "NBA finding. See `dashboards/referees.html` for the funnel plot and top-10 outlier table.")
         a("")

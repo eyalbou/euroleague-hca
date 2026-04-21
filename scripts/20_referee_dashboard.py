@@ -94,7 +94,7 @@ HTML = r"""<!doctype html>
     <h1>EuroLeague referees are <span class="lead">unbiased.</span><br/>
       <span style="color:var(--muted);font-weight:500">The outlier count matches pure chance almost exactly.</span></h1>
     <p class="sub">We tested all __N_ELIGIBLE__ referees with at least __MIN__ games for home-vs-away asymmetry in fouls called and free-throw attempts. Every claim uses cluster-resampled 95% CIs and Holm-corrected p-values.</p>
-    <div class="meta">__N_TOTAL__ unique referees observed &middot; __N_ELIGIBLE__ tested (n &ge; __MIN__) &middot; 2,897 games &middot; 10 seasons</div>
+    <div class="meta">__N_TOTAL__ unique referees observed &middot; __N_ELIGIBLE__ tested (n &ge; __MIN__) &middot; 3,278 games &middot; 11 seasons</div>
   </div>
 
   <div class="kpis">
@@ -159,7 +159,7 @@ HTML = r"""<!doctype html>
       <br/><br/>
       <strong>Result:</strong> <span class="chip null">__RAW_PF__ of __N_ELIGIBLE__</span> refs cleared p &lt; 0.05 on the raw test. Expected by pure chance alone: <strong>__EXPECTED__</strong>. The permutation test (shuffle home/away labels 200x and recount outliers) produced a mean outlier count of <strong>__PERM_MEAN__</strong> &mdash; essentially identical to what we observed. After Holm correction: <strong>zero</strong> refs remain significant on either metric.
       <br/><br/>
-      <strong>Interpretation:</strong> EuroLeague's league-wide home-court advantage (+3.88 pts / game) is <em>not</em> driven by any individual referee or even a small group of biased referees. The small home-foul-call skew is distributed evenly across the referee pool. Coupled with the mechanism-decomposition finding that the foul differential contributes only +0.05 pts of the +3.88 pt HCA (1.3%), refereeing is effectively neutral in European basketball.
+      <strong>Interpretation:</strong> EuroLeague's league-wide home-court advantage (+3.73 pts / game) is <em>not</em> driven by any individual referee or even a small group of biased referees. The small home-foul-call skew is distributed evenly across the referee pool. Coupled with the mechanism-decomposition finding that the foul differential contributes only +0.05 pts of the +3.73 pt HCA (1.3%), refereeing is effectively neutral in European basketball.
       <br/><br/>
       <strong>Why this differs from the NBA:</strong> Moskowitz &amp; Wertheim (<em>Scorecasting</em>, 2011) found that referee bias was the majority driver of NBA HCA. Our data replicates that EuroLeague HCA is instead driven by possession-level offensive efficiency (94% of HCA from a +0.049 &Delta; PPP home edge), not officiating.
       <br/><br/>

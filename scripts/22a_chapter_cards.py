@@ -100,7 +100,7 @@ def main() -> None:
         track="A",
         label="1 of 2  ---  chapter one",
         headline="Why home wins.",
-        sub="Decomposing the +3.88 point home-court edge.",
+        sub="Decomposing the +3.73 point home-court edge.",
         accent=(60, 207, 142),
     )
     _draw_card(

@@ -1,16 +1,16 @@
 Do EuroLeague home teams win more? And if they do, why?
 
-I analyzed ten seasons of EuroLeague basketball. Twenty-eight hundred games. One point one million play-by-play events. All of it running locally, in Cursor, on my laptop.
+I analyzed eleven seasons of EuroLeague basketball. Thirty-two hundred games. One point seven million play-by-play events. All of it running locally, in Cursor, on my laptop.
 
 One dataset. Two investigations. Track A -- why home wins. Track B -- how possessions chain. Let's start with Track A.
 
-The headline. EuroLeague home teams win one point seven five times more often than road teams. Plus three point eight eight points per game, on average. A ten-season mean, stable across seasons.
+The headline. EuroLeague home teams win one point seven five times more often than road teams. Plus three point seven three points per game, on average. An eleven-season mean, stable across seasons.
 
 So the question becomes: why?
 
-The old answer, from N B A research, is referee bias. Home refs whistle fewer fouls on home players. I tested it for Europe. Sixty one referees, each with at least thirty games.
+The old answer, from N B A research, is referee bias. Home refs whistle fewer fouls on home players. I tested it for Europe. Every referee with at least thirty games over eleven seasons.
 
-After Holm correction for sixty one simultaneous tests, the number of statistically biased referees came out to zero. European officiating, within our statistical power, is neutral. That hypothesis is dead.
+After Holm correction for simultaneous tests, the number of statistically biased referees came out to zero. European officiating, within our statistical power, is neutral. That hypothesis is dead.
 
 So what is driving the home edge? I decomposed every box-score mechanism. Shooting efficiency. Turnovers. Free-throw rate. Pace.
 
@@ -18,13 +18,13 @@ Then, COVID became a natural experiment nobody could run on purpose. Games playe
 
 The full model explains ninety four percent of home advantage from measurable, in-game mechanism.
 
-Okay. Mechanism. But where does that plus three point eight eight actually live, play by play? For that: Track B.
+Okay. Mechanism. But where does that plus three point seven three actually live, play by play? For that: Track B.
 
-After every action on the floor, what comes next? First-order Markov chains, computed over one point one million events.
+After every action on the floor, what comes next? First-order Markov chains, computed over one point three million in-play events.
 
-Then I added a home-versus-road lens on top. Home teams score zero point zero four nine more points per possession than road teams. That tiny per-possession edge, times eighty possessions a game, reproduces the entire three point eight eight.
+Then I added a home-versus-road lens on top. Home teams score zero point zero four nine more points per possession than road teams. That tiny per-possession edge, times roughly seventy four possessions a team per game, reproduces almost all of the three point seven three.
 
-Every action. Nineteen of nineteen possession starters. The home edge is not one big thing. It is a thousand small things.
+Every action. Eighteen of eighteen possession starters. The home edge is not one big thing. It is a thousand small things.
 
 Two-step chains -- what I call Storylines. After a home-team defensive rebound, the next three events cascade, slightly, in the home team's favor. Momentum exists. It is just micro.
 

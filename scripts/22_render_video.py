@@ -78,11 +78,11 @@ SCENES: list[Scene] = [
           caption="Do home teams really win more?",
           zoom_dir="in", focus=(0.50, 0.35), track="neutral"),
     Scene(frame="index.png",
-          narration=("I analyzed ten seasons of EuroLeague basketball. "
-                     "Twenty-eight hundred games. One point one million "
+          narration=("I analyzed eleven seasons of EuroLeague basketball. "
+                     "Thirty-two hundred games. One point seven million "
                      "play-by-play events. All of it running locally, "
                      "in Cursor, on my laptop."),
-          caption="10 seasons  -  2,897 games  -  1.13M plays",
+          caption="11 seasons  -  3,278 games  -  1.72M plays",
           zoom_dir="in", focus=(0.30, 0.45), track="neutral"),
     Scene(frame="index.png",
           narration=("One dataset. Two investigations. Track A -- "
@@ -99,23 +99,24 @@ SCENES: list[Scene] = [
     Scene(frame="dashboard_overview.png",
           narration=("The headline. EuroLeague home teams win one point "
                      "seven five times more often than road teams. Plus "
-                     "three point eight eight points per game, on average. "
-                     "A ten-season mean, stable across seasons."),
-          caption="+3.88 pts  -  1.75x home odds  -  n=2,897",
+                     "three point seven three points per game, on average. "
+                     "An eleven-season mean, stable across seasons."),
+          caption="+3.73 pts  -  1.75x home odds  -  n=3,278",
           zoom_dir="in", focus=(0.42, 0.40), track="A"),
     Scene(frame="referees.png",
           narration=("So the question becomes: why? The old answer, from "
                      "N B A research, is referee bias. Home refs whistle "
                      "fewer fouls on home players. I tested it for Europe. "
-                     "Sixty one referees, each with at least thirty games."),
+                     "Every referee with at least thirty games "
+                     "over eleven seasons."),
           caption="Hypothesis 1: referee bias (Scorecasting, NBA)",
           zoom_dir="in", focus=(0.50, 0.35), track="A"),
     Scene(frame="referees_funnel.png",
-          narration=("After Holm correction for sixty one simultaneous "
+          narration=("After Holm correction for simultaneous "
                      "tests, the number of statistically biased referees "
                      "came out to zero. European officiating, within our "
                      "statistical power, is neutral. That hypothesis is dead."),
-          caption="0 of 61 refs biased (Holm-corrected) - hypothesis dead",
+          caption="0 biased refs (Holm-corrected) - hypothesis dead",
           zoom_dir="in", focus=(0.50, 0.40), track="A"),
     Scene(frame="dashboard_mechanisms.png",
           narration=("So what is driving the home edge? I decomposed every "
@@ -139,9 +140,9 @@ SCENES: list[Scene] = [
 
     Scene(frame="dashboard_overview.png",
           narration=("Okay. Mechanism. But where does that plus three point "
-                     "eight eight actually live, play by play? For that: "
+                     "seven three actually live, play by play? For that: "
                      "Track B."),
-          caption="Where does +3.88 live, play by play?",
+          caption="Where does +3.73 live, play by play?",
           zoom_dir="out", focus=(0.50, 0.50), track="neutral"),
 
     Scene(frame="chapter_track_b.png",
@@ -152,22 +153,23 @@ SCENES: list[Scene] = [
     Scene(frame="transitions_bars.png",
           narration=("After every action on the floor, what comes next? "
                      "First-order Markov chains, computed over one point "
-                     "one million events."),
-          caption="First-order Markov chains  -  1.13M events",
+                     "three million in-play events."),
+          caption="First-order Markov chains  -  1.29M in-play events",
           zoom_dir="in", focus=(0.40, 0.40), track="B"),
     Scene(frame="transitions_hca.png",
           narration=("Then I added a home-versus-road lens on top. Home teams "
                      "score zero point zero four nine more points per "
                      "possession than road teams. That tiny per-possession "
-                     "edge, times eighty possessions a game, reproduces the "
-                     "entire three point eight eight."),
-          caption="+0.049 PPP  x  80 poss/game  =  +3.88 pts",
+                     "edge, times roughly seventy four possessions a team "
+                     "per game, reproduces almost all of the three point "
+                     "seven three."),
+          caption="+0.049 PPP  x  ~74 poss/team/game  =  +3.73 pts",
           zoom_dir="in", focus=(0.45, 0.45), track="B"),
     Scene(frame="transitions_hca.png",
-          narration=("Every action. Nineteen of nineteen possession starters. "
+          narration=("Every action. Eighteen of eighteen possession starters. "
                      "The home edge is not one big thing. It is a thousand "
                      "small things."),
-          caption="19 of 19 source actions favor home",
+          caption="18 of 18 source actions favor home",
           zoom_dir="in", focus=(0.55, 0.55), track="B"),
     Scene(frame="transitions_bigrams.png",
           narration=("Two-step chains -- what I call Storylines. After a "

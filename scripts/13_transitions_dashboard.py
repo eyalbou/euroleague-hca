@@ -183,7 +183,7 @@ HTML_TEMPLATE = r"""<!doctype html>
   <p class="sub" style="background:rgba(110,176,255,0.05);border-left:3px solid #6eb0ff;padding:10px 14px;border-radius:4px;margin-top:12px;font-size:13px">
     <strong style="color:#e7ecf1">Bridge to Track A:</strong> the <em>HCA lens</em> view (pill above) re-reads these
     distributions as home vs away possessions, and reveals that the tiny per-possession efficiency edge
-    (+0.049 PPP) multiplied across ~72 possessions produces the league's +3.88 HCA. That's where these
+    (+0.049 PPP) multiplied across ~74 possessions produces the league's +3.73 HCA. That's where these
     two investigations meet; everywhere else, this dashboard is about tactics and flow, not who wins.
   </p>
   <div class="meta" id="meta-line">Loading...</div>

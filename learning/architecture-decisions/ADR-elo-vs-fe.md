@@ -14,17 +14,17 @@ Same test season held out. Same held-out metric: log-loss on `team_win`.
 
 | Model                                      | log-loss | accuracy | brier |
 |--------------------------------------------|----------|----------|-------|
-| Elo + logistic                             | 0.6217   | 0.645    | 0.218 |
-| Team-season FE (ridge logistic)            | 0.6650   | 0.618    | 0.236 |
+| Elo + logistic                             | 0.6372   | 0.627    | 0.224 |
+| Team-season FE (ridge logistic)            | 0.6551   | 0.638    | 0.231 |
 
 ## Decision
 Elo is the default team-strength feature for downstream models. Rationale:
 
 * Continuous and updates walk-forward within a season, so it reacts to early-season surprises
   without waiting for the season to end.
-* Far lower-dimensional (4 features vs ~324 dummies for FE), so it
+* Far lower-dimensional (4 features vs ~360 dummies for FE), so it
   generalizes better with our ~3,500-row training set.
-* Near-equivalent held-out performance (within 0.043 log-loss).
+* Near-equivalent held-out performance (within 0.018 log-loss).
 
 ## Consequence
 We use Elo everywhere as the team-strength feature. Keep `07d_ridge_fe.py` as a reference

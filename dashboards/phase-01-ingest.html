@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase 1 -- Ingestion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script id="payload" type="application/json">{"title": "Phase 1 -- Ingestion", "subtitle": "Pulled 11 season(s) from source=live in 389.6s", "kpis": [{"label": "Seasons", "value": "11", "caption": "2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025"}, {"label": "Games", "value": "6175", "caption": "source=live"}, {"label": "Teams", "value": "444", "caption": ""}, {"label": "Runtime", "value": "389.6s", "caption": "wall clock"}], "sections": [{"id": "coverage", "title": "Per-season coverage", "description": "Games ingested per season.", "charts": [{"type": "bar", "id": "P01-1", "title": "Games per season", "labels": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "datasets": [{"label": "games", "data": [500, 518, 520, 520, 504, 656, 598, 656, 662, 660, 381]}], "yTitle": "games", "xTitle": "season"}]}], "sample_mode": false}</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="assets/fmt.js"></script>
+  <script src="assets/chart-theme.js"></script>
+  <script src="assets/chart-helpers.js"></script>
+  <script src="assets/filters.js"></script>
+  <script src="assets/dashboard.js"></script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ad72209</code> &middot; rebuilt 2026-04-21 21:00 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body>
+</html>

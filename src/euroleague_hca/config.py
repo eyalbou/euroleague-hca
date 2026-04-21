@@ -7,7 +7,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # -- Scope --
-SEASONS_FULL = list(range(2015, 2025))  # 2015-16 through 2024-25 (start year)
+SEASONS_FULL = list(range(2015, 2026))  # 2015-16 through 2025-26 (start year)
 COMPETITION = os.environ.get("ELH_COMPETITION", "E")  # EuroLeague (U = EuroCup)
 
 DATA_DIR = PROJECT_ROOT / "data" / COMPETITION

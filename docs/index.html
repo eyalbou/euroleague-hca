@@ -74,15 +74,15 @@
 </div>
 
 <div class="hero">
-  <div class="eyebrow">EuroLeague Basketball · 10 seasons · 2015-16 → 2024-25</div>
+  <div class="eyebrow">EuroLeague Basketball · 11 seasons · 2015-16 → 2025-26</div>
   <h1>Home teams win <span class="lead">1.75x</span> more often.<br/>
      <span style="color:var(--muted);font-weight:500">Two investigations on the same data.</span></h1>
   <p class="sub">
     <strong style="color:var(--ink)">Track A &mdash; why home wins:</strong> quantify HCA, decompose its mechanisms, rule out referee bias, catalog surprising outcome patterns.
     <strong style="color:var(--ink)">Track B &mdash; how possessions chain:</strong> what actually happens on the next play, and on the opponent's reply.
-    Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.13M play-by-play events.
+    Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.29M play-by-play events.
   </p>
-  <div class="meta">Build <code>5de369c</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
+  <div class="meta">Build <code>81608e4</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
 </div>
 
 <div style="margin:24px 0 0;padding:20px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
@@ -96,21 +96,21 @@
 <div style="margin:14px 0 0;padding:20px;background:linear-gradient(135deg,rgba(60,207,142,0.08),rgba(110,176,255,0.06));border:1px solid rgba(110,176,255,0.22);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
   <div style="flex:1;min-width:240px">
     <div style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px">⟐ Interactive slicer</div>
-    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">Pick any teams and any seasons -- every HCA number, record, and shooting split below the hero recomputes live in the browser from 10 seasons of team-game data.</div>
+    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">Pick any teams and any seasons -- every HCA number, record, and shooting split below the hero recomputes live in the browser from 11 seasons of team-game data.</div>
   </div>
   <a href="explorer.html" style="background:var(--accent);color:#0b0d10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap">Open explorer →</a>
 </div>
 
 <div class="kpis">
   <div class="kpi">
-    <span class="v pos">+3.88</span>
+    <span class="v pos">+3.57</span>
     <span class="k">pts / game home advantage</span>
     <span class="n">mixed-effects LM intercept, 95% CI</span>
   </div>
   <div class="kpi">
     <span class="v neu">1.75x</span>
     <span class="k">home-win odds ratio</span>
-    <span class="n">logistic regression on 2,897 games</span>
+    <span class="n">logistic regression on 393 games</span>
   </div>
   <div class="kpi">
     <span class="v pos">94%</span>
@@ -137,7 +137,7 @@
 <div class="cards">
   <a class="card" href="explorer.html" style="border-color:rgba(110,176,255,0.28);background:linear-gradient(180deg,rgba(110,176,255,0.05),transparent)">
     <div class="title" style="color:var(--accent)">Team &amp; Season Explorer <span style="font-size:11px;background:var(--accent);color:#0b0d10;padding:2px 8px;border-radius:10px;margin-left:8px;letter-spacing:.02em">FILTERS</span></div>
-    <div class="desc">Multi-select any combination of 36 teams and 10 seasons (2015-16 → 2024-25). HCA, home/away record, shooting profile, and per-season trend all recompute instantly from the raw team-game sums. Start here if you want to ask "what does HCA look like for <em>my</em> team in <em>this</em> year?"</div>
+    <div class="desc">Multi-select any combination of 36 teams and 11 seasons (2015-16 → 2025-26). HCA, home/away record, shooting profile, and per-season trend all recompute instantly from the raw team-game sums. Start here if you want to ask "what does HCA look like for <em>my</em> team in <em>this</em> year?"</div>
     <span class="arrow">Open the interactive explorer →</span>
   </a>
   <a class="card" href="dashboard.html">
@@ -152,7 +152,7 @@
   </a>
   <a class="card" href="referees.html">
     <div class="title">Is it the referees?</div>
-    <div class="desc">Per-referee home-vs-away call asymmetry on 61 officials with 30+ games. Funnel plot, Holm correction, permutation test. <strong style="color:var(--pos)">Null result:</strong> zero biased refs after correction -- rules out referee bias as a meaningful mechanism.</div>
+    <div class="desc">Per-referee home-vs-away call asymmetry on 12 officials with 30+ games. Funnel plot, Holm correction, permutation test. <strong style="color:var(--pos)">Null result:</strong> zero biased refs after correction -- rules out referee bias as a meaningful mechanism.</div>
     <span class="arrow">Referee-bias audit →</span>
   </a>
   <a class="card" href="final_report.html">
@@ -181,7 +181,7 @@
 </div>
 
 <div style="margin:28px 0 0;padding:16px 20px;background:rgba(110,176,255,0.05);border-left:3px solid var(--accent);border-radius:6px;color:var(--muted);font-size:13px;line-height:1.6">
-  <strong style="color:var(--ink)">Bridge between the tracks:</strong> the transitions dashboard has a dedicated <em>HCA lens</em> view showing per-action Δ PPP between home and away possessions -- that's where Track B partially re-connects to Track A. The headline: <strong style="color:var(--ink)">94% of the +3.88 HCA is explained by a tiny (+0.049) per-possession efficiency edge repeated across ~72 possessions</strong>. Otherwise, Track B is its own investigation about how basketball flows, independent of who's at home.
+  <strong style="color:var(--ink)">Bridge between the tracks:</strong> the transitions dashboard has a dedicated <em>HCA lens</em> view showing per-action Δ PPP between home and away possessions -- that's where Track B partially re-connects to Track A. The headline: <strong style="color:var(--ink)">94% of the +3.73 HCA is explained by a tiny (+0.049) per-possession efficiency edge repeated across ~74 possessions</strong>. Otherwise, Track B is its own investigation about how basketball flows, independent of who's at home.
 </div>
 
 <h2>Learning notes</h2>
@@ -233,7 +233,7 @@
     <ul class="facts">
       <li>Closed-doors 2019-20 / 2020-21 as a natural experiment</li>
       <li>Difference-in-differences on <code>home_pts - away_pts</code></li>
-      <li>post − pre = <strong>+0.11 pts/game</strong> (CIs overlap zero)</li>
+      <li>post − pre = <strong>-0.02 pts/game</strong> (CIs overlap zero)</li>
       <li>HCA effectively recovered post-pandemic</li>
     </ul>
   </div>
@@ -257,4 +257,4 @@
 </footer>
 
 </div>
-<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">2280476</code> &middot; rebuilt 2026-04-21 19:16 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ad72209</code> &middot; rebuilt 2026-04-21 21:00 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

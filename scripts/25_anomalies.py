@@ -6,7 +6,7 @@ JSON output so the dashboard can render them without recomputation.
 Anomalies:
   1. Overtime HCA -- does home advantage survive regulation ending tied?
   2. First-score effect -- who scores first and who wins
-  3. Quarter-by-quarter HCA -- which quarter drives the league-wide +3.88
+  3. Quarter-by-quarter HCA -- which quarter drives the league-wide +3.73
   4. Clutch HCA -- home win rate in games decided by <= 5
   5. Blowout asymmetry -- 20+ point wins at home vs on the road
   6. Halftime comeback rate -- trailing 10+ at half, win % (home vs away)

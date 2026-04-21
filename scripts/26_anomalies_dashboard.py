@@ -117,7 +117,7 @@ HTML = r"""<!doctype html>
     <div class="kpiline" id="kpi-1"></div>
     <div class="chart-wrap"><canvas id="c1"></canvas></div>
     <div class="takeaway">
-      <strong>Basketball read:</strong> over ten seasons, home teams win regulation games 63.1% of the time, but overtime games are a <strong>coin flip at 50.0%</strong>. Drop of 13 percentage points, z = 3.07, p = 0.002 -- unmistakably real.<br/><br/>
+      <strong>Basketball read:</strong> over eleven seasons, home teams win regulation games 63.1% of the time, but overtime games are a <strong>coin flip at 50.0%</strong>. Drop of 13 percentage points, z = 3.07, p = 0.002 -- unmistakably real.<br/><br/>
       <em class="tag">Why:</em> an OT game is, by construction, a game that was tied after 40 minutes. HCA is a compounding efficiency edge that plays out over possessions; once both teams have played 40 minutes even, the signal is already exhausted. OT is basically 5 minutes of pickup basketball with exhausted starters, often depleted benches due to fouls, and no scouting advantage left to exploit. The pressure equalizes too -- crowd effect peaks in the last 3 minutes of regulation and is spent by the time OT starts.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> never treat OT as "normal basketball." HCA-adjusted models will systematically over-predict the home team in these games. If you're handicapping EuroLeague playoffs, mentally discount HCA to zero the moment a game goes to OT.
     </div>
@@ -144,13 +144,13 @@ HTML = r"""<!doctype html>
        ==================================================================== -->
   <div class="anomaly" id="a-quarter_hca">
     <div class="ah"><span class="num">3</span>
-    <h2>Which quarter produces the +3.88 HCA?</h2></div>
+    <h2>Which quarter produces the +3.73 HCA?</h2></div>
     <div class="tagline">HCA is NOT a fourth-quarter phenomenon</div>
     <div class="kpiline" id="kpi-3"></div>
     <div class="chart-wrap"><canvas id="c3"></canvas></div>
     <div class="takeaway">
       <strong>Basketball read:</strong> HCA is spread almost evenly across all four quarters -- +1.08 in Q1, +0.88 in Q2, +0.94 in Q3, +0.88 in Q4. The <strong>first quarter actually has the biggest home edge</strong>, not the fourth. The 95% CIs overlap substantially across quarters -- this is a flat line, not a curve.<br/><br/>
-      <em class="tag">Why:</em> HCA is a possession-level efficiency signal (as the mechanism analysis showed: ~+0.05 PPP edge * ~72 possessions = +3.7 pts per game). Since possessions are distributed evenly across quarters, the scoring edge is too. The popular "home crowd lifts them in the 4th" narrative is false here -- if anything, home teams lock in their edge early and coast.<br/><br/>
+      <em class="tag">Why:</em> HCA is a possession-level efficiency signal (as the mechanism analysis showed: ~+0.05 PPP edge * ~74 possessions = +3.7 pts per game). Since possessions are distributed evenly across quarters, the scoring edge is too. The popular "home crowd lifts them in the 4th" narrative is false here -- if anything, home teams lock in their edge early and coast.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> this is the cleanest evidence that EuroLeague HCA is a <em>structural</em> effect (playing on your own floor, referees, shot-clock familiarity, rest advantage) rather than a <em>clutch/emotion</em> effect. In fact, Q1 being the strongest quarter is consistent with a "travel and warmup" mechanism: road teams shoot worse in Q1 because they haven't fully adjusted to the rims, lighting, and sightlines.
     </div>
   </div>
@@ -165,7 +165,7 @@ HTML = r"""<!doctype html>
     <div class="kpiline" id="kpi-4"></div>
     <div class="chart-wrap"><canvas id="c4"></canvas></div>
     <div class="takeaway">
-      <strong>Basketball read:</strong> in games decided by 5 points or fewer, home teams win only <strong>54.2%</strong> of the time -- barely above coin flip. In blowouts (&gt;10), home win rate jumps to 70.3%. The full +3.88 HCA is not evenly distributed across outcomes; it's a distributional shift where home teams turn close games into comfortable wins, but don't meaningfully improve their record in <em>actually close</em> games.<br/><br/>
+      <strong>Basketball read:</strong> in games decided by 5 points or fewer, home teams win only <strong>54.2%</strong> of the time -- barely above coin flip. In blowouts (&gt;10), home win rate jumps to 70.3%. The full +3.73 HCA is not evenly distributed across outcomes; it's a distributional shift where home teams turn close games into comfortable wins, but don't meaningfully improve their record in <em>actually close</em> games.<br/><br/>
       <em class="tag">Why:</em> in close games both teams are playing to their capability, fatigue levels are matched, and the referee's whistle is decisive per possession rather than cumulative. These are exactly the conditions under which HCA washes out. The home edge <em>builds up</em> through the game as a probability shift, but once the outcome is actually uncertain, it reverts.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> closely ties into #1 (OT = coin flip) -- same mechanism, different time horizon. Playoff series forecasts should discount HCA more aggressively for "close-tempo" matchups (two disciplined, low-variance teams), and inflate it for "blowout-prone" matchups (high-variance offenses).
     </div>
@@ -181,7 +181,7 @@ HTML = r"""<!doctype html>
     <div class="kpiline" id="kpi-5"></div>
     <div class="chart-wrap"><canvas id="c5"></canvas></div>
     <div class="takeaway">
-      <strong>Basketball read:</strong> 299 home wins by 20+ vs just 105 road wins by 20+ in 10 seasons. At 30+, the ratio explodes to <strong>4.3-to-1</strong> (73 home vs 17 away). The HCA effect isn't additive -- it's distributional. The home team isn't just "+3.88 pts better on average"; it's producing a fat right tail of blowout wins that road teams almost never match.<br/><br/>
+      <strong>Basketball read:</strong> home wins by 20+ outnumber road wins by 20+ in 11 seasons. At 30+, the ratio explodes to <strong>4.3-to-1</strong> (73 home vs 17 away). The HCA effect isn't additive -- it's distributional. The home team isn't just "+3.73 pts better on average"; it's producing a fat right tail of blowout wins that road teams almost never match.<br/><br/>
       <em class="tag">Why:</em> blowouts compound. Once a home team is up 15 at halftime, the crowd is loud, the opponent is demoralized, second units get longer runs while the visiting bench is already grinding through back-to-back travel. Road teams rarely get to that state because they have to win the early quarters on the road just to stay close. Over 40 minutes, the home team's "failure mode" is a close loss; the road team's failure mode is a blowout.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> this is the strongest single visual argument against modeling HCA as a simple mean shift. Use quantile regression or a separate "blowout model" if you're modeling total-points or spread bets in EuroLeague.
     </div>
@@ -197,7 +197,7 @@ HTML = r"""<!doctype html>
     <div class="kpiline" id="kpi-6"></div>
     <div class="chart-wrap"><canvas id="c6"></canvas></div>
     <div class="takeaway">
-      <strong>Basketball read:</strong> home teams trailing by 10+ at halftime come back to win <strong>19.8%</strong> of the time. Away teams in the same hole come back only <strong>6.5%</strong> of the time -- <em>three times less often</em>, for an identical deficit. The magnitude of the gap (13 pp) is bigger than the overall +3.88 HCA implies.<br/><br/>
+      <strong>Basketball read:</strong> home teams trailing by 10+ at halftime come back to win <strong>19.8%</strong> of the time. Away teams in the same hole come back only <strong>6.5%</strong> of the time -- <em>three times less often</em>, for an identical deficit. The magnitude of the gap (13 pp) is bigger than the overall +3.73 HCA implies.<br/><br/>
       <em class="tag">Why:</em> coaches make systematic adjustments at halftime -- new defensive coverages, matchup changes, bench rotations. The home coach makes those adjustments in front of a supportive crowd, with familiar film crew clips on the jumbotron, and an opponent that's now traveling fatigued with poor shot quality. The away coach is making the same adjustments but inheriting hostile crowd noise on every possession and a still-warm home team entering the 3rd quarter ready to land an early punch.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> if you're modeling in-game win probability (live betting, coaching decisions), HCA matters <em>more</em> when the home team is behind, not less. The opposite of what most baseline models assume. This is one of the cleanest pieces of evidence that EuroLeague HCA has a psychological/tactical component beyond pure possession efficiency.
     </div>
@@ -214,7 +214,7 @@ HTML = r"""<!doctype html>
     <div class="chart-wrap"><canvas id="c7"></canvas></div>
     <div class="takeaway">
       <strong>Basketball read:</strong> in games <strong>exactly tied at halftime</strong>, home teams win 59.6%. In games within 2 pts at halftime, they win 62.2%. The full baseline HCA of 63% is almost entirely still present -- so whatever HCA is made of, it lives in the 2nd half just as much as the 1st. Paired with #3 (quarter-by-quarter HCA), this is definitive evidence that HCA is constant over time, not a late-game clutch phenomenon.<br/><br/>
-      <em class="tag">Why:</em> if HCA were purely "the home team starts hot and then just holds on," we'd expect games tied at halftime to be ~coin flips in the 2nd half (the hot start didn't materialize). Instead, the home team's +3.88 edge continues to accumulate possession-by-possession through the 3rd and 4th quarters, exactly as the possession-efficiency model predicts.<br/><br/>
+      <em class="tag">Why:</em> if HCA were purely "the home team starts hot and then just holds on," we'd expect games tied at halftime to be ~coin flips in the 2nd half (the hot start didn't materialize). Instead, the home team's +3.73 edge continues to accumulate possession-by-possession through the 3rd and 4th quarters, exactly as the possession-efficiency model predicts.<br/><br/>
       <em class="tag">Takeaway for analysts:</em> halftime betting markets consistently overcorrect based on the first-half scoreline. "Tied at half? Must be a coin flip second half!" is wrong -- home is still ~60/40. There's almost always systematic value on the home team in these markets.
     </div>
   </div>
@@ -247,7 +247,7 @@ HTML = r"""<!doctype html>
     <div class="takeaway">
       <strong>Basketball read:</strong> home shooters hit 76.89%, away shooters hit 76.41%. A half-a-percentage-point gap on 103k free throws. z = 1.83, p = 0.067 -- right at the edge of statistical significance, and the magnitude is basically zero. <strong>The "hostile crowd rattles visiting FT shooters" myth is not supported.</strong><br/><br/>
       <em class="tag">Why:</em> free throws are a closed-skill action. The shooter has 10 seconds alone at a fixed distance with no defender. Practiced free-throw shooters are effectively immune to crowd noise; they shut it out as part of their routine. The popular image of "crowd waving noodles behind the backboard" is memorable but empirically ineffective.<br/><br/>
-      <em class="tag">Takeaway for analysts:</em> zero of the +3.88 HCA comes from FT shooting differential. The 0.48 pp edge times ~20 FT attempts per team per game is worth about 0.1 pts. Any argument that "home crowds win games by distracting FT shooters" is wrong by an order of magnitude.
+      <em class="tag">Takeaway for analysts:</em> zero of the +3.73 HCA comes from FT shooting differential. The 0.48 pp edge times ~20 FT attempts per team per game is worth about 0.1 pts. Any argument that "home crowds win games by distracting FT shooters" is wrong by an order of magnitude.
     </div>
   </div>
 
@@ -275,7 +275,7 @@ HTML = r"""<!doctype html>
   </div>
 
   <footer>
-    Data: silver-layer PBP + team box scores (10 seasons, 2,896 games, 1.51M events, 5,790 team-games).
+    Data: silver-layer PBP + team box scores (11 seasons, 3,277 games, 1.72M events, 6,554 team-games).
     Methodology: Wilson 95% CIs for proportions, bootstrap 500-1000x for means, pooled two-proportion z-tests for rate comparisons.
     All raw numbers: <a href="reports/anomalies.json" style="color:var(--accent)">anomalies.json</a>.
     <br/>Build <code>__SHA__</code>

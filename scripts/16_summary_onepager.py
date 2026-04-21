@@ -107,13 +107,13 @@ HTML = """<!doctype html>
 </div>
 
 <div class="hero">
-  <div class="eyebrow">EuroLeague Basketball · 10 seasons · 2015-16 → 2024-25</div>
+  <div class="eyebrow">EuroLeague Basketball · 11 seasons · 2015-16 → 2025-26</div>
   <h1>Home teams win <span class="lead">__ODDS__x</span> more often.<br/>
      <span style="color:var(--muted);font-weight:500">Two investigations on the same data.</span></h1>
   <p class="sub">
     <strong style="color:var(--ink)">Track A &mdash; why home wins:</strong> quantify HCA, decompose its mechanisms, rule out referee bias, catalog surprising outcome patterns.
     <strong style="color:var(--ink)">Track B &mdash; how possessions chain:</strong> what actually happens on the next play, and on the opponent's reply.
-    Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.13M play-by-play events.
+    Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.29M play-by-play events.
   </p>
   <div class="meta">Build <code>__SHA__</code> · rebuilt __DATE__ UTC · <a href="https://github.com/__REPO__" style="color:var(--accent)">source on GitHub</a></div>
 </div>
@@ -129,7 +129,7 @@ HTML = """<!doctype html>
 <div style="margin:14px 0 0;padding:20px;background:linear-gradient(135deg,rgba(60,207,142,0.08),rgba(110,176,255,0.06));border:1px solid rgba(110,176,255,0.22);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
   <div style="flex:1;min-width:240px">
     <div style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px">⟐ Interactive slicer</div>
-    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">Pick any teams and any seasons -- every HCA number, record, and shooting split below the hero recomputes live in the browser from 10 seasons of team-game data.</div>
+    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">Pick any teams and any seasons -- every HCA number, record, and shooting split below the hero recomputes live in the browser from 11 seasons of team-game data.</div>
   </div>
   <a href="explorer.html" style="background:var(--accent);color:#0b0d10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap">Open explorer →</a>
 </div>
@@ -170,7 +170,7 @@ HTML = """<!doctype html>
 <div class="cards">
   <a class="card" href="explorer.html" style="border-color:rgba(110,176,255,0.28);background:linear-gradient(180deg,rgba(110,176,255,0.05),transparent)">
     <div class="title" style="color:var(--accent)">Team &amp; Season Explorer <span style="font-size:11px;background:var(--accent);color:#0b0d10;padding:2px 8px;border-radius:10px;margin-left:8px;letter-spacing:.02em">FILTERS</span></div>
-    <div class="desc">Multi-select any combination of 36 teams and 10 seasons (2015-16 → 2024-25). HCA, home/away record, shooting profile, and per-season trend all recompute instantly from the raw team-game sums. Start here if you want to ask "what does HCA look like for <em>my</em> team in <em>this</em> year?"</div>
+    <div class="desc">Multi-select any combination of 36 teams and 11 seasons (2015-16 → 2025-26). HCA, home/away record, shooting profile, and per-season trend all recompute instantly from the raw team-game sums. Start here if you want to ask "what does HCA look like for <em>my</em> team in <em>this</em> year?"</div>
     <span class="arrow">Open the interactive explorer →</span>
   </a>
   <a class="card" href="dashboard.html">
@@ -214,7 +214,7 @@ HTML = """<!doctype html>
 </div>
 
 <div style="margin:28px 0 0;padding:16px 20px;background:rgba(110,176,255,0.05);border-left:3px solid var(--accent);border-radius:6px;color:var(--muted);font-size:13px;line-height:1.6">
-  <strong style="color:var(--ink)">Bridge between the tracks:</strong> the transitions dashboard has a dedicated <em>HCA lens</em> view showing per-action Δ PPP between home and away possessions -- that's where Track B partially re-connects to Track A. The headline: <strong style="color:var(--ink)">94% of the +3.88 HCA is explained by a tiny (+0.049) per-possession efficiency edge repeated across ~72 possessions</strong>. Otherwise, Track B is its own investigation about how basketball flows, independent of who's at home.
+  <strong style="color:var(--ink)">Bridge between the tracks:</strong> the transitions dashboard has a dedicated <em>HCA lens</em> view showing per-action Δ PPP between home and away possessions -- that's where Track B partially re-connects to Track A. The headline: <strong style="color:var(--ink)">94% of the +3.73 HCA is explained by a tiny (+0.049) per-possession efficiency edge repeated across ~74 possessions</strong>. Otherwise, Track B is its own investigation about how basketball flows, independent of who's at home.
 </div>
 
 <h2>Learning notes</h2>

@@ -466,7 +466,7 @@ PAYLOAD = {
                 f"Regular season: {phase_rows[0]['hca']:+.2f} pts ({phase_rows[0]['n']} games, 95% CI [{phase_rows[0]['lo']:+.2f}, {phase_rows[0]['hi']:+.2f}]). "
                 f"Playoffs: {phase_rows[1]['hca']:+.2f} pts ({phase_rows[1]['n']} games, 95% CI [{phase_rows[1]['lo']:+.2f}, {phase_rows[1]['hi']:+.2f}]). "
                 f"The two CIs overlap substantially -- HCA does NOT collapse in the playoffs, contrary to intuition. "
-                f"Caveat: playoff sample is small ({phase_rows[1]['n']} games over 10 seasons)."
+                f"Caveat: playoff sample is small ({phase_rows[1]['n']} games over 11 seasons)."
             ),
         },
         {
@@ -705,9 +705,9 @@ TEMPLATE = r"""<!doctype html>
   <header class="hero">
     <div>
       <div class="hero-eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins</div>
-      <div class="hero-eyebrow">EuroLeague Basketball &middot; 10 seasons &middot; {n_games} games</div>
+      <div class="hero-eyebrow">EuroLeague Basketball &middot; 11 seasons &middot; {n_games} games</div>
       <h1>The crowd, the court, and the count.<br><span class="accent">What actually moves home-court advantage?</span></h1>
-      <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2024-25).
+      <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2025-26).
         Combines bootstrap inference, mixed-effects per-team crowd sensitivity, and a natural experiment built around the
         2020-21 empty-arena regime.</p>
     </div>

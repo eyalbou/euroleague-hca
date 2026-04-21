@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase 5 -- Mechanism analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script id="payload" type="application/json">{"title": "Phase 5 -- Mechanism analysis", "subtitle": "Home-court advantage decomposed into basketball mechanisms", "kpis": [{"label": "Games analyzed", "value": "393"}, {"label": "OLS R^2", "value": "0.855"}, {"label": "Observed HCA", "value": "+3.54 pts"}, {"label": "Biggest driver", "value": "efg_diff", "caption": "1.22 pts"}], "sections": [{"id": "mechanisms", "title": "Home - Away differentials per mechanism", "description": "Positive = home teams outperform. Paired on game_id.", "charts": [{"type": "forest", "id": "D11-1", "title": "Home - Away differential (paired by game)", "teams": [{"label": "Points per game", "mean": 3.2340966921119594, "lo": 1.989503816793893, "hi": 4.371628498727734}, {"label": "Points per 100 possessions (efficiency)", "mean": 4.332249239544436, "lo": 2.5959781059148024, "hi": 5.888509271424572}, {"label": "eFG%  (effective field-goal %)", "mean": 0.010174504995038386, "lo": -0.000739376692821735, "hi": 0.020462261869909407}, {"label": "TS%  (true shooting %)", "mean": 0.011444118890059425, "lo": 0.0016737726947881647, "hi": 0.021002271340566998}, {"label": "2-pt FG%", "mean": 0.016260903127516806, "lo": 0.004970814532616567, "hi": 0.027137720229228886}, {"label": "3-pt FG%", "mean": 0.00049299049107657, "lo": -0.012102722129851863, "hi": 0.013490224836663588}, {"label": "FT%", "mean": -0.0005493338590849691, "lo": -0.014724283710347714, "hi": 0.013437396879590197}, {"label": "FT rate (FTA / FGA)", "mean": 0.020750005580959067, "lo": 0.004851595488935239, "hi": 0.036788699352978405}, {"label": "Turnovers per 100 possessions", "mean": -1.5446836446192254, "lo": -2.146959037651278, "hi": -0.9831741817396872}, {"label": "Offensive rebounds per game", "mean": 0.11704834605597965, "lo": -0.37659033078880405, "hi": 0.6513994910941476}, {"label": "Pace (possessions per game)", "mean": 0.03104325699745508, "lo": -0.1538015267175573, "hi": 0.20885750636132264}, {"label": "Personal fouls committed", "mean": -0.8905852417302799, "lo": -1.3359414758269719, "hi": -0.4681933842239186}, {"label": "Personal fouls drawn", "mean": 0.8804071246819338, "lo": 0.4655852417302799, "hi": 1.3129770992366412}], "xTitle": "home - away (in each metric's own units)", "tall": true, "wide": true}]}, {"id": "attribution", "title": "HCA attribution -- pts of home edge per mechanism", "description": "OLS decomposition of point_diff. R^2 = 0.855.", "charts": [{"type": "bar", "id": "D11-2", "title": "Points of HCA attributable to each mechanism", "labels": ["Shooting (eFG)", "Ball security (TOV)", "Off. rebounds", "FT rate", "Foul diff."], "datasets": [{"label": "pts explained", "data": [1.2185067953263153, 1.214752957176879, 0.1259577318067068, 0.26744709153107227, 0.06918698125274494], "colors": ["#4f8cff", "#f5c264", "#7bd8dd", "#a78bfa", "#f87171"]}], "yTitle": "pts of HCA", "legend": false}]}], "sample_mode": false}</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="assets/fmt.js"></script>
+  <script src="assets/chart-theme.js"></script>
+  <script src="assets/chart-helpers.js"></script>
+  <script src="assets/filters.js"></script>
+  <script src="assets/dashboard.js"></script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ad72209</code> &middot; rebuilt 2026-04-21 21:00 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body>
+</html>

@@ -1,893 +1,893 @@
 {
-  "n_games": 2896,
-  "n_events": 1130400,
+  "n_games": 3277,
+  "n_events": 1285342,
   "per_source": [
     {
       "source": "3FGM",
       "source_label": "Made 3-pointer",
-      "n_home": 25805,
-      "n_away": 24928,
-      "home_ppp": 1.1039,
-      "away_ppp": 1.0678,
-      "delta_ppp": 0.0361,
-      "delta_lo": 0.0126,
-      "delta_hi": 0.057,
+      "n_home": 29395,
+      "n_away": 28556,
+      "home_ppp": 1.109,
+      "away_ppp": 1.0734,
+      "delta_ppp": 0.0356,
+      "delta_lo": 0.0154,
+      "delta_hi": 0.055,
       "jsd_q1": 0.0007,
-      "freq_per_game": 17.709,
-      "freq_per_game_home": 9.008,
-      "freq_per_game_away": 8.701,
+      "freq_per_game": 17.872,
+      "freq_per_game_home": 9.067,
+      "freq_per_game_away": 8.805,
       "top_home_q1": {
         "action": "2FGM",
-        "p": 0.1852
+        "p": 0.1866
       },
       "top_away_q1": {
         "action": "2FGM",
-        "p": 0.1949
+        "p": 0.1958
       },
-      "contribution_pts_per_game": 0.6393
+      "contribution_pts_per_game": 0.6362
     },
     {
       "source": "3FGA",
       "source_label": "Missed 3-pointer",
-      "n_home": 42920,
-      "n_away": 43591,
-      "home_ppp": 1.1055,
-      "away_ppp": 1.0669,
-      "delta_ppp": 0.0386,
-      "delta_lo": 0.022,
-      "delta_hi": 0.0549,
+      "n_home": 49218,
+      "n_away": 49968,
+      "home_ppp": 1.1107,
+      "away_ppp": 1.0697,
+      "delta_ppp": 0.041,
+      "delta_lo": 0.025,
+      "delta_hi": 0.0572,
       "jsd_q1": 0.0003,
-      "freq_per_game": 30.511,
-      "freq_per_game_home": 15.131,
-      "freq_per_game_away": 15.38,
+      "freq_per_game": 30.916,
+      "freq_per_game_home": 15.333,
+      "freq_per_game_away": 15.583,
       "top_home_q1": {
         "action": "D",
-        "p": 0.7272
+        "p": 0.7255
       },
       "top_away_q1": {
         "action": "D",
-        "p": 0.7426
+        "p": 0.7395
       },
-      "contribution_pts_per_game": 1.1777
+      "contribution_pts_per_game": 1.2675
     },
     {
       "source": "2FGM",
       "source_label": "Made 2-pointer",
-      "n_home": 58418,
-      "n_away": 56060,
-      "home_ppp": 1.0776,
-      "away_ppp": 1.0361,
-      "delta_ppp": 0.0415,
-      "delta_lo": 0.0284,
-      "delta_hi": 0.0549,
-      "jsd_q1": 0.0006,
-      "freq_per_game": 39.896,
-      "freq_per_game_home": 20.353,
-      "freq_per_game_away": 19.543,
+      "n_home": 66549,
+      "n_away": 63756,
+      "home_ppp": 1.0821,
+      "away_ppp": 1.042,
+      "delta_ppp": 0.0401,
+      "delta_lo": 0.0274,
+      "delta_hi": 0.0519,
+      "jsd_q1": 0.0005,
+      "freq_per_game": 40.135,
+      "freq_per_game_home": 20.491,
+      "freq_per_game_away": 19.644,
       "top_home_q1": {
         "action": "2FGM",
-        "p": 0.173
+        "p": 0.1738
       },
       "top_away_q1": {
         "action": "2FGM",
         "p": 0.184
       },
-      "contribution_pts_per_game": 1.6557
+      "contribution_pts_per_game": 1.6094
     },
     {
       "source": "2FGA",
       "source_label": "Missed 2-pointer",
-      "n_home": 48102,
-      "n_away": 48604,
-      "home_ppp": 1.1178,
-      "away_ppp": 1.0553,
-      "delta_ppp": 0.0625,
-      "delta_lo": 0.0471,
-      "delta_hi": 0.078,
+      "n_home": 54383,
+      "n_away": 54986,
+      "home_ppp": 1.1183,
+      "away_ppp": 1.0591,
+      "delta_ppp": 0.0592,
+      "delta_lo": 0.0436,
+      "delta_hi": 0.0741,
       "jsd_q1": 0.0006,
-      "freq_per_game": 33.724,
-      "freq_per_game_home": 16.769,
-      "freq_per_game_away": 16.955,
+      "freq_per_game": 33.702,
+      "freq_per_game_home": 16.752,
+      "freq_per_game_away": 16.95,
       "top_home_q1": {
         "action": "D",
-        "p": 0.6752
+        "p": 0.6721
       },
       "top_away_q1": {
         "action": "D",
-        "p": 0.6757
+        "p": 0.6718
       },
-      "contribution_pts_per_game": 2.1078
+      "contribution_pts_per_game": 1.9952
     },
     {
       "source": "FTM",
       "source_label": "Made free throw",
-      "n_home": 40384,
-      "n_away": 36959,
-      "home_ppp": 1.1079,
-      "away_ppp": 1.0699,
-      "delta_ppp": 0.038,
-      "delta_lo": 0.0156,
-      "delta_hi": 0.0591,
-      "jsd_q1": 0.001,
-      "freq_per_game": 27.451,
-      "freq_per_game_home": 14.346,
-      "freq_per_game_away": 13.105,
+      "n_home": 46410,
+      "n_away": 42520,
+      "home_ppp": 1.1126,
+      "away_ppp": 1.0661,
+      "delta_ppp": 0.0465,
+      "delta_lo": 0.0259,
+      "delta_hi": 0.0663,
+      "jsd_q1": 0.0009,
+      "freq_per_game": 27.873,
+      "freq_per_game_home": 14.562,
+      "freq_per_game_away": 13.311,
       "top_home_q1": {
         "action": "3FGA",
-        "p": 0.1726
+        "p": 0.1765
       },
       "top_away_q1": {
         "action": "2FGM",
-        "p": 0.1819
+        "p": 0.1841
       },
-      "contribution_pts_per_game": 1.0431
+      "contribution_pts_per_game": 1.2961
     },
     {
       "source": "FTA",
       "source_label": "Missed free throw",
-      "n_home": 11684,
-      "n_away": 11136,
-      "home_ppp": 1.1137,
-      "away_ppp": 1.0424,
-      "delta_ppp": 0.0713,
-      "delta_lo": 0.0393,
-      "delta_hi": 0.1056,
-      "jsd_q1": 0.0012,
-      "freq_per_game": 8.096,
-      "freq_per_game_home": 4.135,
-      "freq_per_game_away": 3.961,
+      "n_home": 13338,
+      "n_away": 12659,
+      "home_ppp": 1.1092,
+      "away_ppp": 1.0513,
+      "delta_ppp": 0.0579,
+      "delta_lo": 0.0285,
+      "delta_hi": 0.0858,
+      "jsd_q1": 0.0011,
+      "freq_per_game": 8.145,
+      "freq_per_game_home": 4.169,
+      "freq_per_game_away": 3.976,
       "top_home_q1": {
         "action": "D",
         "p": 0.5242
       },
       "top_away_q1": {
         "action": "D",
-        "p": 0.5473
+        "p": 0.5448
       },
-      "contribution_pts_per_game": 0.5772
+      "contribution_pts_per_game": 0.4716
     },
     {
       "source": "AS",
       "source_label": "Assist",
-      "n_home": 51510,
-      "n_away": 48547,
-      "home_ppp": 1.0957,
-      "away_ppp": 1.0622,
-      "delta_ppp": 0.0334,
-      "delta_lo": 0.0183,
-      "delta_hi": 0.048,
-      "jsd_q1": 0.0006,
-      "freq_per_game": 34.867,
-      "freq_per_game_home": 17.952,
-      "freq_per_game_away": 16.915,
+      "n_home": 58770,
+      "n_away": 55563,
+      "home_ppp": 1.1015,
+      "away_ppp": 1.0664,
+      "delta_ppp": 0.0351,
+      "delta_lo": 0.0214,
+      "delta_hi": 0.0494,
+      "jsd_q1": 0.0005,
+      "freq_per_game": 35.207,
+      "freq_per_game_home": 18.099,
+      "freq_per_game_away": 17.107,
       "top_home_q1": {
         "action": "2FGM",
-        "p": 0.1784
+        "p": 0.1792
       },
       "top_away_q1": {
         "action": "2FGM",
-        "p": 0.188
+        "p": 0.1886
       },
-      "contribution_pts_per_game": 1.1645
+      "contribution_pts_per_game": 1.2358
     },
     {
       "source": "TO",
       "source_label": "Turnover",
-      "n_home": 34640,
-      "n_away": 37342,
-      "home_ppp": 1.1008,
-      "away_ppp": 1.0313,
-      "delta_ppp": 0.0695,
-      "delta_lo": 0.0524,
-      "delta_hi": 0.087,
+      "n_home": 39110,
+      "n_away": 42263,
+      "home_ppp": 1.1014,
+      "away_ppp": 1.035,
+      "delta_ppp": 0.0664,
+      "delta_lo": 0.0506,
+      "delta_hi": 0.0827,
       "jsd_q1": 0.0003,
-      "freq_per_game": 25.057,
-      "freq_per_game_home": 12.062,
-      "freq_per_game_away": 12.995,
+      "freq_per_game": 25.037,
+      "freq_per_game_home": 12.038,
+      "freq_per_game_away": 12.999,
       "top_home_q1": {
         "action": "ST",
-        "p": 0.5208
+        "p": 0.5211
       },
       "top_away_q1": {
         "action": "ST",
-        "p": 0.5105
+        "p": 0.5096
       },
-      "contribution_pts_per_game": 1.7415
+      "contribution_pts_per_game": 1.6625
     },
     {
       "source": "D",
       "source_label": "Defensive rebound",
-      "n_home": 67219,
-      "n_away": 65544,
-      "home_ppp": 1.1465,
-      "away_ppp": 1.0873,
-      "delta_ppp": 0.0592,
-      "delta_lo": 0.0461,
-      "delta_hi": 0.0718,
+      "n_home": 76112,
+      "n_away": 74314,
+      "home_ppp": 1.1493,
+      "away_ppp": 1.0924,
+      "delta_ppp": 0.0569,
+      "delta_lo": 0.0439,
+      "delta_hi": 0.0697,
       "jsd_q1": 0.0003,
-      "freq_per_game": 46.571,
-      "freq_per_game_home": 23.586,
-      "freq_per_game_away": 22.985,
+      "freq_per_game": 46.627,
+      "freq_per_game_home": 23.601,
+      "freq_per_game_away": 23.026,
       "top_home_q1": {
         "action": "CM",
-        "p": 0.2647
+        "p": 0.2669
       },
       "top_away_q1": {
         "action": "CM",
-        "p": 0.2576
+        "p": 0.2586
       },
-      "contribution_pts_per_game": 2.757
+      "contribution_pts_per_game": 2.6531
     },
     {
       "source": "O",
       "source_label": "Offensive rebound",
-      "n_home": 29578,
-      "n_away": 29086,
-      "home_ppp": 1.1369,
-      "away_ppp": 1.0853,
-      "delta_ppp": 0.0515,
-      "delta_lo": 0.029,
-      "delta_hi": 0.0728,
-      "jsd_q1": 0.0007,
-      "freq_per_game": 20.505,
-      "freq_per_game_home": 10.328,
-      "freq_per_game_away": 10.177,
+      "n_home": 33790,
+      "n_away": 33287,
+      "home_ppp": 1.1421,
+      "away_ppp": 1.0904,
+      "delta_ppp": 0.0517,
+      "delta_lo": 0.0336,
+      "delta_hi": 0.0703,
+      "jsd_q1": 0.0006,
+      "freq_per_game": 20.721,
+      "freq_per_game_home": 10.43,
+      "freq_per_game_away": 10.291,
       "top_home_q1": {
         "action": "D",
         "p": 0.2312
       },
       "top_away_q1": {
         "action": "D",
-        "p": 0.2396
+        "p": 0.2385
       },
-      "contribution_pts_per_game": 1.056
+      "contribution_pts_per_game": 1.0713
     },
     {
       "source": "ST",
       "source_label": "Steal",
-      "n_home": 19007,
-      "n_away": 18012,
-      "home_ppp": 1.162,
-      "away_ppp": 1.1165,
-      "delta_ppp": 0.0455,
-      "delta_lo": 0.0212,
-      "delta_hi": 0.0694,
-      "jsd_q1": 0.0009,
-      "freq_per_game": 12.94,
-      "freq_per_game_home": 6.651,
-      "freq_per_game_away": 6.289,
+      "n_home": 21476,
+      "n_away": 20347,
+      "home_ppp": 1.1635,
+      "away_ppp": 1.1198,
+      "delta_ppp": 0.0437,
+      "delta_lo": 0.021,
+      "delta_hi": 0.0628,
+      "jsd_q1": 0.0007,
+      "freq_per_game": 12.919,
+      "freq_per_game_home": 6.64,
+      "freq_per_game_away": 6.279,
       "top_home_q1": {
         "action": "CM",
-        "p": 0.2396
+        "p": 0.2409
       },
       "top_away_q1": {
         "action": "CM",
-        "p": 0.24
+        "p": 0.241
       },
-      "contribution_pts_per_game": 0.5888
+      "contribution_pts_per_game": 0.5646
     },
     {
       "source": "FV",
       "source_label": "Block (defender)",
-      "n_home": 7440,
-      "n_away": 6723,
-      "home_ppp": 1.1204,
-      "away_ppp": 1.0858,
-      "delta_ppp": 0.0346,
-      "delta_lo": -0.0053,
-      "delta_hi": 0.0699,
-      "jsd_q1": 0.0015,
-      "freq_per_game": 4.951,
-      "freq_per_game_home": 2.603,
-      "freq_per_game_away": 2.348,
+      "n_home": 8463,
+      "n_away": 7620,
+      "home_ppp": 1.1348,
+      "away_ppp": 1.0861,
+      "delta_ppp": 0.0487,
+      "delta_lo": 0.0113,
+      "delta_hi": 0.0863,
+      "jsd_q1": 0.0014,
+      "freq_per_game": 4.967,
+      "freq_per_game_home": 2.616,
+      "freq_per_game_away": 2.351,
       "top_home_q1": {
         "action": "O",
-        "p": 0.3187
+        "p": 0.3222
       },
       "top_away_q1": {
         "action": "O",
-        "p": 0.3095
+        "p": 0.3118
       },
-      "contribution_pts_per_game": 0.1713
+      "contribution_pts_per_game": 0.2419
     },
     {
       "source": "AG",
       "source_label": "Shot blocked (shooter)",
-      "n_home": 6733,
-      "n_away": 7449,
-      "home_ppp": 1.0988,
-      "away_ppp": 1.0034,
-      "delta_ppp": 0.0954,
-      "delta_lo": 0.0542,
-      "delta_hi": 0.134,
-      "jsd_q1": 0.0011,
-      "freq_per_game": 4.949,
-      "freq_per_game_home": 2.348,
-      "freq_per_game_away": 2.601,
+      "n_home": 7632,
+      "n_away": 8474,
+      "home_ppp": 1.0929,
+      "away_ppp": 1.0112,
+      "delta_ppp": 0.0817,
+      "delta_lo": 0.0487,
+      "delta_hi": 0.1154,
+      "jsd_q1": 0.001,
+      "freq_per_game": 4.966,
+      "freq_per_game_home": 2.351,
+      "freq_per_game_away": 2.615,
       "top_home_q1": {
         "action": "FV",
-        "p": 0.823
+        "p": 0.8287
       },
       "top_away_q1": {
         "action": "FV",
-        "p": 0.8134
+        "p": 0.8223
       },
-      "contribution_pts_per_game": 0.4721
+      "contribution_pts_per_game": 0.4057
     },
     {
       "source": "CM",
       "source_label": "Foul committed",
-      "n_home": 52352,
-      "n_away": 53468,
-      "home_ppp": 1.0684,
-      "away_ppp": 1.0205,
-      "delta_ppp": 0.0479,
-      "delta_lo": 0.0339,
-      "delta_hi": 0.0636,
+      "n_home": 59341,
+      "n_away": 60730,
+      "home_ppp": 1.0718,
+      "away_ppp": 1.0228,
+      "delta_ppp": 0.049,
+      "delta_lo": 0.0346,
+      "delta_hi": 0.0647,
       "jsd_q1": 0.0007,
-      "freq_per_game": 36.699,
-      "freq_per_game_home": 18.162,
-      "freq_per_game_away": 18.537,
+      "freq_per_game": 36.793,
+      "freq_per_game_home": 18.19,
+      "freq_per_game_away": 18.603,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.7134
+        "p": 0.7178
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.7001
+        "p": 0.7034
       },
-      "contribution_pts_per_game": 1.7579
+      "contribution_pts_per_game": 1.8029
     },
     {
       "source": "RV",
       "source_label": "Foul drawn",
-      "n_home": 58896,
-      "n_away": 57180,
-      "home_ppp": 1.1722,
-      "away_ppp": 1.1231,
-      "delta_ppp": 0.049,
+      "n_home": 66904,
+      "n_away": 64833,
+      "home_ppp": 1.1752,
+      "away_ppp": 1.126,
+      "delta_ppp": 0.0491,
       "delta_lo": 0.0366,
-      "delta_hi": 0.0614,
-      "jsd_q1": 0.0008,
-      "freq_per_game": 40.473,
-      "freq_per_game_home": 20.541,
-      "freq_per_game_away": 19.932,
+      "delta_hi": 0.0636,
+      "jsd_q1": 0.0007,
+      "freq_per_game": 40.587,
+      "freq_per_game_home": 20.618,
+      "freq_per_game_away": 19.969,
       "top_home_q1": {
         "action": "CM",
-        "p": 0.3578
+        "p": 0.354
       },
       "top_away_q1": {
         "action": "CM",
-        "p": 0.3462
+        "p": 0.3419
       },
-      "contribution_pts_per_game": 1.9832
+      "contribution_pts_per_game": 1.9928
     },
     {
       "source": "OF",
       "source_label": "Offensive foul",
-      "n_home": 4437,
-      "n_away": 4919,
-      "home_ppp": 1.1113,
-      "away_ppp": 1.0441,
-      "delta_ppp": 0.0672,
-      "delta_lo": 0.0252,
-      "delta_hi": 0.1148,
-      "jsd_q1": 0.0018,
-      "freq_per_game": 3.241,
-      "freq_per_game_home": 1.538,
-      "freq_per_game_away": 1.703,
+      "n_home": 5045,
+      "n_away": 5624,
+      "home_ppp": 1.1076,
+      "away_ppp": 1.045,
+      "delta_ppp": 0.0626,
+      "delta_lo": 0.0199,
+      "delta_hi": 0.1081,
+      "jsd_q1": 0.0014,
+      "freq_per_game": 3.268,
+      "freq_per_game_home": 1.547,
+      "freq_per_game_away": 1.721,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.83
+        "p": 0.8303
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.8237
+        "p": 0.8306
       },
-      "contribution_pts_per_game": 0.2178
+      "contribution_pts_per_game": 0.2046
     },
     {
       "source": "CMU",
       "source_label": "Unsportsmanlike foul",
-      "n_home": 660,
-      "n_away": 861,
-      "home_ppp": 1.0909,
-      "away_ppp": 0.9826,
-      "delta_ppp": 0.1083,
-      "delta_lo": -0.0149,
-      "delta_hi": 0.2392,
-      "jsd_q1": 0.0114,
-      "freq_per_game": 0.532,
+      "n_home": 748,
+      "n_away": 947,
+      "home_ppp": 1.1083,
+      "away_ppp": 0.9905,
+      "delta_ppp": 0.1178,
+      "delta_lo": 0.0052,
+      "delta_hi": 0.2253,
+      "jsd_q1": 0.0089,
+      "freq_per_game": 0.524,
       "freq_per_game_home": 0.231,
-      "freq_per_game_away": 0.301,
+      "freq_per_game_away": 0.293,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.7156
+        "p": 0.7279
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.6575
+        "p": 0.6726
       },
-      "contribution_pts_per_game": 0.0576
+      "contribution_pts_per_game": 0.0617
     },
     {
       "source": "CMT",
       "source_label": "Technical foul",
-      "n_home": 535,
-      "n_away": 594,
-      "home_ppp": 1.1963,
-      "away_ppp": 1.1448,
-      "delta_ppp": 0.0515,
-      "delta_lo": -0.0902,
-      "delta_hi": 0.1909,
-      "jsd_q1": 0.0103,
-      "freq_per_game": 0.393,
-      "freq_per_game_home": 0.186,
-      "freq_per_game_away": 0.207,
+      "n_home": 636,
+      "n_away": 699,
+      "home_ppp": 1.1808,
+      "away_ppp": 1.1445,
+      "delta_ppp": 0.0363,
+      "delta_lo": -0.1033,
+      "delta_hi": 0.1656,
+      "jsd_q1": 0.0108,
+      "freq_per_game": 0.41,
+      "freq_per_game_home": 0.196,
+      "freq_per_game_away": 0.215,
       "top_home_q1": {
         "action": "FTM",
-        "p": 0.6679
+        "p": 0.6859
       },
       "top_away_q1": {
         "action": "FTM",
-        "p": 0.6973
+        "p": 0.6927
       },
-      "contribution_pts_per_game": 0.0202
+      "contribution_pts_per_game": 0.0149
     }
   ],
   "waterfall": [
     {
       "source": "CMU",
       "source_label": "Unsportsmanlike foul",
-      "contribution": 0.0576,
-      "delta_ppp": 0.1083,
-      "delta_lo": -0.0149,
-      "delta_hi": 0.2392,
-      "freq_per_game": 0.532,
-      "n_home": 660,
-      "n_away": 861
+      "contribution": 0.0617,
+      "delta_ppp": 0.1178,
+      "delta_lo": 0.0052,
+      "delta_hi": 0.2253,
+      "freq_per_game": 0.524,
+      "n_home": 748,
+      "n_away": 947
     },
     {
       "source": "AG",
       "source_label": "Shot blocked (shooter)",
-      "contribution": 0.4721,
-      "delta_ppp": 0.0954,
-      "delta_lo": 0.0542,
-      "delta_hi": 0.134,
-      "freq_per_game": 4.949,
-      "n_home": 6733,
-      "n_away": 7449
-    },
-    {
-      "source": "FTA",
-      "source_label": "Missed free throw",
-      "contribution": 0.5772,
-      "delta_ppp": 0.0713,
-      "delta_lo": 0.0393,
-      "delta_hi": 0.1056,
-      "freq_per_game": 8.096,
-      "n_home": 11684,
-      "n_away": 11136
+      "contribution": 0.4057,
+      "delta_ppp": 0.0817,
+      "delta_lo": 0.0487,
+      "delta_hi": 0.1154,
+      "freq_per_game": 4.966,
+      "n_home": 7632,
+      "n_away": 8474
     },
     {
       "source": "TO",
       "source_label": "Turnover",
-      "contribution": 1.7415,
-      "delta_ppp": 0.0695,
-      "delta_lo": 0.0524,
-      "delta_hi": 0.087,
-      "freq_per_game": 25.057,
-      "n_home": 34640,
-      "n_away": 37342
+      "contribution": 1.6625,
+      "delta_ppp": 0.0664,
+      "delta_lo": 0.0506,
+      "delta_hi": 0.0827,
+      "freq_per_game": 25.037,
+      "n_home": 39110,
+      "n_away": 42263
     },
     {
       "source": "OF",
       "source_label": "Offensive foul",
-      "contribution": 0.2178,
-      "delta_ppp": 0.0672,
-      "delta_lo": 0.0252,
-      "delta_hi": 0.1148,
-      "freq_per_game": 3.241,
-      "n_home": 4437,
-      "n_away": 4919
+      "contribution": 0.2046,
+      "delta_ppp": 0.0626,
+      "delta_lo": 0.0199,
+      "delta_hi": 0.1081,
+      "freq_per_game": 3.268,
+      "n_home": 5045,
+      "n_away": 5624
     },
     {
       "source": "2FGA",
       "source_label": "Missed 2-pointer",
-      "contribution": 2.1078,
-      "delta_ppp": 0.0625,
-      "delta_lo": 0.0471,
-      "delta_hi": 0.078,
-      "freq_per_game": 33.724,
-      "n_home": 48102,
-      "n_away": 48604
+      "contribution": 1.9952,
+      "delta_ppp": 0.0592,
+      "delta_lo": 0.0436,
+      "delta_hi": 0.0741,
+      "freq_per_game": 33.702,
+      "n_home": 54383,
+      "n_away": 54986
+    },
+    {
+      "source": "FTA",
+      "source_label": "Missed free throw",
+      "contribution": 0.4716,
+      "delta_ppp": 0.0579,
+      "delta_lo": 0.0285,
+      "delta_hi": 0.0858,
+      "freq_per_game": 8.145,
+      "n_home": 13338,
+      "n_away": 12659
     },
     {
       "source": "D",
       "source_label": "Defensive rebound",
-      "contribution": 2.757,
-      "delta_ppp": 0.0592,
-      "delta_lo": 0.0461,
-      "delta_hi": 0.0718,
-      "freq_per_game": 46.571,
-      "n_home": 67219,
-      "n_away": 65544
+      "contribution": 2.6531,
+      "delta_ppp": 0.0569,
+      "delta_lo": 0.0439,
+      "delta_hi": 0.0697,
+      "freq_per_game": 46.627,
+      "n_home": 76112,
+      "n_away": 74314
     },
     {
       "source": "O",
       "source_label": "Offensive rebound",
-      "contribution": 1.056,
-      "delta_ppp": 0.0515,
-      "delta_lo": 0.029,
-      "delta_hi": 0.0728,
-      "freq_per_game": 20.505,
-      "n_home": 29578,
-      "n_away": 29086
-    },
-    {
-      "source": "CMT",
-      "source_label": "Technical foul",
-      "contribution": 0.0202,
-      "delta_ppp": 0.0515,
-      "delta_lo": -0.0902,
-      "delta_hi": 0.1909,
-      "freq_per_game": 0.393,
-      "n_home": 535,
-      "n_away": 594
+      "contribution": 1.0713,
+      "delta_ppp": 0.0517,
+      "delta_lo": 0.0336,
+      "delta_hi": 0.0703,
+      "freq_per_game": 20.721,
+      "n_home": 33790,
+      "n_away": 33287
     },
     {
       "source": "RV",
       "source_label": "Foul drawn",
-      "contribution": 1.9832,
-      "delta_ppp": 0.049,
+      "contribution": 1.9928,
+      "delta_ppp": 0.0491,
       "delta_lo": 0.0366,
-      "delta_hi": 0.0614,
-      "freq_per_game": 40.473,
-      "n_home": 58896,
-      "n_away": 57180
+      "delta_hi": 0.0636,
+      "freq_per_game": 40.587,
+      "n_home": 66904,
+      "n_away": 64833
     },
     {
       "source": "CM",
       "source_label": "Foul committed",
-      "contribution": 1.7579,
-      "delta_ppp": 0.0479,
-      "delta_lo": 0.0339,
-      "delta_hi": 0.0636,
-      "freq_per_game": 36.699,
-      "n_home": 52352,
-      "n_away": 53468
-    },
-    {
-      "source": "ST",
-      "source_label": "Steal",
-      "contribution": 0.5888,
-      "delta_ppp": 0.0455,
-      "delta_lo": 0.0212,
-      "delta_hi": 0.0694,
-      "freq_per_game": 12.94,
-      "n_home": 19007,
-      "n_away": 18012
-    },
-    {
-      "source": "2FGM",
-      "source_label": "Made 2-pointer",
-      "contribution": 1.6557,
-      "delta_ppp": 0.0415,
-      "delta_lo": 0.0284,
-      "delta_hi": 0.0549,
-      "freq_per_game": 39.896,
-      "n_home": 58418,
-      "n_away": 56060
-    },
-    {
-      "source": "3FGA",
-      "source_label": "Missed 3-pointer",
-      "contribution": 1.1777,
-      "delta_ppp": 0.0386,
-      "delta_lo": 0.022,
-      "delta_hi": 0.0549,
-      "freq_per_game": 30.511,
-      "n_home": 42920,
-      "n_away": 43591
-    },
-    {
-      "source": "FTM",
-      "source_label": "Made free throw",
-      "contribution": 1.0431,
-      "delta_ppp": 0.038,
-      "delta_lo": 0.0156,
-      "delta_hi": 0.0591,
-      "freq_per_game": 27.451,
-      "n_home": 40384,
-      "n_away": 36959
-    },
-    {
-      "source": "3FGM",
-      "source_label": "Made 3-pointer",
-      "contribution": 0.6393,
-      "delta_ppp": 0.0361,
-      "delta_lo": 0.0126,
-      "delta_hi": 0.057,
-      "freq_per_game": 17.709,
-      "n_home": 25805,
-      "n_away": 24928
+      "contribution": 1.8029,
+      "delta_ppp": 0.049,
+      "delta_lo": 0.0346,
+      "delta_hi": 0.0647,
+      "freq_per_game": 36.793,
+      "n_home": 59341,
+      "n_away": 60730
     },
     {
       "source": "FV",
       "source_label": "Block (defender)",
-      "contribution": 0.1713,
-      "delta_ppp": 0.0346,
-      "delta_lo": -0.0053,
-      "delta_hi": 0.0699,
-      "freq_per_game": 4.951,
-      "n_home": 7440,
-      "n_away": 6723
+      "contribution": 0.2419,
+      "delta_ppp": 0.0487,
+      "delta_lo": 0.0113,
+      "delta_hi": 0.0863,
+      "freq_per_game": 4.967,
+      "n_home": 8463,
+      "n_away": 7620
+    },
+    {
+      "source": "FTM",
+      "source_label": "Made free throw",
+      "contribution": 1.2961,
+      "delta_ppp": 0.0465,
+      "delta_lo": 0.0259,
+      "delta_hi": 0.0663,
+      "freq_per_game": 27.873,
+      "n_home": 46410,
+      "n_away": 42520
+    },
+    {
+      "source": "ST",
+      "source_label": "Steal",
+      "contribution": 0.5646,
+      "delta_ppp": 0.0437,
+      "delta_lo": 0.021,
+      "delta_hi": 0.0628,
+      "freq_per_game": 12.919,
+      "n_home": 21476,
+      "n_away": 20347
+    },
+    {
+      "source": "3FGA",
+      "source_label": "Missed 3-pointer",
+      "contribution": 1.2675,
+      "delta_ppp": 0.041,
+      "delta_lo": 0.025,
+      "delta_hi": 0.0572,
+      "freq_per_game": 30.916,
+      "n_home": 49218,
+      "n_away": 49968
+    },
+    {
+      "source": "2FGM",
+      "source_label": "Made 2-pointer",
+      "contribution": 1.6094,
+      "delta_ppp": 0.0401,
+      "delta_lo": 0.0274,
+      "delta_hi": 0.0519,
+      "freq_per_game": 40.135,
+      "n_home": 66549,
+      "n_away": 63756
+    },
+    {
+      "source": "CMT",
+      "source_label": "Technical foul",
+      "contribution": 0.0149,
+      "delta_ppp": 0.0363,
+      "delta_lo": -0.1033,
+      "delta_hi": 0.1656,
+      "freq_per_game": 0.41,
+      "n_home": 636,
+      "n_away": 699
+    },
+    {
+      "source": "3FGM",
+      "source_label": "Made 3-pointer",
+      "contribution": 0.6362,
+      "delta_ppp": 0.0356,
+      "delta_lo": 0.0154,
+      "delta_hi": 0.055,
+      "freq_per_game": 17.872,
+      "n_home": 29395,
+      "n_away": 28556
     },
     {
       "source": "AS",
       "source_label": "Assist",
-      "contribution": 1.1645,
-      "delta_ppp": 0.0334,
-      "delta_lo": 0.0183,
-      "delta_hi": 0.048,
-      "freq_per_game": 34.867,
-      "n_home": 51510,
-      "n_away": 48547
+      "contribution": 1.2358,
+      "delta_ppp": 0.0351,
+      "delta_lo": 0.0214,
+      "delta_hi": 0.0494,
+      "freq_per_game": 35.207,
+      "n_home": 58770,
+      "n_away": 55563
     }
   ],
   "kpi": {
     "n_sources": 18,
-    "weighted_delta_ppp": 0.0494,
-    "poss_per_team_per_game": 73.45,
-    "hca_from_possession_efficiency_pts": 3.628,
+    "weighted_delta_ppp": 0.0491,
+    "poss_per_team_per_game": 73.83,
+    "hca_from_possession_efficiency_pts": 3.626,
     "hca_observed_pts": 3.86,
-    "share_of_hca_explained": 0.94,
+    "share_of_hca_explained": 0.939,
     "top_home_advantage_source": "CMU",
-    "top_home_advantage_delta": 0.1083,
+    "top_home_advantage_delta": 0.1178,
     "pct_sources_positive_delta": 1.0
   },
   "top_advantage": [
     {
       "source": "CMU",
       "source_label": "Unsportsmanlike foul",
-      "n_home": 660,
-      "n_away": 861,
-      "home_ppp": 1.0909,
-      "away_ppp": 0.9826,
-      "delta_ppp": 0.1083,
-      "delta_lo": -0.0149,
-      "delta_hi": 0.2392,
-      "jsd_q1": 0.0114,
-      "freq_per_game": 0.532,
+      "n_home": 748,
+      "n_away": 947,
+      "home_ppp": 1.1083,
+      "away_ppp": 0.9905,
+      "delta_ppp": 0.1178,
+      "delta_lo": 0.0052,
+      "delta_hi": 0.2253,
+      "jsd_q1": 0.0089,
+      "freq_per_game": 0.524,
       "freq_per_game_home": 0.231,
-      "freq_per_game_away": 0.301,
+      "freq_per_game_away": 0.293,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.7156
+        "p": 0.7279
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.6575
+        "p": 0.6726
       },
-      "contribution_pts_per_game": 0.0576
+      "contribution_pts_per_game": 0.0617
     },
     {
       "source": "AG",
       "source_label": "Shot blocked (shooter)",
-      "n_home": 6733,
-      "n_away": 7449,
-      "home_ppp": 1.0988,
-      "away_ppp": 1.0034,
-      "delta_ppp": 0.0954,
-      "delta_lo": 0.0542,
-      "delta_hi": 0.134,
-      "jsd_q1": 0.0011,
-      "freq_per_game": 4.949,
-      "freq_per_game_home": 2.348,
-      "freq_per_game_away": 2.601,
+      "n_home": 7632,
+      "n_away": 8474,
+      "home_ppp": 1.0929,
+      "away_ppp": 1.0112,
+      "delta_ppp": 0.0817,
+      "delta_lo": 0.0487,
+      "delta_hi": 0.1154,
+      "jsd_q1": 0.001,
+      "freq_per_game": 4.966,
+      "freq_per_game_home": 2.351,
+      "freq_per_game_away": 2.615,
       "top_home_q1": {
         "action": "FV",
-        "p": 0.823
+        "p": 0.8287
       },
       "top_away_q1": {
         "action": "FV",
-        "p": 0.8134
+        "p": 0.8223
       },
-      "contribution_pts_per_game": 0.4721
-    },
-    {
-      "source": "FTA",
-      "source_label": "Missed free throw",
-      "n_home": 11684,
-      "n_away": 11136,
-      "home_ppp": 1.1137,
-      "away_ppp": 1.0424,
-      "delta_ppp": 0.0713,
-      "delta_lo": 0.0393,
-      "delta_hi": 0.1056,
-      "jsd_q1": 0.0012,
-      "freq_per_game": 8.096,
-      "freq_per_game_home": 4.135,
-      "freq_per_game_away": 3.961,
-      "top_home_q1": {
-        "action": "D",
-        "p": 0.5242
-      },
-      "top_away_q1": {
-        "action": "D",
-        "p": 0.5473
-      },
-      "contribution_pts_per_game": 0.5772
+      "contribution_pts_per_game": 0.4057
     },
     {
       "source": "TO",
       "source_label": "Turnover",
-      "n_home": 34640,
-      "n_away": 37342,
-      "home_ppp": 1.1008,
-      "away_ppp": 1.0313,
-      "delta_ppp": 0.0695,
-      "delta_lo": 0.0524,
-      "delta_hi": 0.087,
+      "n_home": 39110,
+      "n_away": 42263,
+      "home_ppp": 1.1014,
+      "away_ppp": 1.035,
+      "delta_ppp": 0.0664,
+      "delta_lo": 0.0506,
+      "delta_hi": 0.0827,
       "jsd_q1": 0.0003,
-      "freq_per_game": 25.057,
-      "freq_per_game_home": 12.062,
-      "freq_per_game_away": 12.995,
+      "freq_per_game": 25.037,
+      "freq_per_game_home": 12.038,
+      "freq_per_game_away": 12.999,
       "top_home_q1": {
         "action": "ST",
-        "p": 0.5208
+        "p": 0.5211
       },
       "top_away_q1": {
         "action": "ST",
-        "p": 0.5105
+        "p": 0.5096
       },
-      "contribution_pts_per_game": 1.7415
+      "contribution_pts_per_game": 1.6625
     },
     {
       "source": "OF",
       "source_label": "Offensive foul",
-      "n_home": 4437,
-      "n_away": 4919,
-      "home_ppp": 1.1113,
-      "away_ppp": 1.0441,
-      "delta_ppp": 0.0672,
-      "delta_lo": 0.0252,
-      "delta_hi": 0.1148,
-      "jsd_q1": 0.0018,
-      "freq_per_game": 3.241,
-      "freq_per_game_home": 1.538,
-      "freq_per_game_away": 1.703,
+      "n_home": 5045,
+      "n_away": 5624,
+      "home_ppp": 1.1076,
+      "away_ppp": 1.045,
+      "delta_ppp": 0.0626,
+      "delta_lo": 0.0199,
+      "delta_hi": 0.1081,
+      "jsd_q1": 0.0014,
+      "freq_per_game": 3.268,
+      "freq_per_game_home": 1.547,
+      "freq_per_game_away": 1.721,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.83
+        "p": 0.8303
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.8237
+        "p": 0.8306
       },
-      "contribution_pts_per_game": 0.2178
+      "contribution_pts_per_game": 0.2046
+    },
+    {
+      "source": "2FGA",
+      "source_label": "Missed 2-pointer",
+      "n_home": 54383,
+      "n_away": 54986,
+      "home_ppp": 1.1183,
+      "away_ppp": 1.0591,
+      "delta_ppp": 0.0592,
+      "delta_lo": 0.0436,
+      "delta_hi": 0.0741,
+      "jsd_q1": 0.0006,
+      "freq_per_game": 33.702,
+      "freq_per_game_home": 16.752,
+      "freq_per_game_away": 16.95,
+      "top_home_q1": {
+        "action": "D",
+        "p": 0.6721
+      },
+      "top_away_q1": {
+        "action": "D",
+        "p": 0.6718
+      },
+      "contribution_pts_per_game": 1.9952
     }
   ],
   "top_style": [
     {
-      "source": "CMU",
-      "source_label": "Unsportsmanlike foul",
-      "n_home": 660,
-      "n_away": 861,
-      "home_ppp": 1.0909,
-      "away_ppp": 0.9826,
-      "delta_ppp": 0.1083,
-      "delta_lo": -0.0149,
-      "delta_hi": 0.2392,
-      "jsd_q1": 0.0114,
-      "freq_per_game": 0.532,
-      "freq_per_game_home": 0.231,
-      "freq_per_game_away": 0.301,
-      "top_home_q1": {
-        "action": "RV",
-        "p": 0.7156
-      },
-      "top_away_q1": {
-        "action": "RV",
-        "p": 0.6575
-      },
-      "contribution_pts_per_game": 0.0576
-    },
-    {
       "source": "CMT",
       "source_label": "Technical foul",
-      "n_home": 535,
-      "n_away": 594,
-      "home_ppp": 1.1963,
-      "away_ppp": 1.1448,
-      "delta_ppp": 0.0515,
-      "delta_lo": -0.0902,
-      "delta_hi": 0.1909,
-      "jsd_q1": 0.0103,
-      "freq_per_game": 0.393,
-      "freq_per_game_home": 0.186,
-      "freq_per_game_away": 0.207,
+      "n_home": 636,
+      "n_away": 699,
+      "home_ppp": 1.1808,
+      "away_ppp": 1.1445,
+      "delta_ppp": 0.0363,
+      "delta_lo": -0.1033,
+      "delta_hi": 0.1656,
+      "jsd_q1": 0.0108,
+      "freq_per_game": 0.41,
+      "freq_per_game_home": 0.196,
+      "freq_per_game_away": 0.215,
       "top_home_q1": {
         "action": "FTM",
-        "p": 0.6679
+        "p": 0.6859
       },
       "top_away_q1": {
         "action": "FTM",
-        "p": 0.6973
+        "p": 0.6927
       },
-      "contribution_pts_per_game": 0.0202
+      "contribution_pts_per_game": 0.0149
     },
     {
-      "source": "OF",
-      "source_label": "Offensive foul",
-      "n_home": 4437,
-      "n_away": 4919,
-      "home_ppp": 1.1113,
-      "away_ppp": 1.0441,
-      "delta_ppp": 0.0672,
-      "delta_lo": 0.0252,
-      "delta_hi": 0.1148,
-      "jsd_q1": 0.0018,
-      "freq_per_game": 3.241,
-      "freq_per_game_home": 1.538,
-      "freq_per_game_away": 1.703,
+      "source": "CMU",
+      "source_label": "Unsportsmanlike foul",
+      "n_home": 748,
+      "n_away": 947,
+      "home_ppp": 1.1083,
+      "away_ppp": 0.9905,
+      "delta_ppp": 0.1178,
+      "delta_lo": 0.0052,
+      "delta_hi": 0.2253,
+      "jsd_q1": 0.0089,
+      "freq_per_game": 0.524,
+      "freq_per_game_home": 0.231,
+      "freq_per_game_away": 0.293,
       "top_home_q1": {
         "action": "RV",
-        "p": 0.83
+        "p": 0.7279
       },
       "top_away_q1": {
         "action": "RV",
-        "p": 0.8237
+        "p": 0.6726
       },
-      "contribution_pts_per_game": 0.2178
+      "contribution_pts_per_game": 0.0617
     },
     {
       "source": "FV",
       "source_label": "Block (defender)",
-      "n_home": 7440,
-      "n_away": 6723,
-      "home_ppp": 1.1204,
-      "away_ppp": 1.0858,
-      "delta_ppp": 0.0346,
-      "delta_lo": -0.0053,
-      "delta_hi": 0.0699,
-      "jsd_q1": 0.0015,
-      "freq_per_game": 4.951,
-      "freq_per_game_home": 2.603,
-      "freq_per_game_away": 2.348,
+      "n_home": 8463,
+      "n_away": 7620,
+      "home_ppp": 1.1348,
+      "away_ppp": 1.0861,
+      "delta_ppp": 0.0487,
+      "delta_lo": 0.0113,
+      "delta_hi": 0.0863,
+      "jsd_q1": 0.0014,
+      "freq_per_game": 4.967,
+      "freq_per_game_home": 2.616,
+      "freq_per_game_away": 2.351,
       "top_home_q1": {
         "action": "O",
-        "p": 0.3187
+        "p": 0.3222
       },
       "top_away_q1": {
         "action": "O",
-        "p": 0.3095
+        "p": 0.3118
       },
-      "contribution_pts_per_game": 0.1713
+      "contribution_pts_per_game": 0.2419
+    },
+    {
+      "source": "OF",
+      "source_label": "Offensive foul",
+      "n_home": 5045,
+      "n_away": 5624,
+      "home_ppp": 1.1076,
+      "away_ppp": 1.045,
+      "delta_ppp": 0.0626,
+      "delta_lo": 0.0199,
+      "delta_hi": 0.1081,
+      "jsd_q1": 0.0014,
+      "freq_per_game": 3.268,
+      "freq_per_game_home": 1.547,
+      "freq_per_game_away": 1.721,
+      "top_home_q1": {
+        "action": "RV",
+        "p": 0.8303
+      },
+      "top_away_q1": {
+        "action": "RV",
+        "p": 0.8306
+      },
+      "contribution_pts_per_game": 0.2046
     },
     {
       "source": "FTA",
       "source_label": "Missed free throw",
-      "n_home": 11684,
-      "n_away": 11136,
-      "home_ppp": 1.1137,
-      "away_ppp": 1.0424,
-      "delta_ppp": 0.0713,
-      "delta_lo": 0.0393,
-      "delta_hi": 0.1056,
-      "jsd_q1": 0.0012,
-      "freq_per_game": 8.096,
-      "freq_per_game_home": 4.135,
-      "freq_per_game_away": 3.961,
+      "n_home": 13338,
+      "n_away": 12659,
+      "home_ppp": 1.1092,
+      "away_ppp": 1.0513,
+      "delta_ppp": 0.0579,
+      "delta_lo": 0.0285,
+      "delta_hi": 0.0858,
+      "jsd_q1": 0.0011,
+      "freq_per_game": 8.145,
+      "freq_per_game_home": 4.169,
+      "freq_per_game_away": 3.976,
       "top_home_q1": {
         "action": "D",
         "p": 0.5242
       },
       "top_away_q1": {
         "action": "D",
-        "p": 0.5473
+        "p": 0.5448
       },
-      "contribution_pts_per_game": 0.5772
+      "contribution_pts_per_game": 0.4716
     }
   ],
   "plain_labels": {
@@ -912,8 +912,8 @@
   },
   "qa": {
     "delta_ppp_range": {
-      "min": 0.033,
-      "max": 0.108,
+      "min": 0.035,
+      "max": 0.118,
       "expect": "most deltas in [-0.10, +0.10] -- a few outliers OK"
     },
     "sign_majority": {
@@ -921,8 +921,8 @@
       "expect": "> 0.50 if home teams hold an edge on most possessions"
     },
     "hca_from_possession_efficiency": {
-      "pts_per_game": 3.628,
-      "share_of_hca": 0.94,
+      "pts_per_game": 3.626,
+      "share_of_hca": 0.939,
       "expect": "pts in [1.0, 3.5]; share in [0.30, 0.90] -- rest is pace / FTA rate"
     }
   }

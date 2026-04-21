@@ -1,7 +1,7 @@
 {
   "n_shot_types": 3,
   "n_splits": 3,
-  "total_eligible_all": 200793,
+  "total_eligible_all": 228159,
   "dreb_plus_oreb_le_n": true,
   "all_probs_in_0_1": true,
   "ci_ordered": true

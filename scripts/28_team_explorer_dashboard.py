@@ -116,12 +116,12 @@ HTML = r"""<!doctype html>
     Track A &middot; why home wins
   </div>
   <h1>Does home-court advantage live in <span class="lead">certain teams or certain seasons?</span></h1>
-  <p class="sub">The league-level +3.88 HCA (Track A) is an average. This tool lets you slice it.
+  <p class="sub">The league-level +3.73 HCA (Track A) is an average. This tool lets you slice it.
     Pick any combination of teams and seasons -- every KPI and chart below recomputes in the
     browser over the filtered slice. Use it to answer questions the static dashboards can't:
     <em>is a given team's home edge driven by a particular era? Did a specific season swing the league HCA?
     Does the COVID dip appear for every team?</em></p>
-  <div class="meta">__N_GAMES__ games &middot; 10 seasons (2015-16 &rarr; 2024-25) &middot;
+  <div class="meta">__N_GAMES__ games &middot; 11 seasons (2015-16 &rarr; 2025-26) &middot;
     36 teams &middot; data: <a href="reports/team_explorer.json" style="color:var(--accent)">team_explorer.json</a></div>
 
   <!-- FILTER BAR -->

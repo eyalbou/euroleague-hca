@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase 2 -- Silver build + Validation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script id="payload" type="application/json">{"title": "Phase 2 -- Silver build + Validation", "subtitle": "Schema, coverage, referential integrity, sanity checks", "kpis": [{"label": "Seasons", "value": "11", "caption": "2015-2025"}, {"label": "Games", "value": "3278"}, {"label": "League HCA", "value": "+3.73 pts", "caption": "home margin, all games"}, {"label": "Home win %", "value": "62.6%"}], "sections": [{"id": "coverage", "title": "Per-season coverage", "description": "Games per season, home-win rate, league HCA.", "charts": [{"type": "bar", "id": "P02-1", "title": "Games per season", "labels": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "datasets": [{"label": "games", "data": [250, 259, 260, 260, 252, 328, 299, 328, 331, 330, 381]}]}, {"type": "line", "id": "P02-2", "title": "League HCA per season", "labels": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "datasets": [{"label": "HCA (pts)", "data": [4.7, 3.08, 3.83, 3.75, 3.58, 3.15, 3.97, 4.45, 3.97, 3.39, 3.35]}], "yTitle": "HCA (points)"}, {"type": "line", "id": "P02-3", "title": "Home win % per season", "labels": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "datasets": [{"label": "home win %", "data": [64.4, 62.16, 63.46, 62.69, 61.9, 56.71, 64.88, 62.5, 64.65, 61.82, 63.78]}], "yTitle": "win %"}, {"type": "table", "id": "P02-4", "title": "Referential integrity", "wide": true, "columns": ["Check", "Violations"], "rows": [["games_home_orphan", 0], ["games_away_orphan", 0], ["games_venue_orphan", 0], ["games_self_play", 0]], "footnote": "All counts should be zero."}]}], "sample_mode": false}</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="assets/fmt.js"></script>
+  <script src="assets/chart-theme.js"></script>
+  <script src="assets/chart-helpers.js"></script>
+  <script src="assets/filters.js"></script>
+  <script src="assets/dashboard.js"></script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ad72209</code> &middot; rebuilt 2026-04-21 21:00 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body>
+</html>
