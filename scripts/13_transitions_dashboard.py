@@ -66,6 +66,8 @@ HTML_TEMPLATE = r"""<!doctype html>
     font-feature-settings:"cv11","ss01";letter-spacing:-0.02em;line-height:1.5;}
   body{padding:32px;max-width:1500px;margin:0 auto}
   header{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+  .back{color:#6eb0ff;font-size:13px;text-decoration:none;display:inline-block;margin-bottom:10px}
+  .back:hover{text-decoration:underline}
   h1{font-size:28px;font-weight:700;margin:0;letter-spacing:-0.03em;line-height:1.15}
   h2{font-size:16px;font-weight:600;margin:0 0 8px 0;letter-spacing:-0.02em;color:var(--fg)}
   h3{font-size:13px;font-weight:500;margin:0 0 4px 0;color:var(--fg-mute);
@@ -158,10 +160,11 @@ HTML_TEMPLATE = r"""<!doctype html>
 </style>
 </head>
 <body>
+<a class="back" href="index.html">&larr; back to dashboard index</a>
 <header>
   <div style="color:#6eb0ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px">
     <span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
-    Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a> &middot; <a href="explorer.html" style="color:#6eb0ff;text-decoration:none">team+season explorer</a>
+    Track B &middot; game dynamics &middot; <a href="explorer.html" style="color:#6eb0ff;text-decoration:none">team+season explorer</a>
   </div>
   <h1>After action X, what actually happens next?</h1>
   <p class="sub">A separate investigation from the HCA story: this is about how possessions <em>chain</em>,

@@ -92,7 +92,7 @@ HTML = r"""<!doctype html>
   <a class="back" href="index.html">&larr; back to dashboard index</a>
 
   <div class="hero">
-    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a> &middot; <a href="explorer.html" style="color:#3ccf8e;text-decoration:none">team+season explorer</a></div>
+    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="explorer.html" style="color:#3ccf8e;text-decoration:none">team+season explorer</a></div>
     <h1>Ten surprising patterns buried in <span class="lead">1.5M PBP events</span>.</h1>
     <p class="sub">A basketball analyst's tour through the EuroLeague data. Most of these findings re-frame where HCA is (and isn't) present -- OT collapse, clutch dilution, halftime holes. Two are standalone dynamics findings (#8 team 3PT travel, #10 named players). Each card is self-contained -- jump around freely.</p>
     <div class="meta">__N_GAMES__ games &middot; __N_SEASONS__ seasons &middot; all claims carry CIs or p-values</div>

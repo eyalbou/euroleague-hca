@@ -530,6 +530,8 @@ TEMPLATE = r"""<!doctype html>
           padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
   .hero-eyebrow { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px;
                   color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .back { color: var(--accent); font-size: 13px; text-decoration: none; display: inline-block; margin: 0 0 14px 0; }
+  .back:hover { text-decoration: underline; }
   h1 { font-size: 40px; letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 12px 0; font-weight: 600; }
   h1 .accent { color: var(--accent); }
   .hero-sub { color: var(--fg-dim); font-size: 15px; max-width: 620px; line-height: 1.55; margin: 0; }
@@ -692,9 +694,10 @@ TEMPLATE = r"""<!doctype html>
 </head>
 <body>
 <div class="app">
+  <a class="back" href="index.html">&larr; back to dashboard index</a>
   <header class="hero">
     <div>
-      <div class="hero-eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a></div>
+      <div class="hero-eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins</div>
       <div class="hero-eyebrow">EuroLeague Basketball &middot; 10 seasons &middot; {n_games} games</div>
       <h1>The crowd, the court, and the count.<br><span class="accent">What actually moves home-court advantage?</span></h1>
       <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2024-25).

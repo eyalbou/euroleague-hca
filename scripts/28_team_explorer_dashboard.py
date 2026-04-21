@@ -42,7 +42,8 @@ HTML = r"""<!doctype html>
   .sub{color:var(--muted);max-width:880px;margin:0}
   .meta{color:var(--dim);font-size:12px;margin-top:10px}
   .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-  .back{color:var(--accent);text-decoration:none;font-size:13px}
+  .back{color:var(--accent);text-decoration:none;font-size:13px;display:inline-block;margin-bottom:10px}
+  .back:hover{text-decoration:underline}
 
   /* FILTER BAR */
   .filterbar{margin:22px 0 8px;padding:16px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;
@@ -102,14 +103,17 @@ HTML = r"""<!doctype html>
 <body>
 <div class="wrap">
 
+  <a class="back" href="index.html">&larr; back to dashboard index</a>
   <div class="eyebrow" style="color:#3ccf8e">
     <span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
-    Track A &middot; why home wins &middot; <a class="back" href="index.html">back to index</a>
+    Track A &middot; why home wins
   </div>
-  <h1>Team &amp; Season <span class="lead">Explorer</span></h1>
-  <p class="sub">Pick any combination of teams and seasons. Every number below
-    updates instantly from 10 seasons of silver-layer box-score data. All aggregates are
-    recomputed in the browser over the filtered slice -- no server round-trip.</p>
+  <h1>Does home-court advantage live in <span class="lead">certain teams or certain seasons?</span></h1>
+  <p class="sub">The league-level +3.88 HCA (Track A) is an average. This tool lets you slice it.
+    Pick any combination of teams and seasons -- every KPI and chart below recomputes in the
+    browser over the filtered slice. Use it to answer questions the static dashboards can't:
+    <em>is a given team's home edge driven by a particular era? Did a specific season swing the league HCA?
+    Does the COVID dip appear for every team?</em></p>
   <div class="meta">__N_GAMES__ games &middot; 10 seasons (2015-16 &rarr; 2024-25) &middot;
     36 teams &middot; data: <a href="reports/team_explorer.json" style="color:var(--accent)">team_explorer.json</a></div>
 
