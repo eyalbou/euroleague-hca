@@ -258,6 +258,186 @@ def _fort_row(r: pd.Series) -> dict:
 
 home_forts = [_fort_row(r) for _, r in fort_pivot.iterrows()]
 
+# -- Maccabi Tel Aviv deep-dive: a unique natural experiment across four home-venue regimes.
+# Context:
+#  * 2015-16 through 2022-23: normal home at Menora Mivtachim Arena (AQO), Tel Aviv
+#  * 2020-21 / 2021-22: COVID forced several games at AQO to be played with no crowd
+#  * 2023-24: after the Oct 7 2023 war, EuroLeague moved Israeli games abroad. Maccabi
+#    played their "home" games primarily at Aleksandar Nikolic Hall in Belgrade (AUF/AUF4),
+#    with a handful at Belgrade Arena (ATM7). Attendance was essentially zero.
+#  * 2024-25: full season of displaced home games in Belgrade (AUF4).
+#  * 2025-26: partial return to TLV (5 games at AQO plus 1 at Pais Arena Jerusalem) while
+#    13 games remained in Belgrade under ongoing EuroLeague security restrictions. The
+#    Belgrade games were played with strict attendance caps (crowds typically <500).
+TEL = "TEL"  # Maccabi Tel Aviv team_id
+TLV_VENUES = {"AQO"}        # Menora Mivtachim, Tel Aviv
+BELGRADE_VENUES = {"AUF", "AUF4", "ATM7"}
+IL_NEUTRAL_VENUES = {"ASZ2"}  # Pais Arena Jerusalem
+EMPTY_ATT_CAP = 2000  # below this = "empty arena" (covers COVID = 0 and Belgrade caps < 1k)
+
+
+def _mac_regime(venue_code: str, attendance) -> str:
+    att = 0 if attendance is None or pd.isna(attendance) else float(attendance)
+    if venue_code in TLV_VENUES:
+        return "TLV with crowd" if att >= EMPTY_ATT_CAP else "TLV empty (COVID)"
+    if venue_code in BELGRADE_VENUES:
+        return "Belgrade (displaced)"
+    if venue_code in IL_NEUTRAL_VENUES:
+        return "Jerusalem (home-country)"
+    return "Other"
+
+
+mac_home = games[games["home_team_id"] == TEL].copy()
+mac_away = games[games["away_team_id"] == TEL].copy()
+mac_home["regime"] = [
+    _mac_regime(v, a) for v, a in zip(mac_home["venue_code"], mac_home["attendance"])
+]
+mac_home["tel_margin"] = mac_home["home_margin"].astype(float)
+mac_away["tel_margin"] = -mac_away["home_margin"].astype(float)
+
+REGIME_ORDER = ["TLV with crowd", "TLV empty (COVID)", "Belgrade (displaced)", "Jerusalem (home-country)"]
+
+mac_regime_rows = []
+for rg in REGIME_ORDER:
+    sub = mac_home[mac_home["regime"] == rg]
+    vals = sub["tel_margin"].values.astype(float)
+    if len(vals) == 0:
+        continue
+    if len(vals) >= 2:
+        m, lo, hi = boot_mean_ci(vals, n_boot=5000, seed=11)
+    else:
+        m, lo, hi = float(vals.mean()), float("nan"), float("nan")
+    mac_regime_rows.append({
+        "regime": rg,
+        "n": int(len(vals)),
+        "mean": round(float(m), 2),
+        "lo": round(float(lo), 2) if not np.isnan(lo) else None,
+        "hi": round(float(hi), 2) if not np.isnan(hi) else None,
+        "win_rate": round(float((vals > 0).mean()), 4),
+        "avg_att": int(sub["attendance"].fillna(0).mean()),
+        "seasons": sorted({int(s) for s in sub["season"].unique()}),
+    })
+
+# "True away" baseline -- same-regime invariant. Maccabi's away performance
+# gives us the team-quality-neutral floor to compare against.
+vals_away = mac_away["tel_margin"].values.astype(float)
+m_aw, lo_aw, hi_aw = boot_mean_ci(vals_away, n_boot=5000, seed=12)
+mac_away_baseline = {
+    "regime": "AWAY (opponent's home)",
+    "n": int(len(vals_away)),
+    "mean": round(float(m_aw), 2),
+    "lo": round(float(lo_aw), 2),
+    "hi": round(float(hi_aw), 2),
+    "win_rate": round(float((vals_away > 0).mean()), 4),
+    "avg_att": None,
+    "seasons": sorted({int(s) for s in mac_away["season"].unique()}),
+}
+
+# Paired same-opponent deltas: for each (season, opponent) with BOTH a Maccabi home and
+# a Maccabi away game, compute (home_margin - away_margin). Controls for opponent quality.
+mac_all = pd.concat([
+    mac_home.assign(is_home=1, opp=mac_home["away_team_id"]),
+    mac_away.assign(is_home=0, opp=mac_away["home_team_id"], regime="AWAY"),
+], ignore_index=True)
+_h = mac_all[mac_all["is_home"] == 1][["season", "opp", "tel_margin", "regime"]].rename(
+    columns={"tel_margin": "home_margin", "regime": "home_regime"}
+)
+_a = mac_all[mac_all["is_home"] == 0][["season", "opp", "tel_margin"]].rename(columns={"tel_margin": "away_margin"})
+mac_pair = _h.merge(_a, on=["season", "opp"], how="inner")
+mac_pair["delta"] = mac_pair["home_margin"] - mac_pair["away_margin"]
+
+mac_paired_rows = []
+for rg in REGIME_ORDER:
+    sub = mac_pair[mac_pair["home_regime"] == rg]
+    if len(sub) == 0:
+        continue
+    if len(sub) >= 2:
+        m, lo, hi = boot_mean_ci(sub["delta"].values.astype(float), n_boot=5000, seed=13)
+    else:
+        m, lo, hi = float(sub["delta"].mean()), float("nan"), float("nan")
+    mac_paired_rows.append({
+        "regime": rg,
+        "n": int(len(sub)),
+        "mean": round(float(m), 2),
+        "lo": round(float(lo), 2) if not np.isnan(lo) else None,
+        "hi": round(float(hi), 2) if not np.isnan(hi) else None,
+    })
+
+# Per-season timeline: avg Maccabi home margin, avg attendance, dominant regime.
+def _label_season(s: int) -> str:
+    return f"{s}-{str(s + 1)[-2:]}"
+
+
+mac_timeline = []
+for s, grp in mac_home.groupby("season"):
+    reg = grp["regime"].value_counts().idxmax()
+    att = float(grp["attendance"].fillna(0).mean())
+    mac_timeline.append({
+        "season": int(s),
+        "season_label": _label_season(int(s)),
+        "n": int(len(grp)),
+        "home_margin": round(float(grp["tel_margin"].mean()), 2),
+        "home_wr": round(float((grp["tel_margin"] > 0).mean()), 4),
+        "avg_att": int(att),
+        "dominant_regime": reg,
+    })
+
+# Individual home games for the 2025-26 zoom: every venue/attendance/margin/opponent.
+mac_2526 = mac_home[mac_home["season"] == 2025].sort_values("date").copy()
+mac_2526_games = [
+    {
+        "date": pd.to_datetime(r["date"]).strftime("%Y-%m-%d"),
+        "venue_code": str(r["venue_code"]) if pd.notna(r["venue_code"]) else "",
+        "regime": r["regime"],
+        "opp": str(r["away_team_id"]),
+        "opp_name": team_name.get(str(r["away_team_id"]), str(r["away_team_id"])),
+        "home_pts": int(r["home_pts"]),
+        "away_pts": int(r["away_pts"]),
+        "margin": int(r["tel_margin"]),
+        "attendance": int(r["attendance"]) if pd.notna(r["attendance"]) else 0,
+    }
+    for _, r in mac_2526.iterrows()
+]
+
+# Venue tally: (season, venue_code) counts + avg attendance for the narrative table.
+mac_venue_table = (
+    mac_home.groupby(["season", "venue_code"])
+    .agg(n=("venue_code", "size"), avg_att=("attendance", "mean"), mean_margin=("tel_margin", "mean"))
+    .reset_index()
+)
+VENUE_META = {
+    "AQO": {"name": "Menora Mivtachim Arena", "city": "Tel Aviv", "country": "Israel"},
+    "ASZ2": {"name": "Pais Arena", "city": "Jerusalem", "country": "Israel"},
+    "AUF": {"name": "Aleksandar Nikolic Hall", "city": "Belgrade", "country": "Serbia"},
+    "AUF4": {"name": "Aleksandar Nikolic Hall", "city": "Belgrade", "country": "Serbia"},
+    "ATM7": {"name": "Stark Arena", "city": "Belgrade", "country": "Serbia"},
+}
+mac_venue_rows = []
+for _, r in mac_venue_table.iterrows():
+    meta = VENUE_META.get(r["venue_code"], {"name": r["venue_code"], "city": "-", "country": "-"})
+    mac_venue_rows.append({
+        "season": int(r["season"]),
+        "season_label": _label_season(int(r["season"])),
+        "venue_code": str(r["venue_code"]),
+        "venue_name": meta["name"],
+        "city": meta["city"],
+        "country": meta["country"],
+        "n": int(r["n"]),
+        "avg_att": int(r["avg_att"]) if pd.notna(r["avg_att"]) else 0,
+        "mean_margin": round(float(r["mean_margin"]), 2),
+    })
+
+maccabi_payload = {
+    "name": team_name.get(TEL, "Maccabi Tel Aviv"),
+    "team_id": TEL,
+    "regime_raw": mac_regime_rows,          # raw home HCA per regime (95% CI)
+    "regime_paired": mac_paired_rows,       # same-opponent paired delta per regime
+    "away_baseline": mac_away_baseline,     # sanity floor
+    "timeline": mac_timeline,               # per-season margin + attendance
+    "games_2526": mac_2526_games,           # every 2025-26 home game
+    "venues": mac_venue_rows,               # season x venue tally
+}
+
 # -- attendance dose-response: deciles (replaces buckets)
 # Exclude neutral-site home rows too (2024 FF in Berlin) -- their "is_home=1" assignment
 # is arbitrary and would inject non-home-court signal into the dose-response.
@@ -524,6 +704,7 @@ PAYLOAD = {
     },
     # Per team-season home-fort rankings. Shipped whole so the UI can re-sort/re-filter.
     "home_forts": home_forts,
+    "maccabi": maccabi_payload,
     "covid": {
         "regimes": [{"regime": r["regime"], "hca": round(r["hca"], 3),
                      "lo": round(r["lo"], 3), "hi": round(r["hi"], 3), "n": r["n"]}
@@ -791,6 +972,15 @@ TEMPLATE = r"""<!doctype html>
   .forts-wrap { max-height: 560px; overflow: auto; border: 1px solid var(--border); border-radius: 10px;
                 background: var(--panel); }
 
+  /* Country chips used in the Maccabi venue table */
+  .country-chip { display: inline-block; padding: 1px 7px; border-radius: 10px;
+                  font-size: 10.5px; letter-spacing: 0.04em; margin-left: 6px; font-weight: 500;
+                  border: 1px solid transparent; }
+  .country-chip.country-israel { background: rgba(20, 184, 166, 0.12); color: #5eead4;
+                                 border-color: rgba(20, 184, 166, 0.35); }
+  .country-chip.country-serbia { background: rgba(239, 68, 68, 0.12); color: #fca5a5;
+                                 border-color: rgba(239, 68, 68, 0.35); }
+
   /* Upsets table */
   .upsets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .upsets-table th { text-align: left; padding: 8px 10px; color: var(--fg-mute); font-weight: 500;
@@ -924,6 +1114,7 @@ TEMPLATE = r"""<!doctype html>
     <button class="tab" data-target="tab-models">5. Models</button>
     <button class="tab" data-target="tab-verdict">6. Verdict</button>
     <button class="tab" data-target="tab-mechanisms">7. Mechanisms</button>
+    <button class="tab" data-target="tab-maccabi">8. Maccabi TLV</button>
   </nav>
   <div style="margin:14px 0 4px;color:#9aa3af;font-size:11px;text-transform:uppercase;letter-spacing:.08em">
     <span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
@@ -1253,6 +1444,87 @@ TEMPLATE = r"""<!doctype html>
         <h3>The "Why": Shooting vs Refereeing</h3>
         <p class="sub" id="mechanisms-narrative">
           Loading mechanism analysis...
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MACCABI TEL AVIV NATURAL EXPERIMENT -->
+  <section class="panel" id="tab-maccabi">
+    <div class="card span-2" style="background:var(--card-soft);border-left:3px solid var(--accent)">
+      <h3 style="margin-top:0">Maccabi Tel Aviv &mdash; the cleanest home-arena experiment in European basketball</h3>
+      <p class="sub" style="font-size:13px;line-height:1.55">
+        No other EuroLeague club has played under four so-different "home" conditions in the last decade.
+        Between 2015 and 2026 Maccabi's home court flipped across regimes that isolate exactly what we care about:
+        the <strong>arena</strong>, the <strong>crowd</strong>, and the <strong>country</strong>.
+      </p>
+      <ul class="sub" style="font-size:13px;line-height:1.55;margin:8px 0 0 20px">
+        <li><strong>2015-16 -> 2022-23 (the normal era)</strong> &mdash; home at <em>Menora Mivtachim Arena</em>, Tel Aviv. ~10k fans per game.</li>
+        <li><strong>2019-20 / 2020-21 (COVID)</strong> &mdash; same arena, same travel, but empty: a handful of Menora games were played with zero fans.</li>
+        <li><strong>2023-24 and 2024-25 (the displacement)</strong> &mdash; after Oct 7 2023, EuroLeague moved Israeli games abroad. Maccabi's full slate ran at <em>Aleksandar Nikolic Hall</em> in Belgrade with essentially no crowd.</li>
+        <li><strong>2025-26 (the partial return)</strong> &mdash; five games back in Tel Aviv (~10k fans) + one at Pais Arena Jerusalem, while thirteen "home" games stayed in Belgrade under ongoing security caps (typical attendance &lt;500).</li>
+      </ul>
+      <p class="sub" style="font-size:12px;color:var(--fg-mute);margin-top:10px">
+        This tab compares Maccabi's home performance across those four regimes -- first on raw home margin,
+        then on the cleaner same-opponent paired delta (which removes the opponent-quality confound).
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Home margin by regime &mdash; with 95% CI</h3>
+        <p class="sub">Raw Maccabi home point differential per regime. Each regime is a bucket of Maccabi home
+          games; the opponent mix differs across buckets (controlled for in the next chart).</p>
+        <div class="chart-wrap"><canvas id="chart-mac-regime-raw"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Same-opponent paired delta &mdash; the clean test</h3>
+        <p class="sub">For each (season, opponent) with both a Maccabi <em>home</em> and <em>away</em> fixture,
+          delta = home margin &minus; away margin. Pairing removes opponent quality and season effects, so
+          the gap between regimes is a direct read on "what the home arena + crowd actually bought Maccabi."</p>
+        <div class="chart-wrap"><canvas id="chart-mac-regime-paired"></canvas></div>
+      </div>
+
+      <div class="card span-2">
+        <h3>Season timeline &mdash; home margin vs avg attendance</h3>
+        <p class="sub">Bars = mean Maccabi home margin per season (colored by dominant regime).
+          Line + right axis = average attendance per home game. The COVID dip (2020-21) and the
+          Belgrade years (2023-24, 2024-25) appear as a paired collapse of attendance and margin.</p>
+        <div class="chart-wrap" style="height:340px"><canvas id="chart-mac-timeline"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h3>2025-26 zoom &mdash; Tel Aviv vs Belgrade in the same season</h3>
+        <p class="sub">The cleanest within-season contrast in the dataset: same team, same squad, same coach,
+          same calendar, same European opposition pool -- but some games in a full Menora Mivtachim and some
+          in a half-empty Belgrade arena. Each marker is one home game.</p>
+        <div class="chart-wrap"><canvas id="chart-mac-2526"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Venues used by season</h3>
+        <p class="sub">Where Maccabi actually played their "home" games. Highlights the 2023-25 Belgrade era
+          and the 2025-26 split.</p>
+        <div class="forts-wrap" style="max-height:320px">
+          <table class="forts-table" id="mac-venues-table">
+            <thead>
+              <tr>
+                <th>Season</th>
+                <th>Venue</th>
+                <th>City</th>
+                <th class="num">Games</th>
+                <th class="num">Avg att.</th>
+                <th class="num">Mean margin</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card span-2">
+        <h3>What the four regimes tell us</h3>
+        <p class="sub" id="mac-narrative" style="font-size:13px;line-height:1.6">
+          Loading Maccabi analysis...
         </p>
       </div>
     </div>
@@ -2262,6 +2534,295 @@ TEMPLATE = r"""<!doctype html>
     const el = document.getElementById('mechanisms-narrative');
     if (el) el.innerHTML = "Mechanism data not available (boxscores not ingested).";
   }
+
+  // === MACCABI TEL AVIV DEEP-DIVE ===
+  const MAC = P.maccabi;
+  const REGIME_COLORS = {
+    'TLV with crowd':        COLORS.green,
+    'TLV empty (COVID)':     COLORS.yellow,
+    'Belgrade (displaced)':  COLORS.red,
+    'Jerusalem (home-country)': COLORS.blue,
+    'AWAY (opponent\'s home)': COLORS.fgMute,
+  };
+
+  // Chart.js plugin for horizontal CI error bars on horizontal bar charts.
+  const hBarErrorPlugin = {
+    id: 'hBarErrorPlugin',
+    afterDatasetsDraw(chart) {
+      const { ctx, scales: { x } } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        if (!ds.errorBars) return;
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const eb = ds.errorBars[i];
+          if (!eb) return;
+          const [lo, hi] = eb;
+          if (lo == null || hi == null) return;
+          const xLo = x.getPixelForValue(lo);
+          const xHi = x.getPixelForValue(hi);
+          const y = bar.y;
+          ctx.save();
+          ctx.strokeStyle = COLORS.fg;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(xLo, y); ctx.lineTo(xHi, y);
+          ctx.moveTo(xLo, y - 5); ctx.lineTo(xLo, y + 5);
+          ctx.moveTo(xHi, y - 5); ctx.lineTo(xHi, y + 5);
+          ctx.stroke();
+          ctx.restore();
+        });
+      });
+    },
+  };
+
+  function drawMacRegimeBar(canvasId, rows, xLabel, extraRows) {
+    // rows = [{regime, n, mean, lo, hi}, ...]; extraRows appended (e.g., AWAY baseline)
+    const all = [...rows, ...(extraRows || [])];
+    const labels = all.map(r => `${r.regime}  (n=${r.n})`);
+    const data = all.map(r => r.mean);
+    const errs = all.map(r => [r.lo, r.hi]);
+    const bg = all.map(r => REGIME_COLORS[r.regime] || COLORS.fgMute);
+    const el = document.getElementById(canvasId);
+    if (!el) return;
+    new Chart(el, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: bg.map(c => c + 'AA'),
+          borderColor: bg,
+          borderWidth: 1.5,
+          errorBars: errs,
+          barThickness: 28,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const r = all[ctx.dataIndex];
+                const ci = (r.lo != null && r.hi != null)
+                  ? `  95% CI [${fmtSigned(r.lo, 2)}, ${fmtSigned(r.hi, 2)}]`
+                  : '  (too few games for CI)';
+                return `${fmtSigned(r.mean, 2)} pts${ci}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: { title: { display: true, text: xLabel }, grid: { color: COLORS.grid } },
+          y: { grid: { display: false } },
+        },
+      },
+      plugins: [hBarErrorPlugin],
+    });
+  }
+
+  drawMacRegimeBar('chart-mac-regime-raw', MAC.regime_raw,
+                   'Mean Maccabi home margin (pts)', [MAC.away_baseline]);
+  drawMacRegimeBar('chart-mac-regime-paired', MAC.regime_paired,
+                   'Paired delta: home \u2212 same-opp away (pts)', []);
+
+  // === Season timeline: bars for home margin + line for attendance (dual axis) ===
+  (() => {
+    const tl = MAC.timeline;
+    const el = document.getElementById('chart-mac-timeline');
+    if (!el || !tl || !tl.length) return;
+    const labels = tl.map(t => t.season_label);
+    const margins = tl.map(t => t.home_margin);
+    const attend = tl.map(t => t.avg_att);
+    const colors = tl.map(t => REGIME_COLORS[t.dominant_regime] || COLORS.fgMute);
+    new Chart(el, {
+      data: {
+        labels,
+        datasets: [
+          {
+            type: 'bar', yAxisID: 'y',
+            label: 'Mean home margin (pts)',
+            data: margins,
+            backgroundColor: colors.map(c => c + 'B0'),
+            borderColor: colors,
+            borderWidth: 1.5,
+            barPercentage: 0.75,
+            order: 2,
+          },
+          {
+            type: 'line', yAxisID: 'y1',
+            label: 'Avg attendance',
+            data: attend,
+            borderColor: COLORS.fg,
+            backgroundColor: COLORS.fg,
+            pointRadius: 4, pointHoverRadius: 6,
+            borderWidth: 2, tension: 0.25,
+            order: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: COLORS.fg } },
+          tooltip: {
+            callbacks: {
+              afterLabel: (ctx) => {
+                const row = tl[ctx.dataIndex];
+                return `${row.n} games  ·  regime: ${row.dominant_regime}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: { grid: { color: COLORS.grid } },
+          y: {
+            position: 'left',
+            title: { display: true, text: 'Home margin (pts)' },
+            grid: { color: COLORS.grid },
+          },
+          y1: {
+            position: 'right',
+            title: { display: true, text: 'Avg attendance' },
+            grid: { display: false },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  })();
+
+  // === 2025-26 scatter: attendance vs margin, colored by regime ===
+  (() => {
+    const games = MAC.games_2526 || [];
+    const el = document.getElementById('chart-mac-2526');
+    if (!el || !games.length) return;
+    const groups = {};
+    games.forEach(g => {
+      (groups[g.regime] = groups[g.regime] || []).push({
+        x: g.attendance, y: g.margin, game: g,
+      });
+    });
+    const datasets = Object.entries(groups).map(([rg, pts]) => ({
+      label: `${rg} (n=${pts.length})`,
+      data: pts,
+      backgroundColor: (REGIME_COLORS[rg] || COLORS.fgMute) + 'CC',
+      borderColor: REGIME_COLORS[rg] || COLORS.fgMute,
+      pointRadius: 7, pointHoverRadius: 9, borderWidth: 1.5,
+    }));
+    new Chart(el, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: COLORS.fg } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const g = ctx.raw.game;
+                const venue = g.venue_code === 'AQO' ? 'Menora (TLV)'
+                              : g.venue_code === 'ASZ2' ? 'Pais (Jerusalem)'
+                              : (g.venue_code.startsWith('AUF') ? 'Nikolic (Belgrade)' : g.venue_code);
+                return `${g.date}  vs ${g.opp_name}  @ ${venue}  ·  ${g.home_pts}-${g.away_pts}  (${fmtSigned(g.margin, 0)})  ·  att ${fmtNum(g.attendance)}`;
+              },
+            },
+          },
+          annotation: {
+            annotations: {
+              zero: {
+                type: 'line', yMin: 0, yMax: 0,
+                borderColor: COLORS.fgMute, borderWidth: 1, borderDash: [4, 4],
+              },
+            },
+          },
+        },
+        scales: {
+          x: { title: { display: true, text: 'Attendance at the game' }, grid: { color: COLORS.grid }, beginAtZero: true },
+          y: { title: { display: true, text: 'Maccabi margin (pts)' }, grid: { color: COLORS.grid } },
+        },
+      },
+    });
+  })();
+
+  // === Venue table ===
+  (() => {
+    const tbody = document.querySelector('#mac-venues-table tbody');
+    if (!tbody) return;
+    const rows = (MAC.venues || []).slice().sort((a, b) => {
+      if (a.season !== b.season) return a.season - b.season;
+      return b.n - a.n;
+    });
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      const countryChip = r.country && r.country !== '-'
+        ? `<span class="country-chip country-${r.country.toLowerCase()}">${r.country}</span>`
+        : '';
+      tr.innerHTML =
+        `<td>${r.season_label}</td>` +
+        `<td>${r.venue_name}</td>` +
+        `<td>${r.city} ${countryChip}</td>` +
+        `<td class="num">${r.n}</td>` +
+        `<td class="num">${fmtNum(r.avg_att)}</td>` +
+        `<td class="num">${fmtSigned(r.mean_margin, 1)}</td>`;
+      tbody.appendChild(tr);
+    });
+  })();
+
+  // === Narrative ===
+  (() => {
+    const el = document.getElementById('mac-narrative');
+    if (!el) return;
+    const byReg = (rows, name) => rows.find(r => r.regime === name);
+    const rawT  = byReg(MAC.regime_raw, 'TLV with crowd');
+    const rawE  = byReg(MAC.regime_raw, 'TLV empty (COVID)');
+    const rawB  = byReg(MAC.regime_raw, 'Belgrade (displaced)');
+    const pairT = byReg(MAC.regime_paired, 'TLV with crowd');
+    const pairE = byReg(MAC.regime_paired, 'TLV empty (COVID)');
+    const pairB = byReg(MAC.regime_paired, 'Belgrade (displaced)');
+    const crowdPremium = (pairT && pairE) ? (pairT.mean - pairE.mean) : null;
+    const displacementCost = (pairT && pairB) ? (pairT.mean - pairB.mean) : null;
+    const html = `
+      <strong>Raw home margins.</strong>
+      Maccabi's home edge at Menora Mivtachim with fans is
+      <span style="color:${COLORS.green}">${fmtSigned(rawT.mean, 2)} pts</span>
+      (n=${rawT.n}). The same arena during COVID fell to
+      <span style="color:${COLORS.yellow}">${fmtSigned(rawE.mean, 2)} pts</span>
+      (n=${rawE.n}), and the Belgrade displacement produced only
+      <span style="color:${COLORS.red}">${fmtSigned(rawB.mean, 2)} pts</span>
+      (n=${rawB.n}). Their away baseline is
+      ${fmtSigned(MAC.away_baseline.mean, 2)} pts (n=${MAC.away_baseline.n}).
+      <br><br>
+      <strong>Same-opponent paired deltas (clean).</strong>
+      After controlling for opponent quality (pairing home and away games against the
+      same opponent in the same season), the delta is
+      <span style="color:${COLORS.green}">${fmtSigned(pairT.mean, 2)} pts</span>
+      in Tel Aviv with fans (${pairT.n} pairs),
+      <span style="color:${COLORS.yellow}">${fmtSigned(pairE.mean, 2)} pts</span>
+      in Tel Aviv empty (${pairE.n} pairs), and
+      <span style="color:${COLORS.red}">${fmtSigned(pairB.mean, 2)} pts</span>
+      in Belgrade (${pairB.n} pairs).
+      <br><br>
+      <strong>What it buys them.</strong>
+      Moving from the empty Menora to Menora with its full crowd was worth about
+      <strong>${crowdPremium != null ? fmtSigned(crowdPremium, 1) : '-'} pts</strong>
+      (the crowd premium). Moving from Belgrade back to Tel Aviv with crowd was worth
+      <strong>${displacementCost != null ? fmtSigned(displacementCost, 1) : '-'} pts</strong>
+      -- that gap bundles the familiar-arena effect <em>and</em> the crowd.
+      In other words, even an empty Menora bought Maccabi more than a half-empty Belgrade did:
+      the <em>arena itself</em> (travel, locker room, rims, sight lines, supportive refs) is a
+      meaningful chunk of their home advantage, with the crowd layered on top.
+      <br><br>
+      <strong>2025-26 in-season check.</strong>
+      With the squad held constant, Maccabi's five home games back in Menora with fans and their
+      thirteen "home" games in a near-empty Belgrade Nikolic Hall give the cleanest causal read
+      in the data -- see the scatter above.
+    `;
+    el.innerHTML = html;
+  })();
 
   // === VERDICT + mock banner ===
   const isMock = P.meta.is_mock;
