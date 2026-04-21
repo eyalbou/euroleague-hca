@@ -23,6 +23,7 @@ HTML = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png"/>
 <title>Team &amp; Season Explorer -- EuroLeague HCA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -42,8 +43,11 @@ HTML = r"""<!doctype html>
   .sub{color:var(--muted);max-width:880px;margin:0}
   .meta{color:var(--dim);font-size:12px;margin-top:10px}
   .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-  .back{color:var(--accent);text-decoration:none;font-size:13px;display:inline-block;margin-bottom:10px}
+  .back{color:var(--accent);text-decoration:none;font-size:13px}
   .back:hover{text-decoration:underline}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .brand{height:32px;width:auto;background:#fff;border-radius:6px;padding:4px 8px;
+         box-shadow:0 1px 2px rgba(0,0,0,.18);flex-shrink:0}
 
   /* FILTER BAR */
   .filterbar{margin:22px 0 8px;padding:16px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;
@@ -103,7 +107,10 @@ HTML = r"""<!doctype html>
 <body>
 <div class="wrap">
 
-  <a class="back" href="index.html">&larr; back to dashboard index</a>
+  <div class="topbar">
+    <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+    <a class="back" href="index.html">&larr; back to dashboard index</a>
+  </div>
   <div class="eyebrow" style="color:#3ccf8e">
     <span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
     Track A &middot; why home wins

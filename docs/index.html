@@ -2,6 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png"/>
 <title>EuroLeague HCA -- Home Court Advantage Analysis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -16,6 +17,9 @@
     font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.45;
     letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .brand{height:44px;width:auto;background:#fff;border-radius:8px;padding:6px 12px;
+         box-shadow:0 1px 3px rgba(0,0,0,.22);flex-shrink:0}
   .hero{padding:32px 0 24px;border-bottom:1px solid var(--hair)}
   .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
   h1{font-size:36px;font-weight:700;line-height:1.08;margin:0 0 12px;letter-spacing:-0.03em}
@@ -65,6 +69,10 @@
 <body>
 <div class="wrap">
 
+<div class="topbar">
+  <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+</div>
+
 <div class="hero">
   <div class="eyebrow">EuroLeague Basketball · 10 seasons · 2015-16 → 2024-25</div>
   <h1>Home teams win <span class="lead">1.75x</span> more often.<br/>
@@ -74,7 +82,7 @@
     <strong style="color:var(--ink)">Track B &mdash; how possessions chain:</strong> what actually happens on the next play, and on the opponent's reply.
     Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.13M play-by-play events.
   </p>
-  <div class="meta">Build <code>33aec70</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
+  <div class="meta">Build <code>5de369c</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
 </div>
 
 <div style="margin:24px 0 0;padding:20px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
@@ -249,4 +257,4 @@
 </footer>
 
 </div>
-<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">3143b9e</code> &middot; rebuilt 2026-04-21 18:45 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">48b5347</code> &middot; rebuilt 2026-04-21 18:53 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

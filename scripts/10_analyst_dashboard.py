@@ -490,6 +490,7 @@ TEMPLATE = r"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png">
 <title>EuroLeague Home-Court Advantage</title>
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/400.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/500.css" rel="stylesheet">
@@ -530,8 +531,11 @@ TEMPLATE = r"""<!doctype html>
           padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
   .hero-eyebrow { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px;
                   color: var(--accent); font-weight: 600; margin-bottom: 8px; }
-  .back { color: var(--accent); font-size: 13px; text-decoration: none; display: inline-block; margin: 0 0 14px 0; }
+  .back { color: var(--accent); font-size: 13px; text-decoration: none; }
   .back:hover { text-decoration: underline; }
+  .topbar { display: flex; align-items: center; gap: 14px; margin: 0 0 14px 0; }
+  .brand { height: 32px; width: auto; background: #fff; border-radius: 6px; padding: 4px 8px;
+           box-shadow: 0 1px 2px rgba(0,0,0,.18); flex-shrink: 0; }
   h1 { font-size: 40px; letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 12px 0; font-weight: 600; }
   h1 .accent { color: var(--accent); }
   .hero-sub { color: var(--fg-dim); font-size: 15px; max-width: 620px; line-height: 1.55; margin: 0; }
@@ -694,7 +698,10 @@ TEMPLATE = r"""<!doctype html>
 </head>
 <body>
 <div class="app">
-  <a class="back" href="index.html">&larr; back to dashboard index</a>
+  <div class="topbar">
+    <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+    <a class="back" href="index.html">&larr; back to dashboard index</a>
+  </div>
   <header class="hero">
     <div>
       <div class="hero-eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins</div>

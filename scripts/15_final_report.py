@@ -268,6 +268,7 @@ HTML_WRAPPER = """<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png"/>
 <title>EuroLeague HCA -- final report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -279,6 +280,9 @@ HTML_WRAPPER = """<!doctype html>
     font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.55;letter-spacing:-0.01em}
   .wrap{max-width:780px;margin:0 auto;padding:40px 24px 96px}
   .back{color:var(--accent);font-size:13px;text-decoration:none}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .brand{height:32px;width:auto;background:#fff;border-radius:6px;padding:4px 8px;
+         box-shadow:0 1px 2px rgba(0,0,0,.18);flex-shrink:0}
   h1{font-size:32px;letter-spacing:-0.02em;margin:24px 0 8px}
   h2{font-size:22px;letter-spacing:-0.02em;margin:36px 0 12px;border-bottom:1px solid var(--hair);padding-bottom:6px}
   h3{font-size:17px;margin:24px 0 8px}
@@ -293,7 +297,10 @@ HTML_WRAPPER = """<!doctype html>
 </style>
 </head>
 <body><div class="wrap">
-<a class="back" href="index.html">← back to dashboard index</a>
+<div class="topbar">
+  <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+  <a class="back" href="index.html">← back to dashboard index</a>
+</div>
 {body}
 </div></body></html>"""
 

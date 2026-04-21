@@ -35,6 +35,7 @@ HTML = """<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png"/>
 <title>EuroLeague HCA -- Home Court Advantage Analysis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -49,6 +50,9 @@ HTML = """<!doctype html>
     font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.45;
     letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .brand{height:44px;width:auto;background:#fff;border-radius:8px;padding:6px 12px;
+         box-shadow:0 1px 3px rgba(0,0,0,.22);flex-shrink:0}
   .hero{padding:32px 0 24px;border-bottom:1px solid var(--hair)}
   .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
   h1{font-size:36px;font-weight:700;line-height:1.08;margin:0 0 12px;letter-spacing:-0.03em}
@@ -97,6 +101,10 @@ HTML = """<!doctype html>
 </head>
 <body>
 <div class="wrap">
+
+<div class="topbar">
+  <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+</div>
 
 <div class="hero">
   <div class="eyebrow">EuroLeague Basketball · 10 seasons · 2015-16 → 2024-25</div>

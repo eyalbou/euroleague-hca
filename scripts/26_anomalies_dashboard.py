@@ -22,6 +22,7 @@ OUT = config.DASHBOARDS_DIR / "anomalies.html"
 HTML = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"/>
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>10 anomalies -- EuroLeague HCA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -38,6 +39,9 @@ HTML = r"""<!doctype html>
     letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
   .back{color:var(--accent);font-size:13px;text-decoration:none}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .brand{height:32px;width:auto;background:#fff;border-radius:6px;padding:4px 8px;
+         box-shadow:0 1px 2px rgba(0,0,0,.18);flex-shrink:0}
   .hero{padding:24px 0 16px;border-bottom:1px solid var(--hair)}
   .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
   h1{font-size:30px;font-weight:700;line-height:1.08;letter-spacing:-0.02em;margin:0 0 8px}
@@ -89,7 +93,10 @@ HTML = r"""<!doctype html>
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="index.html">&larr; back to dashboard index</a>
+  <div class="topbar">
+    <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+    <a class="back" href="index.html">&larr; back to dashboard index</a>
+  </div>
 
   <div class="hero">
     <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="explorer.html" style="color:#3ccf8e;text-decoration:none">team+season explorer</a></div>

@@ -48,6 +48,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=1400" />
+<link rel="icon" type="image/png" href="assets/euroleague-logo.png" />
 <title>EuroLeague play-by-play transitions</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -66,8 +67,11 @@ HTML_TEMPLATE = r"""<!doctype html>
     font-feature-settings:"cv11","ss01";letter-spacing:-0.02em;line-height:1.5;}
   body{padding:32px;max-width:1500px;margin:0 auto}
   header{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
-  .back{color:#6eb0ff;font-size:13px;text-decoration:none;display:inline-block;margin-bottom:10px}
+  .back{color:#6eb0ff;font-size:13px;text-decoration:none}
   .back:hover{text-decoration:underline}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .brand{height:32px;width:auto;background:#fff;border-radius:6px;padding:4px 8px;
+         box-shadow:0 1px 2px rgba(0,0,0,.18);flex-shrink:0}
   h1{font-size:28px;font-weight:700;margin:0;letter-spacing:-0.03em;line-height:1.15}
   h2{font-size:16px;font-weight:600;margin:0 0 8px 0;letter-spacing:-0.02em;color:var(--fg)}
   h3{font-size:13px;font-weight:500;margin:0 0 4px 0;color:var(--fg-mute);
@@ -160,7 +164,10 @@ HTML_TEMPLATE = r"""<!doctype html>
 </style>
 </head>
 <body>
-<a class="back" href="index.html">&larr; back to dashboard index</a>
+<div class="topbar">
+  <img class="brand" src="assets/euroleague-logo.png" alt="EuroLeague" />
+  <a class="back" href="index.html">&larr; back to dashboard index</a>
+</div>
 <header>
   <div style="color:#6eb0ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px">
     <span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
