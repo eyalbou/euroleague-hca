@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase 5 -- Mechanism analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script id="payload" type="application/json">{"title": "Phase 5 -- Mechanism analysis", "subtitle": "Home-court advantage decomposed into basketball mechanisms", "kpis": [{"label": "Games analyzed", "value": "2,897"}, {"label": "OLS R^2", "value": "0.432"}, {"label": "Observed HCA", "value": "+3.78 pts"}, {"label": "Biggest driver", "value": "efg_diff", "caption": "0.69 pts"}], "sections": [{"id": "mechanisms", "title": "Home - Away differentials per mechanism", "description": "Positive = home teams outperform. Paired on game_id.", "charts": [{"type": "forest", "id": "D11-1", "title": "Home - Away differential (paired by game)", "teams": [{"label": "Points per game", "mean": 2.522954780807732, "lo": 1.9775543665861235, "hi": 3.0228512254055913}, {"label": "Points per 100 possessions (efficiency)", "mean": 3.353202031626405, "lo": 2.6484190876818787, "hi": 4.035039659436402}, {"label": "eFG%  (effective field-goal %)", "mean": 0.008724334290561433, "lo": 0.004763172227753131, "hi": 0.01269720328420657}, {"label": "TS%  (true shooting %)", "mean": 0.010337013779509185, "lo": 0.006661550467698758, "hi": 0.014185342067391084}, {"label": "2-pt FG%", "mean": 0.007494000832131168, "lo": 0.0031618988167669837, "hi": 0.01209306172166932}, {"label": "3-pt FG%", "mean": 0.007909173244960844, "lo": 0.0026197783201119887, "hi": 0.013172788684318464}, {"label": "FT%", "mean": 0.008144032174471212, "lo": 0.0017646991058081745, "hi": 0.014305004178243881}, {"label": "FT rate (FTA / FGA)", "mean": 0.01648320300756699, "lo": 0.01068404318150165, "hi": 0.022326288127630243}, {"label": "Turnovers per 100 possessions", "mean": -1.0052999808772474, "lo": -1.2445103617654085, "hi": -0.7712029981108718}, {"label": "Offensive rebounds per game", "mean": 0.16603382809803244, "lo": -0.03073006558508802, "hi": 0.3489903348291335}, {"label": "Pace (possessions per game)", "mean": 0.11269589230238174, "lo": -0.053282706247842676, "hi": 0.28100034518467365}, {"label": "Personal fouls committed", "mean": -0.48981705212288573, "lo": -0.6575768035899207, "hi": -0.32581118398343134}, {"label": "Personal fouls drawn", "mean": 0.474974111149465, "lo": 0.30097514670348635, "hi": 0.6469192267863304}], "xTitle": "home - away (in each metric's own units)", "tall": true, "wide": true}]}, {"id": "attribution", "title": "HCA attribution -- pts of home edge per mechanism", "description": "OLS decomposition of point_diff. R^2 = 0.432.", "charts": [{"type": "bar", "id": "D11-2", "title": "Points of HCA attributable to each mechanism", "labels": ["Shooting (eFG)", "Ball security (TOV)", "Off. rebounds", "FT rate", "Foul diff."], "datasets": [{"label": "pts explained", "data": [0.690945176049659, 0.4177743305186629, 0.11226254722353061, 0.1364962764416452, 0.05274001296502391], "colors": ["#4f8cff", "#f5c264", "#7bd8dd", "#a78bfa", "#f87171"]}], "yTitle": "pts of HCA", "legend": false}]}], "sample_mode": false}</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="assets/fmt.js"></script>
+  <script src="assets/chart-theme.js"></script>
+  <script src="assets/chart-helpers.js"></script>
+  <script src="assets/filters.js"></script>
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>

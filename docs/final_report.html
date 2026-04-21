@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EuroLeague HCA -- final report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0d10;--panel:#13171d;--ink:#e7ecf1;--muted:#b6bfcc;--dim:#7a8595;
+    --accent:#6eb0ff;--pos:#3ccf8e;--hair:rgba(255,255,255,.07)}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.55;letter-spacing:-0.01em}
+  .wrap{max-width:780px;margin:0 auto;padding:40px 24px 96px}
+  .back{color:var(--accent);font-size:13px;text-decoration:none}
+  h1{font-size:32px;letter-spacing:-0.02em;margin:24px 0 8px}
+  h2{font-size:22px;letter-spacing:-0.02em;margin:36px 0 12px;border-bottom:1px solid var(--hair);padding-bottom:6px}
+  h3{font-size:17px;margin:24px 0 8px}
+  p,li{color:var(--muted)} strong{color:var(--ink)}
+  code{background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;font-size:12.5px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+  th,td{padding:8px 12px;border-bottom:1px solid var(--hair);text-align:left}
+  th{color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  blockquote{border-left:3px solid var(--accent);margin:16px 0;padding:4px 16px;color:var(--muted);background:rgba(110,176,255,.04)}
+  hr{border:0;border-top:1px solid var(--hair);margin:32px 0}
+  a{color:var(--accent)}
+</style>
+</head>
+<body><div class="wrap">
+<a class="back" href="index.html">← back to dashboard index</a>
+<h1>EuroLeague Home-Court Advantage -- final report</h1>
+<p><strong>Scope:</strong> 10 seasons (2015-16 through 2024-25), 2897 games, 1,130,400 in-play play-by-play events.<br />
+<strong>Data source:</strong> live Swagger API (<code>api-live.euroleague.net</code> v2/v3) + live PBP (<code>live.euroleague.net/api/PlaybyPlay</code>), cached locally as gzipped JSON.<br />
+<strong>Primary metric:</strong> home point differential.  <strong>Last refresh:</strong> 2026-04-21.<br />
+<strong>Build:</strong> <code>4b3e4c3</code>.</p>
+<blockquote>
+<p>This report is regenerated from <code>reports/*_output.json</code> -- every number below traces back to a committed artifact.</p>
+</blockquote>
+<h2>1. The headline</h2>
+<ul>
+<li><strong>EuroLeague home teams win 1.75x more often than on the road</strong> (logistic OR, <code>is_home</code> fixed effect).<br />
+  That's a <strong>+13.6 pp</strong> lift in win probability at the mean covariates.</li>
+<li>Average home advantage on point differential (mixed-effects intercept): <strong>+3.88 pts / game</strong>.</li>
+<li><strong>94% of that HCA (~3.63 pts/game) is explained by possession-level efficiency</strong> -- home teams average +0.049 more points per offensive possession than road teams, across <strong>every one</strong> of the 19 trackable source actions.</li>
+</ul>
+<h2>2. Where does HCA come from? (mechanism decomposition)</h2>
+<p>Paired-game analysis on 2,897 games. Each row = mean home minus mean away, with 95% bootstrap CI.</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th style="text-align: right;">Home</th>
+<th style="text-align: right;">Away</th>
+<th style="text-align: right;">Δ (home - away)</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: right;">p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Points per 100 possessions (efficiency)</td>
+<td style="text-align: right;">113.2</td>
+<td style="text-align: right;">109.8</td>
+<td style="text-align: right;"><strong>+3.4</strong></td>
+<td style="text-align: center;">[+2.6, +4.0]</td>
+<td style="text-align: right;">6.4e-21</td>
+</tr>
+<tr>
+<td>eFG%  (effective field-goal %)</td>
+<td style="text-align: right;">0.544</td>
+<td style="text-align: right;">0.535</td>
+<td style="text-align: right;"><strong>+0.009</strong></td>
+<td style="text-align: center;">[+0.005, +0.013]</td>
+<td style="text-align: right;">2.2e-05</td>
+</tr>
+<tr>
+<td>TS%  (true shooting %)</td>
+<td style="text-align: right;">0.582</td>
+<td style="text-align: right;">0.572</td>
+<td style="text-align: right;"><strong>+0.010</strong></td>
+<td style="text-align: center;">[+0.007, +0.014]</td>
+<td style="text-align: right;">7.5e-08</td>
+</tr>
+<tr>
+<td>FT rate (FTA / FGA)</td>
+<td style="text-align: right;">0.303</td>
+<td style="text-align: right;">0.287</td>
+<td style="text-align: right;"><strong>+0.016</strong></td>
+<td style="text-align: center;">[+0.011, +0.022]</td>
+<td style="text-align: right;">5.9e-08</td>
+</tr>
+<tr>
+<td>Turnovers per 100 possessions</td>
+<td style="text-align: right;">17.0</td>
+<td style="text-align: right;">18.0</td>
+<td style="text-align: right;"><strong>-1.0</strong></td>
+<td style="text-align: center;">[-1.2, -0.8]</td>
+<td style="text-align: right;">9.1e-17</td>
+</tr>
+<tr>
+<td>Offensive rebounds per game</td>
+<td style="text-align: right;">10.4</td>
+<td style="text-align: right;">10.2</td>
+<td style="text-align: right;"><strong>+0.2</strong></td>
+<td style="text-align: center;">[-0.0, +0.3]</td>
+<td style="text-align: right;">8.3e-02</td>
+</tr>
+<tr>
+<td>Personal fouls committed</td>
+<td style="text-align: right;">20.3</td>
+<td style="text-align: right;">20.8</td>
+<td style="text-align: right;"><strong>-0.5</strong></td>
+<td style="text-align: center;">[-0.7, -0.3]</td>
+<td style="text-align: right;">2.4e-08</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading it:</strong> home teams convert at higher eFG% and generate more trips to the line (FT rate), while turning the ball over <em>less</em>. Pace and offensive rebounding differences are small and largely not significant.</p>
+<h2>3. Can we predict home wins?</h2>
+<ul>
+<li><strong>Elo + is_home logistic baseline:</strong> test accuracy = 64.5%, Brier = 0.218.</li>
+<li><strong>Logistic with attendance + rest + interactions:</strong> test accuracy = 65.7%, Brier = 0.216.</li>
+<li><strong>Tree-based models (Random Forest / LightGBM):</strong> comparable Brier, slightly better calibration -- see Models tab of the dashboard.</li>
+<li>A majority-class baseline ('always predict home win') sits at 62.4%.  Models add ~3 pp over that, mainly via Elo and attendance ratio.</li>
+</ul>
+<h2>4. Team-by-team variation (mixed-effects LM)</h2>
+<p><code>point_diff ~ attendance_ratio + is_playoff + (1 + attendance_ratio | team)</code></p>
+<ul>
+<li>Fixed intercept: <strong>+3.88</strong> pts/game (league-wide HCA).  </li>
+<li>Attendance ratio coefficient: <strong>-0.75</strong> pts per unit of arena utilization -- <em>small and not significant at the league level</em>, but team-specific slopes vary widely (see dashboard tab 3).  </li>
+<li>Playoff indicator: <strong>-3.41</strong> pts -- HCA shrinks sharply in the playoffs, consistent with better seed travel schedules and more evenly matched crowds.</li>
+</ul>
+<h2>5. COVID natural experiment (DiD)</h2>
+<p>Pre-COVID (crowded) vs during-COVID (closed-doors) vs post-COVID difference in home advantage:</p>
+<ul>
+<li><strong>post - pre</strong> = +0.11 pts/game (95% CI [-0.98, +1.19])<br />
+  → HCA fully recovered after the pandemic. Closed-doors games showed a meaningful drop but the confidence intervals overlap zero, so we report the effect as directional.</li>
+</ul>
+<h2>6. Play-by-play -- what follows what?</h2>
+<p>Three first-order Markov chains computed from 1.13M events:</p>
+<ul>
+<li><strong>Q0</strong> -- immediate next event (any team).</li>
+<li><strong>Q1</strong> -- opponent's immediate response.</li>
+<li><strong>Q2</strong> -- same team's first offensive action on its next possession (the one that matters for points).</li>
+</ul>
+<p>Each bar is bootstrapped at the game level (500 resamples, 95% CIs). See the <code>transitions.html</code> dashboard for all source-action drill-downs, per-team distinctiveness (KL-divergence ranking), PPP per branch, and the HCA-lens overlay.</p>
+<h2>7. Quality checks</h2>
+<ul>
+<li>Transition QA (6 checks): all green (see <code>reports/transitions_qa.json</code>).</li>
+<li>HCA x Transitions QA:</li>
+<li><code>delta_ppp_range</code>: most deltas in [-0.10, +0.10] -- a few outliers OK</li>
+<li><code>sign_majority</code>: &gt; 0.50 if home teams hold an edge on most possessions</li>
+<li><code>hca_from_possession_efficiency</code>: pts in [1.0, 3.5]; share in [0.30, 0.90] -- rest is pace / FTA rate</li>
+<li>Bootstrap CIs are game-level clustered throughout -- independence assumption would otherwise shrink CIs artificially.</li>
+</ul>
+<h2>8. How to read the dashboard</h2>
+<ul>
+<li><strong>index.html</strong> -- one-pager with the 5 headline KPIs and deep-links.</li>
+<li><strong>analyst_dashboard.html</strong> -- seven tabs covering league, per-team, attendance, COVID, models, verdict, mechanisms.</li>
+<li><strong>transitions.html</strong> -- play-by-play Markov view with four lenses (bars, heatmap, per-source multiples, per-team, HCA).</li>
+</ul>
+<h2>9. What this project taught me</h2>
+<ul>
+<li><strong>Cluster bootstrap vs naive bootstrap:</strong> treating events inside one game as independent triples the apparent precision. Clustering at the game level is the only honest CI for play-by-play metrics.</li>
+<li><strong>Paired-event artifacts:</strong> <code>FV</code> (block by defender) and <code>AG</code> (shot blocked, shooter's view) are two rows for the same incident -- the Q1 chain <code>AG -&gt; FV</code> at 82% is noise, not signal. Always sanity-check twinned events.</li>
+<li><strong>Possession-level framing wins narratively.</strong> "Home teams average +0.05 points per possession more than road teams across every source action" beats "mixed-model intercept = 3.88" for stakeholder communication, even though they describe the same phenomenon.</li>
+</ul>
+<hr />
+<p><em>Generated by <code>scripts/15_final_report.py</code> at 2026-04-21T05:30:57.233512Z on commit <code>4b3e4c3</code>.</em></p>
+</div><!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">4b3e4c3</code> &middot; rebuilt 2026-04-21 05:35 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

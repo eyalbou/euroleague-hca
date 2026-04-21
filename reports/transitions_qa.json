@@ -1,0 +1,110 @@
+{
+  "q1_after_3FGM": {
+    "shot_share": 0.649,
+    "top1": {
+      "source": "3FGM",
+      "source_label": "Made 3-pointer",
+      "question": "q1",
+      "split": "all",
+      "rank": 0,
+      "next_action": "2FGM",
+      "p": 0.19,
+      "baseline_p": 0.095,
+      "lift": 2.0,
+      "lo": 0.1865,
+      "hi": 0.1935,
+      "n": 50994
+    },
+    "expect": "shot_share in [0.60, 0.75]"
+  },
+  "q1_after_ST": {
+    "defensive_share": 0.524,
+    "top1": {
+      "source": "ST",
+      "source_label": "Steal",
+      "question": "q1",
+      "split": "all",
+      "rank": 0,
+      "next_action": "CM",
+      "p": 0.2398,
+      "baseline_p": 0.1153,
+      "lift": 2.08,
+      "lo": 0.2355,
+      "hi": 0.2437,
+      "n": 37228
+    },
+    "expect": "defensive_share > 0.50"
+  },
+  "q2_after_2FGM": {
+    "shot_share": 0.857,
+    "top1": {
+      "source": "2FGM",
+      "source_label": "Made 2-pointer",
+      "question": "q2",
+      "split": "all",
+      "rank": 0,
+      "next_action": "2FGM",
+      "p": 0.2191,
+      "baseline_p": 0.2179,
+      "lift": 1.005,
+      "lo": 0.2166,
+      "hi": 0.2216,
+      "n": 114478
+    },
+    "ppp_mean": 1.057,
+    "expect": "shot_share > 0.85, ppp in [0.8, 1.2]"
+  },
+  "q2_after_2FGA": {
+    "shot_share": 0.848,
+    "top1": {
+      "source": "2FGA",
+      "source_label": "Missed 2-pointer",
+      "question": "q2",
+      "split": "all",
+      "rank": 0,
+      "next_action": "2FGM",
+      "p": 0.2278,
+      "baseline_p": 0.2179,
+      "lift": 1.045,
+      "lo": 0.2249,
+      "hi": 0.2304,
+      "n": 96706
+    },
+    "ppp_mean": 1.086,
+    "expect": "shot_share > 0.80, ppp in [0.9, 1.3]"
+  },
+  "q0_after_2FGM": {
+    "top1": {
+      "source": "2FGM",
+      "source_label": "Made 2-pointer",
+      "question": "q0",
+      "split": "all",
+      "rank": 0,
+      "next_action": "AS",
+      "p": 0.4534,
+      "baseline_p": 0.0895,
+      "lift": 5.063,
+      "lo": 0.4495,
+      "hi": 0.457,
+      "n": 115264
+    },
+    "expect": "top1 == AS, p in [0.40, 0.55]"
+  },
+  "q2_after_3FGM_lift_sanity": {
+    "top1": {
+      "source": "3FGM",
+      "source_label": "Made 3-pointer",
+      "question": "q2",
+      "split": "all",
+      "rank": 0,
+      "next_action": "2FGM",
+      "p": 0.2323,
+      "baseline_p": 0.2179,
+      "lift": 1.066,
+      "lo": 0.229,
+      "hi": 0.2358,
+      "n": 50733
+    },
+    "expect": "lift should be near 1.0 (same-team offensive baseline)"
+  }
+}

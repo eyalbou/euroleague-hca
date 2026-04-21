@@ -1,0 +1,164 @@
+{
+  "fixed_effects": {
+    "Intercept": 3.884975883051743,
+    "attendance_ratio": -0.7504808971012328,
+    "is_playoff": -3.4119423605730614
+  },
+  "team_slopes": [
+    {
+      "team_id": "PAN",
+      "name": "Panathinaikos AKTOR Athens",
+      "total_slope": 2.7074334606467994,
+      "total_intercept": 4.304024271723495
+    },
+    {
+      "team_id": "OLY",
+      "name": "Olympiacos Piraeus",
+      "total_slope": 2.520229726870787,
+      "total_intercept": 5.441890115532689
+    },
+    {
+      "team_id": "CSK",
+      "name": "CSKA Moscow",
+      "total_slope": 2.00491670924419,
+      "total_intercept": 7.017227587360932
+    },
+    {
+      "team_id": "KHI",
+      "name": "BC Khimki",
+      "total_slope": 1.754713840006017,
+      "total_intercept": 0.6275939840359914
+    },
+    {
+      "team_id": "RED",
+      "name": "Crvena Zvezda Meridianbet Belgrade",
+      "total_slope": 1.5084530055496645,
+      "total_intercept": 1.9091588217683848
+    },
+    {
+      "team_id": "ULK",
+      "name": "Fenerbahce Beko Istanbul",
+      "total_slope": 1.3748077895101334,
+      "total_intercept": 5.532391975134795
+    },
+    {
+      "team_id": "MAD",
+      "name": "Real Madrid",
+      "total_slope": 1.1092920956809533,
+      "total_intercept": 7.221224730213347
+    },
+    {
+      "team_id": "MCO",
+      "name": "AS Monaco",
+      "total_slope": 1.0100897529739932,
+      "total_intercept": 4.731171504237169
+    },
+    {
+      "team_id": "TEL",
+      "name": "Maccabi Rapyd Tel Aviv",
+      "total_slope": 0.6322191376278016,
+      "total_intercept": 3.8313424012066606
+    },
+    {
+      "team_id": "PAR",
+      "name": "Partizan Mozzart Bet Belgrade",
+      "total_slope": -0.18825680287129665,
+      "total_intercept": 4.587158277034389
+    },
+    {
+      "team_id": "IST",
+      "name": "Anadolu Efes Istanbul",
+      "total_slope": -0.23876093449467295,
+      "total_intercept": 6.34993355058532
+    },
+    {
+      "team_id": "BAM",
+      "name": "Bamberger Basketball GmbH",
+      "total_slope": -0.3559944098226714,
+      "total_intercept": 3.7775243469068425
+    },
+    {
+      "team_id": "BAS",
+      "name": "Baskonia Vitoria-Gasteiz",
+      "total_slope": -0.7878596705858727,
+      "total_intercept": 6.277551513432165
+    },
+    {
+      "team_id": "BAR",
+      "name": "FC Barcelona",
+      "total_slope": -0.8318813005612766,
+      "total_intercept": 7.431506730479022
+    },
+    {
+      "team_id": "MAL",
+      "name": "Unicaja Malaga",
+      "total_slope": -1.2548320587437218,
+      "total_intercept": 3.2590425640836074
+    },
+    {
+      "team_id": "DAR",
+      "name": "Darussafaka Basketbol",
+      "total_slope": -1.7078725587627552,
+      "total_intercept": 2.108788946184711
+    },
+    {
+      "team_id": "PAM",
+      "name": "Valencia Basket",
+      "total_slope": -1.9103260416196473,
+      "total_intercept": 3.1308112020183803
+    },
+    {
+      "team_id": "ZAL",
+      "name": "Zalgiris Kaunas",
+      "total_slope": -1.934514747269478,
+      "total_intercept": 3.0508901309816903
+    },
+    {
+      "team_id": "VIR",
+      "name": "Virtus Bologna",
+      "total_slope": -2.2860589681654235,
+      "total_intercept": 2.7846893223930405
+    },
+    {
+      "team_id": "ASV",
+      "name": "LDLC ASVEL Villeurbanne",
+      "total_slope": -2.535651510497743,
+      "total_intercept": 0.043936483803481696
+    },
+    {
+      "team_id": "MUN",
+      "name": "FC Bayern Munich",
+      "total_slope": -2.73264220952142,
+      "total_intercept": 3.792574952548721
+    },
+    {
+      "team_id": "UNK",
+      "name": "UNICS Kazan",
+      "total_slope": -2.7554590209817476,
+      "total_intercept": 3.3561166181590663
+    },
+    {
+      "team_id": "MIL",
+      "name": "EA7 Emporio Armani Milan",
+      "total_slope": -3.880914371214105,
+      "total_intercept": 4.196490522658303
+    },
+    {
+      "team_id": "DYR",
+      "name": "Zenit St Petersburg",
+      "total_slope": -4.039728391489443,
+      "total_intercept": 2.956898043815204
+    },
+    {
+      "team_id": "BER",
+      "name": "ALBA Berlin",
+      "total_slope": -5.943424949039887,
+      "total_intercept": -0.5955415200037959
+    }
+  ],
+  "variance_components": {
+    "intercept": 7.481378972126965,
+    "slope": 10.167595418094958,
+    "residual": 149.3983265568629
+  }
+}

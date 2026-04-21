@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.python-version
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data lake -- heavy, rebuildable from API (keep reference/, drop everything else)
+data/*
+!data/reference/
+!data/reference/**
+logs/
+
+# Batch artifacts from unrelated email-cleanup work in this monorepo
+email-cleanup/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/

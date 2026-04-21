@@ -1,0 +1,22 @@
+{
+  "built_at_utc": "2026-04-21T05:35:19.408132Z",
+  "dashboards": [
+    {
+      "href": "index.html",
+      "title": "Summary (start here)"
+    },
+    {
+      "href": "dashboard.html",
+      "title": "Analyst dashboard (7 tabs)"
+    },
+    {
+      "href": "transitions.html",
+      "title": "Play-by-play transitions"
+    },
+    {
+      "href": "final_report.html",
+      "title": "Written report"
+    }
+  ],
+  "reports_count": 12
+}

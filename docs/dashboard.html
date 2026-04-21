@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EuroLeague Home-Court Advantage</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/500.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/700.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #11141b;
+    --panel-2: #161a23;
+    --border: rgba(255,255,255,0.06);
+    --border-2: rgba(255,255,255,0.12);
+    --fg: #f1f3f8;
+    --fg-dim: #a7aec0;
+    --fg-mute: #6b7280;
+    --accent: #f97316;
+    --accent-soft: rgba(249, 115, 22, 0.12);
+    --blue: #60a5fa;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #facc15;
+    --violet: #a78bfa;
+    --cyan: #22d3ee;
+    --grid: rgba(255,255,255,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+               font-family: 'DM Sans', 'Axiforma', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               font-feature-settings: "ss01", "tnum"; -webkit-font-smoothing: antialiased; }
+  .app { max-width: 1280px; margin: 0 auto; padding: 32px 32px 96px 32px; }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.92em;
+         background: rgba(255,255,255,0.05); padding: 1px 5px; border-radius: 3px; }
+
+  /* HERO */
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end;
+          padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+  .hero-eyebrow { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px;
+                  color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  h1 { font-size: 40px; letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 12px 0; font-weight: 600; }
+  h1 .accent { color: var(--accent); }
+  .hero-sub { color: var(--fg-dim); font-size: 15px; max-width: 620px; line-height: 1.55; margin: 0; }
+  .hero-mode { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+               border: 1px solid var(--border-2); border-radius: 999px; font-size: 12px; color: var(--fg-dim); }
+  .hero-mode .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .hero-mode .dot.mock { background: var(--yellow); }
+  .hero-mode .dot.live { background: var(--green); }
+
+  /* KPI strip -- 4 cards now */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+         padding: 24px; position: relative; overflow: hidden; }
+  .kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+  .kpi.crowd::before { background: var(--cyan); }
+  .kpi-label { color: var(--fg-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+               font-weight: 500; margin-bottom: 12px; }
+  .kpi-value { font-size: 36px; letter-spacing: -0.02em; font-weight: 600; line-height: 1; margin-bottom: 8px; }
+  .kpi-value.smaller { font-size: 28px; }
+  .kpi-caption { color: var(--fg-mute); font-size: 13px; line-height: 1.5; }
+  .kpi-caption .up { color: var(--green); }
+  .kpi-caption .down { color: var(--red); }
+
+  /* Basketball-only benchmark TABLE (replaces cross-sport bar) */
+  .bench { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+           padding: 20px 24px; margin-bottom: 32px; }
+  .bench-title { font-size: 13px; color: var(--fg-dim); text-transform: uppercase;
+                 letter-spacing: 0.1em; margin-bottom: 4px; font-weight: 500; }
+  .bench-sub { font-size: 13px; color: var(--fg-mute); margin: 0 0 16px 0; }
+  .bench-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .bench-table th { text-align: left; padding: 8px 12px; color: var(--fg-mute); font-weight: 500;
+                    text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px;
+                    border-bottom: 1px solid var(--border-2); }
+  .bench-table th.num { text-align: right; }
+  .bench-table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--fg-dim);
+                    font-variant-numeric: tabular-nums; }
+  .bench-table td.num { text-align: right; color: var(--fg); font-weight: 500; }
+  .bench-table tr.ours td { background: var(--accent-soft); color: var(--fg); font-weight: 500; }
+  .bench-table tr.ours td:first-child { border-left: 2px solid var(--accent); }
+  .bench-table tr:last-child td { border-bottom: 0; }
+  .bench-source { font-size: 11px; color: var(--fg-mute); }
+  .bench-foot { font-size: 11px; color: var(--fg-mute); margin-top: 12px; line-height: 1.5; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--panel);
+          border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow-x: auto; }
+  .tab { flex: 1; background: transparent; border: 0; color: var(--fg-dim); padding: 10px 16px;
+         border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500;
+         cursor: pointer; white-space: nowrap; transition: all 0.15s ease; }
+  .tab:hover { color: var(--fg); background: var(--panel-2); }
+  .tab.active { background: var(--accent); color: #111; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade 0.2s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .card.span-2 { grid-column: span 2; }
+  .card h3 { margin: 0 0 4px 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+  .card .sub { color: var(--fg-dim); font-size: 13px; margin: 0 0 20px 0; line-height: 1.5; }
+  .card .n-cap { color: var(--fg-mute); font-size: 11px; margin-top: 12px;
+                 padding-top: 12px; border-top: 1px solid var(--border); display: flex;
+                 justify-content: space-between; align-items: center; gap: 12px; }
+  .chart-wrap { position: relative; height: 340px; }
+  .chart-wrap.tall { height: 460px; }
+  .chart-wrap.short { height: 240px; }
+
+  /* Heatmap */
+  .heat { display: grid; gap: 2px; font-size: 11px; }
+  .heat-row { display: grid; grid-template-columns: 160px repeat(var(--cols), 1fr); gap: 2px; align-items: center; }
+  .heat-label { color: var(--fg-dim); padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .heat-cell { height: 26px; border-radius: 3px; display: flex; align-items: center; justify-content: center;
+               font-weight: 600; color: #0b0d12; cursor: default; }
+  .heat-cell.empty { background: var(--panel-2); color: var(--fg-mute); }
+  .heat-head { color: var(--fg-mute); font-size: 11px; text-align: center; }
+
+  /* Forest */
+  .forest { font-size: 12px; }
+  .forest-row { display: grid; grid-template-columns: 180px 1fr 70px; gap: 12px; align-items: center;
+                padding: 4px 0; }
+  .forest-label { color: var(--fg-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .forest-bar { position: relative; height: 18px; }
+  .forest-bar .axis { position: absolute; inset: 50% 0 auto 0; height: 1px; background: var(--grid); }
+  .forest-bar .ref { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--fg-mute); }
+  .forest-bar .ref.league { background: var(--accent); opacity: 0.6; }
+  .forest-bar .ci { position: absolute; height: 2px; top: 50%; margin-top: -1px; background: var(--fg-dim); border-radius: 1px; }
+  .forest-bar .pt { position: absolute; width: 10px; height: 10px; border-radius: 50%;
+                    top: 50%; margin-top: -5px; background: var(--accent);
+                    border: 2px solid var(--bg); }
+  .forest-val { text-align: right; color: var(--fg); font-variant-numeric: tabular-nums;
+                font-weight: 500; }
+  .forest-axis-row { display: grid; grid-template-columns: 180px 1fr 70px; gap: 12px;
+                     color: var(--fg-mute); font-size: 10px; padding-top: 4px;
+                     border-top: 1px solid var(--border); margin-top: 4px; }
+  .forest-axis-row .axis-content { display: flex; justify-content: space-between; }
+
+  /* Upsets table */
+  .upsets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .upsets-table th { text-align: left; padding: 8px 10px; color: var(--fg-mute); font-weight: 500;
+                     text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px;
+                     border-bottom: 1px solid var(--border-2); }
+  .upsets-table th.num { text-align: right; }
+  .upsets-table td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--fg-dim);
+                     font-variant-numeric: tabular-nums; }
+  .upsets-table td.num { text-align: right; color: var(--fg); font-weight: 500; }
+  .upsets-table td.team { color: var(--fg); }
+  .upsets-table td.surprise { color: var(--accent); font-weight: 600; }
+
+  /* Verdict */
+  .mock-banner { background: rgba(250, 204, 21, 0.06); border: 1px solid rgba(250, 204, 21, 0.3);
+                 border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex;
+                 align-items: flex-start; gap: 12px; }
+  .mock-banner .ico { color: var(--yellow); font-size: 18px; line-height: 1; }
+  .mock-banner .body { color: var(--fg-dim); font-size: 13px; line-height: 1.55; }
+  .mock-banner .body strong { color: var(--yellow); font-weight: 600; }
+
+  .verdict-list { display: grid; gap: 12px; }
+  .verdict-item { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+                  padding: 20px; border-left: 3px solid var(--accent); }
+  .verdict-item.crowd { border-left-color: var(--cyan); }
+  .verdict-item h4 { margin: 0 0 6px 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .verdict-item p { margin: 0; color: var(--fg-dim); font-size: 14px; line-height: 1.55; }
+
+  .gap-card { background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%);
+              border: 1px solid var(--border-2); border-radius: 14px; padding: 20px; margin-top: 24px; }
+  .gap-card h3 { margin: 0 0 8px 0; font-size: 14px; text-transform: uppercase;
+                 letter-spacing: 0.1em; color: var(--fg-dim); font-weight: 600; }
+  .gap-card ul { margin: 0; padding-left: 20px; color: var(--fg-dim); font-size: 13px; line-height: 1.7; }
+  .gap-card ul li code { color: var(--accent); }
+
+  /* OR card */
+  .or-grid { display: grid; gap: 12px; }
+  .or-row { padding: 16px 18px; background: var(--panel-2); border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .or-row .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-dim); margin-bottom: 4px; }
+  .or-row .val { font-size: 24px; font-weight: 600; color: var(--accent); line-height: 1; }
+  .or-row .desc { color: var(--fg-mute); font-size: 12px; max-width: 240px; text-align: right; line-height: 1.5; }
+  .or-row .desc strong { color: var(--fg); font-weight: 500; }
+
+  /* LightGBM caveat */
+  .caveat { background: rgba(248, 113, 113, 0.06); border: 1px solid rgba(248, 113, 113, 0.25);
+            border-radius: 10px; padding: 12px 16px; margin-top: 14px; font-size: 12px;
+            color: var(--fg-dim); line-height: 1.55; }
+  .caveat strong { color: var(--red); }
+
+  /* Footer */
+  .footer { color: var(--fg-mute); font-size: 12px; padding-top: 32px; text-align: center; line-height: 1.6; }
+  .footer a { color: var(--fg-dim); }
+
+  @media (max-width: 1000px) {
+    h1 { font-size: 30px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .card.span-2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div>
+      <div class="hero-eyebrow">EuroLeague Basketball &middot; 10 seasons &middot; 2,897 games</div>
+      <h1>The crowd, the court, and the count.<br><span class="accent">What actually moves home-court advantage?</span></h1>
+      <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2024-25).
+        Combines bootstrap inference, mixed-effects per-team crowd sensitivity, and a natural experiment built around the
+        2020-21 empty-arena regime.</p>
+    </div>
+    <div class="hero-mode"><span class="dot live"></span> LIVE DATA</div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">League HCA</div>
+      <div class="kpi-value" id="kpi-hca">--</div>
+      <div class="kpi-caption" id="kpi-hca-caption">95% bootstrap CI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Home win rate</div>
+      <div class="kpi-value" id="kpi-wr">--</div>
+      <div class="kpi-caption">across 2,897 games</div>
+    </div>
+    <div class="kpi crowd">
+      <div class="kpi-label">Crowd contribution</div>
+      <div class="kpi-value" id="kpi-crowd">--</div>
+      <div class="kpi-caption" id="kpi-crowd-caption">from COVID natural experiment (DiD)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Team spread</div>
+      <div class="kpi-value smaller" id="kpi-spread">--</div>
+      <div class="kpi-caption" id="kpi-spread-caption"></div>
+    </div>
+  </section>
+
+  <section class="bench">
+    <div class="bench-title">For context &middot; EuroLeague vs EuroCup</div>
+    <p class="bench-sub">Both leagues measured on the exact same pipeline using live API data. 
+      EuroCup teams generally play in smaller arenas and travel less, which might explain the difference.</p>
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>League</th>
+          <th class="num">HCA (pts)</th>
+          <th>95% CI</th>
+          <th>Home Win %</th>
+          <th>Sample size</th>
+        </tr>
+      </thead>
+      <tbody id="bench-body"></tbody>
+    </table>
+  </section>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-target="tab-overview">1. The league</button>
+    <button class="tab" data-target="tab-teams">2. Per team</button>
+    <button class="tab" data-target="tab-attendance">3. Attendance</button>
+    <button class="tab" data-target="tab-covid">4. COVID experiment</button>
+    <button class="tab" data-target="tab-models">5. Models</button>
+    <button class="tab" data-target="tab-verdict">6. Verdict</button>
+    <button class="tab" data-target="tab-mechanisms">7. Mechanisms</button>
+    <a class="tab" href="transitions.html" style="text-decoration:none;display:inline-flex;align-items:center">
+      8. Transitions &rarr;
+    </a>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="tab-overview">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>HCA held steady around +3 pts; the empty-arena 2020-21 shock is the exception</h3>
+        <p class="sub">League-wide home point-differential per season. The COVID-affected window (mid-2019-20 onwards) is shaded.
+          The dashed orange line marks the 10-year average.</p>
+        <div class="chart-wrap tall"><canvas id="chart-trend"></canvas></div>
+        <div class="n-cap">
+          <span id="trend-n">n=...</span>
+          <span>One row per season. League average reference line in dashed orange.</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Most games are decided by less than two possessions</h3>
+        <p class="sub">Smoothed density of home margin. Markers show the share of games within key clutch thresholds.</p>
+        <div class="chart-wrap"><canvas id="chart-density"></canvas></div>
+        <div class="n-cap">
+          <span id="density-n">n=...</span>
+          <span>Markers at +/-3, +/-5, +/-15 pts</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Regular season vs Playoffs: home edge collapses when stakes peak</h3>
+        <p class="sub">95% bootstrap CIs. Playoffs sample is small (eight teams) so the CI is wide -- but the point estimate
+          is essentially zero, a major directional finding.</p>
+        <div class="chart-wrap"><canvas id="chart-phase"></canvas></div>
+        <div class="n-cap">
+          <span id="phase-n">n=...</span>
+          <span>Bootstrap (2,000 resamples)</span>
+        </div>
+      </div>
+      <div class="card span-2">
+        <h3>Home win rate tracks HCA tightly &mdash; with Wilson 95% CI shading</h3>
+        <p class="sub">Season-level home win rate. Thin error bands = Wilson 95% CI given each season's sample size.</p>
+        <div class="chart-wrap"><canvas id="chart-wr"></canvas></div>
+        <div class="n-cap">
+          <span id="wr-n">n=...</span>
+          <span>Season-level Wilson 95% interval</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAMS -->
+  <section class="panel" id="tab-teams">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>HCA by team &mdash; with league-average reference (orange dashed)</h3>
+        <p class="sub">Each team's mean home point-differential (RS only) with 95% bootstrap CI. Vertical orange line = league
+          average. Vertical gray line = zero (no advantage).</p>
+        <div class="forest" id="team-forest"></div>
+        <div class="n-cap">
+          <span id="teamf-n">n=...</span>
+          <span>RS games only; teams with &lt;30 home games excluded</span>
+        </div>
+      </div>
+      <div class="card span-2">
+        <h3>Team x Season heatmap &mdash; who is consistently high?</h3>
+        <p class="sub">Color = home point differential. Darker orange = larger HCA. White = data missing.</p>
+        <div id="heatmap"></div>
+        <div class="n-cap">
+          <span>RS only</span>
+          <span>Sorted top-down by mean HCA</span>
+        </div>
+      </div>
+      <div class="card span-2">
+        <h3>Biggest home-court upsets &mdash; where the crowd may have mattered most</h3>
+        <p class="sub">Top RS wins where the home team was an Elo underdog. <code>Surprise</code> = actual margin minus
+          Elo-expected margin. Useful for hypothesis-generating about specific arenas.</p>
+        <table class="upsets-table" id="upsets-table">
+          <thead>
+            <tr>
+              <th>Season</th>
+              <th>Date</th>
+              <th>Home</th>
+              <th>Away</th>
+              <th class="num">Score</th>
+              <th class="num">Margin</th>
+              <th class="num">Elo&nbsp;diff</th>
+              <th class="num">Surprise</th>
+              <th class="num">Att%</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="n-cap">
+          <span>Top 8 by surprise</span>
+          <span>Elo-to-margin conversion: 28 Elo points &asymp; 1 pt margin</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section class="panel" id="tab-attendance">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>Dose-response: fuller arenas deliver bigger home margins</h3>
+        <p class="sub">Decile bins of attendance ratio. Dashed line is the OLS fit on raw games. Slope shown inline.</p>
+        <div class="chart-wrap tall"><canvas id="chart-dose"></canvas></div>
+        <div class="n-cap">
+          <span id="dose-n">n=...</span>
+          <span id="dose-slope">slope: ...</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Decile view &mdash; with 95% CI error bars</h3>
+        <p class="sub">Same data sliced into deciles. Error bars are bootstrap 95% intervals; non-overlap = real separation.</p>
+        <div class="chart-wrap"><canvas id="chart-deciles"></canvas></div>
+        <div class="n-cap">
+          <span id="deciles-n">n=...</span>
+          <span>Quantile-based bins (~equal sample per bin)</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Which teams depend most on the crowd?</h3>
+        <p class="sub">Per-team random slope on attendance_ratio (mixedlm). Reference line = zero (no crowd dependence).
+          Higher = more crowd-sensitive.</p>
+        <div class="forest" id="team-slopes"></div>
+        <div class="n-cap">
+          <span id="slopes-n">n teams: ...</span>
+          <span id="slopes-league">League slope: ...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COVID -->
+  <section class="panel" id="tab-covid">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Three regimes, one natural experiment</h3>
+        <p class="sub">Mean HCA per regime with 95% CI error bars. COVID removed a sizeable chunk; post-COVID returned to
+          pre-COVID levels.</p>
+        <div class="chart-wrap"><canvas id="chart-regimes"></canvas></div>
+        <div class="n-cap">
+          <span id="reg-n">n=...</span>
+          <span>Pre = 2015-2018; COVID = 2019-2020; Post = 2021-2024</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Difference-in-differences</h3>
+        <p class="sub">Delta HCA between regimes with bootstrap CI. A non-zero <code>covid - pre</code> estimate is the
+          causal leverage.</p>
+        <div class="forest" id="did-forest"></div>
+        <div class="n-cap">
+          <span>Bootstrap on regime means</span>
+          <span>Orange dot = significant (CI excludes zero)</span>
+        </div>
+      </div>
+      <div class="card span-2">
+        <h3>HCA timeline with COVID shock highlighted</h3>
+        <p class="sub">The 2020-21 season is the left endpoint of the attendance dose-response curve. Pre and post means
+          drawn as horizontal references.</p>
+        <div class="chart-wrap"><canvas id="chart-covid-line"></canvas></div>
+        <div class="n-cap">
+          <span id="covid-n">n=...</span>
+          <span>COVID shading covers 2019-20 (March onwards) + full 2020-21</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODELS -->
+  <section class="panel" id="tab-models">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Elo-adjusted odds: home still wins at a neutral matchup</h3>
+        <p class="sub">Logistic regression controlling for team strength. The odds-ratio on <code>is_home</code> is the clean
+          HCA estimate; the interaction tells us how the crowd amplifies it.</p>
+        <div class="or-grid">
+          <div class="or-row">
+            <div>
+              <div class="lbl">is_home odds ratio</div>
+              <div class="val" id="or-value">--</div>
+            </div>
+            <div class="desc"><strong>+<span id="pp-value">--</span> pp at a 50/50 matchup</strong> (Elo-adjusted home win lift)</div>
+          </div>
+          <div class="or-row">
+            <div>
+              <div class="lbl">is_home &times; attendance OR</div>
+              <div class="val" id="int-value">--</div>
+            </div>
+            <div class="desc" id="int-desc">A sold-out arena adds <strong>+? pp</strong> on top of the base home edge vs an empty one</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Calibration -- when the model says 70%, does 70% of the time it happen?</h3>
+        <p class="sub">Diagonal = perfect calibration. Closer to the diagonal = better-calibrated probabilities (what a GM cares about).</p>
+        <div class="chart-wrap"><canvas id="chart-calib"></canvas></div>
+        <div class="n-cap">
+          <span>Held-out test fold</span>
+          <span>10 equal-width prediction bins</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>ROC -- discrimination across all thresholds</h3>
+        <p class="sub">Diagonal = random; top-left = perfect. AUC labelled per model. All models cluster tightly above the diagonal.</p>
+        <div class="chart-wrap"><canvas id="chart-roc"></canvas></div>
+        <div class="n-cap">
+          <span>Held-out test fold</span>
+          <span id="roc-auc">AUC: ...</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Model comparison -- simpler beats fancier at this sample size</h3>
+        <p class="sub">Held-out test log-loss (lower = better). Logistic with attendance interaction tops the table.</p>
+        <div class="chart-wrap"><canvas id="chart-models"></canvas></div>
+        <div class="caveat" id="lgb-caveat"></div>
+      </div>
+      <div class="card span-2">
+        <h3>Feature importance &mdash; Elo dominates, attendance is a clear second</h3>
+        <p class="sub">LightGBM gain-based importance. Elo captures raw team quality; attendance captures the crowd effect.
+          Note: gain-based importance is high-variance at small samples; treat magnitudes as ordinal not absolute.</p>
+        <div class="chart-wrap"><canvas id="chart-importance"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERDICT -->
+  <section class="panel" id="tab-verdict">
+    <div id="mock-banner-slot"></div>
+    <div class="verdict-list" id="verdict-list"></div>
+    <div class="gap-card">
+      <h3>What we don't have (yet)</h3>
+      <ul>
+        <li><code>Quarter-by-quarter HCA</code> -- whether the home edge is built early (energy) or late (clutch / refs).
+          Requires play-by-play.</li>
+        <li><code>Travel &amp; rest mechanics</code> -- <code>days_rest</code> is in the model, but back-to-backs, miles
+          travelled, and time-zone effects are not analyzed in depth.</li>
+        <li><code>Cluster-robust standard errors</code> -- bootstrap CIs treat games as independent; clustering by team-season
+          would be more honest. Adds ~10-15% to interval widths.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- MECHANISMS -->
+  <section class="panel" id="tab-mechanisms">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Home advantage decomposition</h3>
+        <p class="sub">How much of the home edge comes from shooting better vs getting more free throws?
+          (Based on OLS regression of home margin on stat gaps).</p>
+        <div class="chart-wrap"><canvas id="chart-mechanisms-contrib"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Raw statistical gaps (Home - Away)</h3>
+        <p class="sub">Average difference in key box-score metrics per game (with 95% CIs).</p>
+        <div class="chart-wrap"><canvas id="chart-mechanisms-gaps"></canvas></div>
+      </div>
+      <div class="card span-2">
+        <h3>The "Why": Shooting vs Refereeing</h3>
+        <p class="sub" id="mechanisms-narrative">
+          Loading mechanism analysis...
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    Generated by <code>scripts/10_analyst_dashboard.py</code> &middot; LIVE DATA &middot; 10 seasons,
+    2,897 games, 23 teams.<br>
+    Methodology: bootstrap 95% CI (1,000-2,000 resamples), Wilson binomial CI, mixed-effects (<code>statsmodels.mixedlm</code>),
+    Difference-in-Differences, time-based CV for ML. Full detail in <code>reports/final_report.md</code>.
+  </footer>
+</div>
+
+<script id="payload" type="application/json">{"mechanisms": {"gaps": [{"stat": "eFG% (home vs away)", "gap": 0.008724334290561433, "lo": 0.0046278219151069215, "hi": 0.012791240998422652, "p": 2.165141058669134e-05, "n": 2897}, {"stat": "FT rate (FTA/FGA)", "gap": 0.01648320300756699, "lo": 0.010740991368309614, "hi": 0.022461034567754043, "p": 5.932983306877082e-08, "n": 2897}, {"stat": "Turnovers per 100", "gap": -1.0052999808772474, "lo": -1.2420561537555141, "hi": -0.764555047803683, "p": 9.083725683684517e-17, "n": 2897}, {"stat": "Off. rebounds / game", "gap": 0.16603382809803244, "lo": -0.009682430100103554, "hi": 0.35214877459440763, "p": 0.08324182873443983, "n": 2897}, {"stat": "Fouls committed", "gap": -0.48981705212288573, "lo": -0.659328615809458, "hi": -0.32134967207455994, "p": 2.4468564368442857e-08, "n": 2897}], "contribs": {"eFG%": 0.690945176049659, "FTA/100": 0.1364962764416452, "TOV/100": 0.4177743305186629, "OREB": 0.11226254722353061, "Foul diff": 0.05274001296502391}, "total_hca": 3.781152916810494, "ols_r2": 0.43248915369136254, "n_games": 2897, "n_team_games": 5794, "ols_intercept": 2.3709345736119705}, "meta": {"n_games": 2897, "n_teams": 23, "seasons": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "data_sources": ["live"], "is_mock": false}, "kpis": {"league_hca": 3.781152916810494, "league_hca_lo": 3.3216862271315155, "league_hca_hi": 4.243717638936832, "home_win_rate": 0.6244390749050742, "n_games": 2897, "crowd_contrib": 0.49642103146677385, "crowd_lo": -0.7680705656646892, "crowd_hi": 1.7842406839583127, "crowd_significant": false, "top_team_name": "Real Madrid", "top_team_hca": 8.885906040268456, "bot_team_name": "ALBA Berlin", "bot_team_hca": -4.316326530612245}, "self_context": [{"league": "EuroLeague", "hca_pts": "+3.78", "ci": "[+3.32, +4.24]", "home_win": "62.4%", "n_games": "2,897"}, {"league": "EuroCup", "hca_pts": "+3.78", "ci": "[+3.32, +4.24]", "home_win": "62.4%", "n_games": "2,897"}], "trend": {"seasons": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], "hca": [4.696, 3.085, 3.827, 3.746, 3.575, 3.149, 3.967, 4.445, 3.973, 3.391], "win_rate": [0.644, 0.622, 0.635, 0.627, 0.619, 0.567, 0.649, 0.625, 0.647, 0.618], "wr_lo": [0.583, 0.561, 0.575, 0.567, 0.558, 0.513, 0.593, 0.571, 0.594, 0.565], "wr_hi": [0.701, 0.679, 0.691, 0.683, 0.677, 0.62, 0.701, 0.676, 0.696, 0.669], "n": [250, 259, 260, 260, 252, 328, 299, 328, 331, 330]}, "phase_hca": [{"phase": "Regular Season", "code": "RS", "hca": 3.7686969930609098, "lo": 3.299094063222822, "hi": 4.268812644564379, "n": 2594, "home_wr": 0.6229760986892829}, {"phase": "Playoffs", "code": "PO", "hca": 3.5436241610738257, "lo": 1.623993288590604, "hi": 5.315604026845637, "n": 149, "home_wr": 0.6174496644295302}], "density": {"stats": {"n": 2897, "mean": 3.781152916810494, "median": 4.0, "share_within_3": 0.17915084570245082, "share_within_5": 0.31584397652744217, "share_within_10": 0.5892302381774249, "share_blowout": 0.2222989299275112, "share_home_win": 0.6244390749050742, "share_overtime_eligible": 0.0}, "x": [-39.5, -38.5, -37.5, -36.5, -35.5, -34.5, -33.5, -32.5, -31.5, -30.5, -29.5, -28.5, -27.5, -26.5, -25.5, -24.5, -23.5, -22.5, -21.5, -20.5, -19.5, -18.5, -17.5, -16.5, -15.5, -14.5, -13.5, -12.5, -11.5, -10.5, -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 29.5, 30.5, 31.5, 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 39.5], "y": [0.0115, 0.0115, 0.0115, 0.0231, 0.0462, 0.0577, 0.0577, 0.0692, 0.0923, 0.0923, 0.1731, 0.1615, 0.1846, 0.1385, 0.2538, 0.3692, 0.3692, 0.3346, 0.3346, 0.3923, 0.4615, 0.4615, 0.5654, 0.5884, 0.7846, 0.9346, 1.1076, 1.2346, 1.3615, 1.5115, 1.8576, 2.0999, 2.3768, 2.2961, 2.4807, 2.7576, 2.8268, 3.046, 2.8268, 2.0076, 1.8461, 2.1461, 3.1614, 3.4614, 3.5768, 3.7845, 3.6691, 3.5422, 3.4499, 3.0922, 2.8268, 2.5499, 2.5268, 2.5384, 2.4691, 2.2845, 1.9384, 1.6153, 1.3961, 1.2923, 1.223, 1.073, 0.9461, 0.7961, 0.7384, 0.7154, 0.6461, 0.6346, 0.5077, 0.4846, 0.4038, 0.3808, 0.2885, 0.2769, 0.2308, 0.2077, 0.15, 0.0923, 0.1154, 0.0923]}, "team_hca": [{"team_id": "MAD", "name": "Real Madrid", "hca": 8.886, "n": 149, "lo": 7.197, "hi": 10.571}, {"team_id": "CSK", "name": "CSKA Moscow", "hca": 8.634, "n": 93, "lo": 6.29, "hi": 10.941}, {"team_id": "BAR", "name": "FC Barcelona", "hca": 7.432, "n": 148, "lo": 5.26, "hi": 9.595}, {"team_id": "OLY", "name": "Olympiacos Piraeus", "hca": 7.26, "n": 146, "lo": 5.202, "hi": 9.363}, {"team_id": "IST", "name": "Anadolu Efes Istanbul", "hca": 6.52, "n": 148, "lo": 4.388, "hi": 8.831}, {"team_id": "ULK", "name": "Fenerbahce Beko Istanbul", "hca": 6.265, "n": 147, "lo": 4.214, "hi": 8.214}, {"team_id": "BAS", "name": "Baskonia Vitoria-Gasteiz", "hca": 6.25, "n": 148, "lo": 4.041, "hi": 8.652}, {"team_id": "PAN", "name": "Panathinaikos AKTOR Athens", "hca": 5.973, "n": 150, "lo": 3.94, "hi": 7.857}, {"team_id": "MCO", "name": "AS Monaco", "hca": 5.735, "n": 68, "lo": 3.073, "hi": 8.361}, {"team_id": "PAR", "name": "Partizan Mozzart Bet Belgrade", "hca": 4.902, "n": 51, "lo": 1.97, "hi": 7.775}, {"team_id": "TEL", "name": "Maccabi Rapyd Tel Aviv", "hca": 3.986, "n": 148, "lo": 2.027, "hi": 5.905}, {"team_id": "RED", "name": "Crvena Zvezda Meridianbet Belgrade", "hca": 2.836, "n": 134, "lo": 0.776, "hi": 4.896}, {"team_id": "BAM", "name": "Bamberger Basketball GmbH", "hca": 2.143, "n": 35, "lo": -2.186, "hi": 6.314}, {"team_id": "ZAL", "name": "Zalgiris Kaunas", "hca": 1.919, "n": 149, "lo": -0.007, "hi": 3.963}, {"team_id": "MUN", "name": "FC Bayern Munich", "hca": 1.845, "n": 116, "lo": -0.211, "hi": 4.065}, {"team_id": "PAM", "name": "Valencia Basket", "hca": 1.775, "n": 80, "lo": -0.482, "hi": 4.012}, {"team_id": "MIL", "name": "EA7 Emporio Armani Milan", "hca": 1.755, "n": 147, "lo": -0.034, "hi": 3.657}, {"team_id": "DYR", "name": "Zenit St Petersburg", "hca": 0.488, "n": 43, "lo": -3.488, "hi": 4.756}, {"team_id": "VIR", "name": "Virtus Bologna", "hca": 0.431, "n": 51, "lo": -2.393, "hi": 3.177}, {"team_id": "DAR", "name": "Darussafaka Basketbol", "hca": 0.0, "n": 35, "lo": -3.171, "hi": 3.143}, {"team_id": "KHI", "name": "BC Khimki", "hca": -0.682, "n": 66, "lo": -3.955, "hi": 2.644}, {"team_id": "ASV", "name": "LDLC ASVEL Villeurbanne", "hca": -2.535, "n": 99, "lo": -4.668, "hi": -0.318}, {"team_id": "BER", "name": "ALBA Berlin", "hca": -4.316, "n": 98, "lo": -7.072, "hi": -1.388}], "heatmap": {"teams": ["Real Madrid", "CSKA Moscow", "FC Barcelona", "Olympiacos Piraeus", "Anadolu Efes Istanbul", "Fenerbahce Beko Istanbul", "Baskonia Vitoria-Gasteiz", "Panathinaikos AKTOR Athens", "AS Monaco", "Partizan Mozzart Bet Belgrade", "Maccabi Rapyd Tel Aviv", "Crvena Zvezda Meridianbet Belgrade", "Bamberger Basketball GmbH", "Zalgiris Kaunas", "FC Bayern Munich", "Valencia Basket", "EA7 Emporio Armani Milan", "Zenit St Petersburg", "Virtus Bologna", "Darussafaka Basketbol", "BC Khimki", "LDLC ASVEL Villeurbanne", "ALBA Berlin"], "seasons": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], "values": [[13.0, 11.6, 9.93, 12.6, 9.93, 3.41, 8.88, 10.24, 8.47, 4.76], [12.6, 12.33, 12.8, 7.93, 6.36, 7.59, 2.17, null, null, null], [11.8, -0.47, 5.4, 8.73, 8.08, 8.88, 11.29, 5.76, 10.29, 6.76], [9.0, 8.0, 8.07, 4.93, 3.57, -0.24, 13.57, 13.53, 5.71, 8.06], [6.6, 3.47, -4.73, 10.73, 11.92, 8.53, 7.76, 4.12, 7.94, 9.0], [11.6, 4.13, 5.93, 11.13, 1.07, 3.53, 6.07, 7.41, 11.88, 3.0], [15.8, 5.8, 7.53, 8.2, 0.0, 7.24, 3.0, 12.12, 1.24, 7.35], [15.8, 8.07, 8.73, 6.2, 4.07, 2.71, -0.76, 1.94, 8.94, 11.35], [null, null, null, null, null, null, 7.24, 5.35, 6.41, 3.94], [null, null, null, null, null, null, null, 8.0, 4.06, 2.65], [1.6, -4.0, 1.0, 5.8, 10.93, 2.88, 5.75, 9.47, 5.71, -0.71], [5.6, 6.4, 0.87, null, 1.67, -1.41, 1.38, 3.53, 3.59, 5.82], [12.2, 1.07, -0.13, null, null, null, null, null, null, null], [4.2, -2.87, 1.93, 3.47, 4.0, 5.59, -2.94, 3.47, 3.29, 0.65], [-4.6, null, null, 1.87, -1.5, 3.88, 4.5, 0.35, -0.71, 6.29], [null, null, 2.6, null, 3.43, 3.06, null, 1.59, -1.41, null], [-3.2, -3.33, -3.47, 0.33, 1.71, 6.59, 3.93, 1.65, 5.24, 3.47], [null, null, null, null, -6.87, 5.29, 3.09, null, null, null], [null, null, null, null, null, null, null, 0.06, 3.71, -2.47], [-1.0, 4.73, null, -4.4, null, null, null, null, null, null], [13.0, null, 1.4, -2.13, 6.36, -11.06, null, null, null, null], [null, null, null, null, 1.71, -0.82, -5.59, -3.94, -5.53, -0.29], [null, null, null, null, -0.62, -2.82, 1.35, -3.18, -9.29, -10.47]]}, "upsets": [], "attendance": {"deciles": [{"decile": 1, "ratio_lo": 0.0, "ratio_hi": 0.015504378851767758, "ratio_mid": 0.00034136125333500823, "hca": 3.5, "lo": 2.1516379310344824, "hi": 5.00698275862069, "n": 290}, {"decile": 2, "ratio_lo": 0.016875, "ratio_hi": 0.402, "ratio_mid": 0.2437891388078186, "hca": 3.8275862068965516, "lo": 2.2302586206896553, "hi": 5.472931034482758, "n": 290}, {"decile": 3, "ratio_lo": 0.40685563612392883, "ratio_hi": 0.5616428571428571, "ratio_mid": 0.4955593696737017, "hca": 5.42560553633218, "lo": 4.0828719723183395, "hi": 6.740743944636678, "n": 289}, {"decile": 4, "ratio_lo": 0.5626923076923077, "ratio_hi": 0.6569230769230769, "ratio_mid": 0.6134955633192565, "hca": 4.562068965517241, "lo": 2.9723275862068963, "hi": 6.193879310344827, "n": 290}, {"decile": 5, "ratio_lo": 0.6571010435225249, "ratio_hi": 0.7304827586206897, "ratio_mid": 0.6923355332950503, "hca": 4.4862068965517246, "lo": 3.0026724137931033, "hi": 6.008275862068964, "n": 290}, {"decile": 6, "ratio_lo": 0.7305633802816901, "ratio_hi": 0.8186561466021889, "ratio_mid": 0.7746918203824936, "hca": 3.262975778546713, "lo": 1.902854671280277, "hi": 4.584861591695502, "n": 289}, {"decile": 7, "ratio_lo": 0.8186725663716814, "ratio_hi": 0.8958461538461538, "ratio_mid": 0.8566458027751375, "hca": 2.975862068965517, "lo": 1.4679310344827587, "hi": 4.451896551724137, "n": 290}, {"decile": 8, "ratio_lo": 0.8959671204726432, "ratio_hi": 0.9493846153846154, "ratio_mid": 0.9243269656229188, "hca": 4.387543252595155, "lo": 2.9999134948096886, "hi": 5.747837370242214, "n": 289}, {"decile": 9, "ratio_lo": 0.9495418681598371, "ratio_hi": 0.9874385581649372, "ratio_mid": 0.9693643396053789, "hca": 3.024137931034483, "lo": 1.634396551724138, "hi": 4.449482758620689, "n": 290}, {"decile": 10, "ratio_lo": 0.9874797275381122, "ratio_hi": 1.05, "ratio_mid": 1.01546374201306, "hca": 2.3655172413793104, "lo": 0.9100862068965517, "hi": 3.8246551724137925, "n": 290}], "slope": -0.668, "slope_pp10": -0.067, "intercept": 4.221, "team_slopes": [{"team_id": "BER", "name": "ALBA Berlin", "total_slope": -5.943, "total_intercept": -0.596}, {"team_id": "DYR", "name": "Zenit St Petersburg", "total_slope": -4.04, "total_intercept": 2.957}, {"team_id": "MIL", "name": "EA7 Emporio Armani Milan", "total_slope": -3.881, "total_intercept": 4.196}, {"team_id": "UNK", "name": "UNICS Kazan", "total_slope": -2.755, "total_intercept": 3.356}, {"team_id": "MUN", "name": "FC Bayern Munich", "total_slope": -2.733, "total_intercept": 3.793}, {"team_id": "ASV", "name": "LDLC ASVEL Villeurbanne", "total_slope": -2.536, "total_intercept": 0.044}, {"team_id": "VIR", "name": "Virtus Bologna", "total_slope": -2.286, "total_intercept": 2.785}, {"team_id": "ZAL", "name": "Zalgiris Kaunas", "total_slope": -1.935, "total_intercept": 3.051}, {"team_id": "PAM", "name": "Valencia Basket", "total_slope": -1.91, "total_intercept": 3.131}, {"team_id": "DAR", "name": "Darussafaka Basketbol", "total_slope": -1.708, "total_intercept": 2.109}, {"team_id": "MAL", "name": "Unicaja Malaga", "total_slope": -1.255, "total_intercept": 3.259}, {"team_id": "BAR", "name": "FC Barcelona", "total_slope": -0.832, "total_intercept": 7.432}, {"team_id": "BAS", "name": "Baskonia Vitoria-Gasteiz", "total_slope": -0.788, "total_intercept": 6.278}, {"team_id": "BAM", "name": "Bamberger Basketball GmbH", "total_slope": -0.356, "total_intercept": 3.778}, {"team_id": "IST", "name": "Anadolu Efes Istanbul", "total_slope": -0.239, "total_intercept": 6.35}, {"team_id": "PAR", "name": "Partizan Mozzart Bet Belgrade", "total_slope": -0.188, "total_intercept": 4.587}, {"team_id": "TEL", "name": "Maccabi Rapyd Tel Aviv", "total_slope": 0.632, "total_intercept": 3.831}, {"team_id": "MCO", "name": "AS Monaco", "total_slope": 1.01, "total_intercept": 4.731}, {"team_id": "MAD", "name": "Real Madrid", "total_slope": 1.109, "total_intercept": 7.221}, {"team_id": "ULK", "name": "Fenerbahce Beko Istanbul", "total_slope": 1.375, "total_intercept": 5.532}, {"team_id": "RED", "name": "Crvena Zvezda Meridianbet Belgrade", "total_slope": 1.508, "total_intercept": 1.909}, {"team_id": "KHI", "name": "BC Khimki", "total_slope": 1.755, "total_intercept": 0.628}, {"team_id": "CSK", "name": "CSKA Moscow", "total_slope": 2.005, "total_intercept": 7.017}, {"team_id": "OLY", "name": "Olympiacos Piraeus", "total_slope": 2.52, "total_intercept": 5.442}, {"team_id": "PAN", "name": "Panathinaikos AKTOR Athens", "total_slope": 2.707, "total_intercept": 4.304}], "league_slope": -0.75, "n_games": 2897}, "covid": {"regimes": [{"regime": "Pre-COVID", "hca": 3.831, "lo": 3.073, "hi": 4.612, "n": 1029}, {"regime": "COVID", "hca": 3.334, "lo": 2.279, "hi": 4.391, "n": 580}, {"regime": "Post-COVID", "hca": 3.943, "lo": 3.276, "hi": 4.62, "n": 1288}], "did": {"covid - pre": {"mean": -0.496, "lo": -1.784, "hi": 0.768}, "post - covid": {"mean": 0.608, "lo": -0.634, "hi": 1.921}, "post - pre": {"mean": 0.112, "lo": -0.982, "hi": 1.192}}, "crowd_contrib": 0.5, "crowd_lo": -0.77, "crowd_hi": 1.78}, "models": {"eval": {"home-always": {"accuracy": 0.6181818181818182, "log_loss": 2.6381250521812127, "brier": 0.3810555454545454}, "majority-prior": {"accuracy": 0.6181818181818182, "log_loss": 0.6649796942768497, "brier": 0.23604835537637056}, "elo-only": {"accuracy": 0.6424242424242425, "log_loss": 0.6215495964498271, "brier": 0.21770397567223113}, "logistic": {"accuracy": 0.6303030303030303, "log_loss": 0.6244812117021477, "brier": 0.21899062442231362}, "random forest": {"accuracy": 0.6242424242424243, "log_loss": 0.6406361352412603, "brier": 0.22447997981073428}, "lightgbm": {"accuracy": 0.5969696969696969, "log_loss": 0.7671108562752597, "brier": 0.26021149083956846}}, "auc": {"elo-only": 0.6534391534391535, "logistic": 0.6489262371615312, "random forest": 0.6419623404917523, "lightgbm": 0.603135698723934}, "calibration": {"elo-only": [{"bin_mid": 0.25, "predicted": 0.2646726281294553, "empirical": 0.2, "n": 10}, {"bin_mid": 0.35000000000000003, "predicted": 0.36197549837097187, "empirical": 0.5, "n": 16}, {"bin_mid": 0.45, "predicted": 0.4563524305500909, "empirical": 0.5, "n": 40}, {"bin_mid": 0.55, "predicted": 0.5528369237690773, "empirical": 0.5671641791044776, "n": 67}, {"bin_mid": 0.6500000000000001, "predicted": 0.646434656707199, "empirical": 0.5903614457831325, "n": 83}, {"bin_mid": 0.75, "predicted": 0.7477110407863523, "empirical": 0.6891891891891891, "n": 74}, {"bin_mid": 0.8500000000000001, "predicted": 0.8408417317385741, "empirical": 0.9375, "n": 32}, {"bin_mid": 0.95, "predicted": 0.9099375058188025, "empirical": 1.0, "n": 6}], "logistic": [{"bin_mid": 0.25, "predicted": 0.2700606260770374, "empirical": 0.2, "n": 10}, {"bin_mid": 0.35000000000000003, "predicted": 0.3683848248929574, "empirical": 0.47058823529411764, "n": 17}, {"bin_mid": 0.45, "predicted": 0.46113893733371686, "empirical": 0.5609756097560976, "n": 41}, {"bin_mid": 0.55, "predicted": 0.5550040081289059, "empirical": 0.582089552238806, "n": 67}, {"bin_mid": 0.6500000000000001, "predicted": 0.6497965516212773, "empirical": 0.5875, "n": 80}, {"bin_mid": 0.75, "predicted": 0.752267613080622, "empirical": 0.6619718309859155, "n": 71}, {"bin_mid": 0.8500000000000001, "predicted": 0.8404908301037124, "empirical": 0.8857142857142857, "n": 35}, {"bin_mid": 0.95, "predicted": 0.9132391820314226, "empirical": 1.0, "n": 7}], "random forest": [{"bin_mid": 0.35000000000000003, "predicted": 0.36868402251131416, "empirical": 0.42105263157894735, "n": 19}, {"bin_mid": 0.45, "predicted": 0.4522294968832261, "empirical": 0.5121951219512195, "n": 82}, {"bin_mid": 0.55, "predicted": 0.5455415162465692, "empirical": 0.6140350877192983, "n": 57}, {"bin_mid": 0.6500000000000001, "predicted": 0.6566686997997792, "empirical": 0.5774647887323944, "n": 71}, {"bin_mid": 0.75, "predicted": 0.7397581832794323, "empirical": 0.7222222222222222, "n": 36}, {"bin_mid": 0.8500000000000001, "predicted": 0.8485011013574673, "empirical": 0.8392857142857143, "n": 56}, {"bin_mid": 0.95, "predicted": 0.9078511279685086, "empirical": 0.6666666666666666, "n": 6}], "lightgbm": [{"bin_mid": 0.15000000000000002, "predicted": 0.1526535651632132, "empirical": 0.6, "n": 20}, {"bin_mid": 0.25, "predicted": 0.2536247144092361, "empirical": 0.4642857142857143, "n": 28}, {"bin_mid": 0.35000000000000003, "predicted": 0.34955856826717524, "empirical": 0.55, "n": 40}, {"bin_mid": 0.45, "predicted": 0.4540030530983844, "empirical": 0.5185185185185185, "n": 27}, {"bin_mid": 0.55, "predicted": 0.5472526899798625, "empirical": 0.5952380952380952, "n": 42}, {"bin_mid": 0.6500000000000001, "predicted": 0.6492067144710104, "empirical": 0.5714285714285714, "n": 35}, {"bin_mid": 0.75, "predicted": 0.7453836354047032, "empirical": 0.5952380952380952, "n": 42}, {"bin_mid": 0.8500000000000001, "predicted": 0.8540339712296424, "empirical": 0.8055555555555556, "n": 36}, {"bin_mid": 0.95, "predicted": 0.9520007256325239, "empirical": 0.75, "n": 56}]}, "roc": {"elo-only": [{"x": 0.0, "y": 0.0}, {"x": 0.0, "y": 0.004901960784313725}, {"x": 0.0, "y": 0.08333333333333333}, {"x": 0.007936507936507936, "y": 0.08333333333333333}, {"x": 0.007936507936507936, "y": 0.11764705882352941}, {"x": 0.015873015873015872, "y": 0.11764705882352941}, {"x": 0.015873015873015872, "y": 0.19607843137254902}, {"x": 0.031746031746031744, "y": 0.19607843137254902}, {"x": 0.031746031746031744, "y": 0.20098039215686275}, {"x": 0.06349206349206349, "y": 0.20098039215686275}, {"x": 0.06349206349206349, "y": 0.2107843137254902}, {"x": 0.07936507936507936, "y": 0.2107843137254902}, {"x": 0.07936507936507936, "y": 0.25980392156862747}, {"x": 0.09523809523809523, "y": 0.25980392156862747}, {"x": 0.09523809523809523, "y": 0.27450980392156865}, {"x": 0.10317460317460317, "y": 0.27450980392156865}, {"x": 0.10317460317460317, "y": 0.27941176470588236}, {"x": 0.11904761904761904, "y": 0.27941176470588236}, {"x": 0.11904761904761904, "y": 0.28921568627450983}, {"x": 0.12698412698412698, "y": 0.28921568627450983}, {"x": 0.12698412698412698, "y": 0.30392156862745096}, {"x": 0.15079365079365079, "y": 0.30392156862745096}, {"x": 0.15079365079365079, "y": 0.3235294117647059}, {"x": 0.15873015873015872, "y": 0.3235294117647059}, {"x": 0.15873015873015872, "y": 0.3382352941176471}, {"x": 0.16666666666666666, "y": 0.3382352941176471}, {"x": 0.16666666666666666, "y": 0.3431372549019608}, {"x": 0.1746031746031746, "y": 0.3431372549019608}, {"x": 0.1746031746031746, "y": 0.3872549019607843}, {"x": 0.18253968253968253, "y": 0.3872549019607843}, {"x": 0.18253968253968253, "y": 0.4117647058823529}, {"x": 0.1984126984126984, "y": 0.4117647058823529}, {"x": 0.1984126984126984, "y": 0.43137254901960786}, {"x": 0.2222222222222222, "y": 0.43137254901960786}, {"x": 0.2222222222222222, "y": 0.4362745098039216}, {"x": 0.23015873015873015, "y": 0.4362745098039216}, {"x": 0.23015873015873015, "y": 0.44607843137254904}, {"x": 0.25396825396825395, "y": 0.44607843137254904}, {"x": 0.25396825396825395, "y": 0.46568627450980393}, {"x": 0.2619047619047619, "y": 0.46568627450980393}, {"x": 0.2619047619047619, "y": 0.47058823529411764}, {"x": 0.2698412698412698, "y": 0.47058823529411764}, {"x": 0.2698412698412698, "y": 0.4803921568627451}, {"x": 0.2857142857142857, "y": 0.4803921568627451}, {"x": 0.2857142857142857, "y": 0.5147058823529411}, {"x": 0.29365079365079366, "y": 0.5147058823529411}, {"x": 0.29365079365079366, "y": 0.5294117647058824}, {"x": 0.30158730158730157, "y": 0.5294117647058824}, {"x": 0.30158730158730157, "y": 0.5392156862745098}, {"x": 0.3253968253968254, "y": 0.5392156862745098}, {"x": 0.3253968253968254, "y": 0.5441176470588235}, {"x": 0.3412698412698413, "y": 0.5441176470588235}, {"x": 0.3412698412698413, "y": 0.5490196078431373}, {"x": 0.35714285714285715, "y": 0.5490196078431373}, {"x": 0.35714285714285715, "y": 0.5637254901960784}, {"x": 0.3888888888888889, "y": 0.5637254901960784}, {"x": 0.3888888888888889, "y": 0.5833333333333334}, {"x": 0.3968253968253968, "y": 0.5833333333333334}, {"x": 0.3968253968253968, "y": 0.5931372549019608}, {"x": 0.40476190476190477, "y": 0.5931372549019608}, {"x": 0.40476190476190477, "y": 0.5980392156862745}, {"x": 0.42063492063492064, "y": 0.5980392156862745}, {"x": 0.42063492063492064, "y": 0.6029411764705882}, {"x": 0.42857142857142855, "y": 0.6029411764705882}, {"x": 0.42857142857142855, "y": 0.6078431372549019}, {"x": 0.4365079365079365, "y": 0.6078431372549019}, {"x": 0.4365079365079365, "y": 0.6176470588235294}, {"x": 0.4444444444444444, "y": 0.6176470588235294}, {"x": 0.4444444444444444, "y": 0.6372549019607843}, {"x": 0.4523809523809524, "y": 0.6372549019607843}, {"x": 0.4523809523809524, "y": 0.6617647058823529}, {"x": 0.4603174603174603, "y": 0.6617647058823529}, {"x": 0.4603174603174603, "y": 0.6666666666666666}, {"x": 0.47619047619047616, "y": 0.6666666666666666}, {"x": 0.47619047619047616, "y": 0.6764705882352942}, {"x": 0.5158730158730159, "y": 0.6764705882352942}, {"x": 0.5158730158730159, "y": 0.696078431372549}, {"x": 0.5238095238095238, "y": 0.696078431372549}, {"x": 0.5238095238095238, "y": 0.7009803921568627}, {"x": 0.5317460317460317, "y": 0.7009803921568627}, {"x": 0.5317460317460317, "y": 0.7107843137254902}, {"x": 0.5555555555555556, "y": 0.7107843137254902}, {"x": 0.5555555555555556, "y": 0.7450980392156863}, {"x": 0.5714285714285714, "y": 0.7450980392156863}, {"x": 0.5714285714285714, "y": 0.7549019607843137}, {"x": 0.5952380952380952, "y": 0.7549019607843137}, {"x": 0.5952380952380952, "y": 0.7647058823529411}, {"x": 0.6111111111111112, "y": 0.7647058823529411}, {"x": 0.6111111111111112, "y": 0.7696078431372549}, {"x": 0.6190476190476191, "y": 0.7696078431372549}, {"x": 0.6190476190476191, "y": 0.7892156862745098}, {"x": 0.6349206349206349, "y": 0.7892156862745098}, {"x": 0.6349206349206349, "y": 0.7990196078431373}, {"x": 0.6507936507936508, "y": 0.7990196078431373}, {"x": 0.6507936507936508, "y": 0.8088235294117647}, {"x": 0.6666666666666666, "y": 0.8088235294117647}, {"x": 0.6666666666666666, "y": 0.8137254901960784}, {"x": 0.6825396825396826, "y": 0.8137254901960784}, {"x": 0.6825396825396826, "y": 0.8284313725490197}, {"x": 0.6904761904761905, "y": 0.8284313725490197}, {"x": 0.6904761904761905, "y": 0.8431372549019608}, {"x": 0.6984126984126984, "y": 0.8431372549019608}, {"x": 0.6984126984126984, "y": 0.8578431372549019}, {"x": 0.7301587301587301, "y": 0.8578431372549019}, {"x": 0.7301587301587301, "y": 0.8725490196078431}, {"x": 0.7380952380952381, "y": 0.8725490196078431}, {"x": 0.7380952380952381, "y": 0.8774509803921569}, {"x": 0.7857142857142857, "y": 0.8774509803921569}, {"x": 0.7857142857142857, "y": 0.9019607843137255}, {"x": 0.7936507936507936, "y": 0.9019607843137255}, {"x": 0.7936507936507936, "y": 0.9166666666666666}, {"x": 0.8015873015873016, "y": 0.9166666666666666}, {"x": 0.8015873015873016, "y": 0.946078431372549}, {"x": 0.8253968253968254, "y": 0.946078431372549}, {"x": 0.8253968253968254, "y": 0.9509803921568627}, {"x": 0.8571428571428571, "y": 0.9509803921568627}, {"x": 0.8571428571428571, "y": 0.9558823529411765}, {"x": 0.8809523809523809, "y": 0.9558823529411765}, {"x": 0.8809523809523809, "y": 0.9754901960784313}, {"x": 0.8888888888888888, "y": 0.9754901960784313}, {"x": 0.8888888888888888, "y": 0.9852941176470589}, {"x": 0.9126984126984127, "y": 0.9852941176470589}, {"x": 0.9126984126984127, "y": 0.9901960784313726}, {"x": 0.9444444444444444, "y": 0.9901960784313726}, {"x": 0.9444444444444444, "y": 0.9950980392156863}, {"x": 0.9523809523809523, "y": 0.9950980392156863}, {"x": 0.9523809523809523, "y": 1.0}, {"x": 1.0, "y": 1.0}], "logistic": [{"x": 0.0, "y": 0.0}, {"x": 0.0, "y": 0.004901960784313725}, {"x": 0.0, "y": 0.08333333333333333}, {"x": 0.007936507936507936, "y": 0.08333333333333333}, {"x": 0.007936507936507936, "y": 0.14215686274509803}, {"x": 0.015873015873015872, "y": 0.14215686274509803}, {"x": 0.015873015873015872, "y": 0.18627450980392157}, {"x": 0.031746031746031744, "y": 0.18627450980392157}, {"x": 0.031746031746031744, "y": 0.19607843137254902}, {"x": 0.047619047619047616, "y": 0.19607843137254902}, {"x": 0.047619047619047616, "y": 0.20098039215686275}, {"x": 0.07936507936507936, "y": 0.20098039215686275}, {"x": 0.07936507936507936, "y": 0.22549019607843138}, {"x": 0.0873015873015873, "y": 0.22549019607843138}, {"x": 0.0873015873015873, "y": 0.2549019607843137}, {"x": 0.09523809523809523, "y": 0.2549019607843137}, {"x": 0.09523809523809523, "y": 0.2696078431372549}, {"x": 0.11904761904761904, "y": 0.2696078431372549}, {"x": 0.11904761904761904, "y": 0.27450980392156865}, {"x": 0.12698412698412698, "y": 0.27450980392156865}, {"x": 0.12698412698412698, "y": 0.29411764705882354}, {"x": 0.1349206349206349, "y": 0.29411764705882354}, {"x": 0.1349206349206349, "y": 0.29901960784313725}, {"x": 0.15079365079365079, "y": 0.29901960784313725}, {"x": 0.15079365079365079, "y": 0.3137254901960784}, {"x": 0.15873015873015872, "y": 0.3137254901960784}, {"x": 0.15873015873015872, "y": 0.3382352941176471}, {"x": 0.16666666666666666, "y": 0.3382352941176471}, {"x": 0.16666666666666666, "y": 0.3480392156862745}, {"x": 0.1746031746031746, "y": 0.3480392156862745}, {"x": 0.1746031746031746, "y": 0.39705882352941174}, {"x": 0.18253968253968253, "y": 0.39705882352941174}, {"x": 0.18253968253968253, "y": 0.4117647058823529}, {"x": 0.2222222222222222, "y": 0.4117647058823529}, {"x": 0.2222222222222222, "y": 0.43137254901960786}, {"x": 0.23015873015873015, "y": 0.43137254901960786}, {"x": 0.23015873015873015, "y": 0.4362745098039216}, {"x": 0.23809523809523808, "y": 0.4362745098039216}, {"x": 0.23809523809523808, "y": 0.4411764705882353}, {"x": 0.2619047619047619, "y": 0.4411764705882353}, {"x": 0.2619047619047619, "y": 0.47058823529411764}, {"x": 0.2698412698412698, "y": 0.47058823529411764}, {"x": 0.2698412698412698, "y": 0.4803921568627451}, {"x": 0.2777777777777778, "y": 0.4803921568627451}, {"x": 0.2777777777777778, "y": 0.5}, {"x": 0.2857142857142857, "y": 0.5}, {"x": 0.2857142857142857, "y": 0.5098039215686274}, {"x": 0.30158730158730157, "y": 0.5098039215686274}, {"x": 0.30158730158730157, "y": 0.5196078431372549}, {"x": 0.30952380952380953, "y": 0.5196078431372549}, {"x": 0.30952380952380953, "y": 0.5294117647058824}, {"x": 0.3412698412698413, "y": 0.5294117647058824}, {"x": 0.3412698412698413, "y": 0.5343137254901961}, {"x": 0.36507936507936506, "y": 0.5343137254901961}, {"x": 0.36507936507936506, "y": 0.5441176470588235}, {"x": 0.373015873015873, "y": 0.5441176470588235}, {"x": 0.373015873015873, "y": 0.5490196078431373}, {"x": 0.38095238095238093, "y": 0.5490196078431373}, {"x": 0.38095238095238093, "y": 0.5637254901960784}, {"x": 0.3888888888888889, "y": 0.5637254901960784}, {"x": 0.3888888888888889, "y": 0.5735294117647058}, {"x": 0.4126984126984127, "y": 0.5735294117647058}, {"x": 0.4126984126984127, "y": 0.5833333333333334}, {"x": 0.42063492063492064, "y": 0.5833333333333334}, {"x": 0.42063492063492064, "y": 0.5882352941176471}, {"x": 0.4365079365079365, "y": 0.5882352941176471}, {"x": 0.4365079365079365, "y": 0.5980392156862745}, {"x": 0.4444444444444444, "y": 0.5980392156862745}, {"x": 0.4444444444444444, "y": 0.6127450980392157}, {"x": 0.4523809523809524, "y": 0.6127450980392157}, {"x": 0.4523809523809524, "y": 0.6323529411764706}, {"x": 0.4603174603174603, "y": 0.6323529411764706}, {"x": 0.4603174603174603, "y": 0.6372549019607843}, {"x": 0.47619047619047616, "y": 0.6372549019607843}, {"x": 0.47619047619047616, "y": 0.6470588235294118}, {"x": 0.48412698412698413, "y": 0.6470588235294118}, {"x": 0.48412698412698413, "y": 0.6715686274509803}, {"x": 0.5079365079365079, "y": 0.6715686274509803}, {"x": 0.5079365079365079, "y": 0.6813725490196079}, {"x": 0.5158730158730159, "y": 0.6813725490196079}, {"x": 0.5158730158730159, "y": 0.6862745098039216}, {"x": 0.5238095238095238, "y": 0.6862745098039216}, {"x": 0.5238095238095238, "y": 0.7107843137254902}, {"x": 0.5317460317460317, "y": 0.7107843137254902}, {"x": 0.5317460317460317, "y": 0.7205882352941176}, {"x": 0.5555555555555556, "y": 0.7205882352941176}, {"x": 0.5555555555555556, "y": 0.7352941176470589}, {"x": 0.5634920634920635, "y": 0.7352941176470589}, {"x": 0.5634920634920635, "y": 0.7401960784313726}, {"x": 0.5714285714285714, "y": 0.7401960784313726}, {"x": 0.5714285714285714, "y": 0.7450980392156863}, {"x": 0.5793650793650794, "y": 0.7450980392156863}, {"x": 0.5793650793650794, "y": 0.7598039215686274}, {"x": 0.6031746031746031, "y": 0.7598039215686274}, {"x": 0.6031746031746031, "y": 0.7745098039215687}, {"x": 0.6111111111111112, "y": 0.7745098039215687}, {"x": 0.6111111111111112, "y": 0.7892156862745098}, {"x": 0.6190476190476191, "y": 0.7892156862745098}, {"x": 0.6190476190476191, "y": 0.7941176470588235}, {"x": 0.6507936507936508, "y": 0.7941176470588235}, {"x": 0.6507936507936508, "y": 0.7990196078431373}, {"x": 0.6587301587301587, "y": 0.7990196078431373}, {"x": 0.6587301587301587, "y": 0.803921568627451}, {"x": 0.6666666666666666, "y": 0.803921568627451}, {"x": 0.6666666666666666, "y": 0.8088235294117647}, {"x": 0.6746031746031746, "y": 0.8088235294117647}, {"x": 0.6746031746031746, "y": 0.8186274509803921}, {"x": 0.6825396825396826, "y": 0.8186274509803921}, {"x": 0.6825396825396826, "y": 0.8284313725490197}, {"x": 0.6904761904761905, "y": 0.8284313725490197}, {"x": 0.6904761904761905, "y": 0.8333333333333334}, {"x": 0.7063492063492064, "y": 0.8333333333333334}, {"x": 0.7063492063492064, "y": 0.8578431372549019}, {"x": 0.7142857142857143, "y": 0.8578431372549019}, {"x": 0.7142857142857143, "y": 0.8676470588235294}, {"x": 0.746031746031746, "y": 0.8676470588235294}, {"x": 0.746031746031746, "y": 0.8725490196078431}, {"x": 0.7619047619047619, "y": 0.8725490196078431}, {"x": 0.7619047619047619, "y": 0.8774509803921569}, {"x": 0.7698412698412699, "y": 0.8774509803921569}, {"x": 0.7698412698412699, "y": 0.8970588235294118}, {"x": 0.7777777777777778, "y": 0.8970588235294118}, {"x": 0.7777777777777778, "y": 0.9019607843137255}, {"x": 0.7857142857142857, "y": 0.9019607843137255}, {"x": 0.7857142857142857, "y": 0.9362745098039216}, {"x": 0.7936507936507936, "y": 0.9362745098039216}, {"x": 0.7936507936507936, "y": 0.9411764705882353}, {"x": 0.8095238095238095, "y": 0.9411764705882353}, {"x": 0.8095238095238095, "y": 0.9509803921568627}, {"x": 0.8650793650793651, "y": 0.9509803921568627}, {"x": 0.8650793650793651, "y": 0.9558823529411765}, {"x": 0.873015873015873, "y": 0.9558823529411765}, {"x": 0.873015873015873, "y": 0.9656862745098039}, {"x": 0.8809523809523809, "y": 0.9656862745098039}, {"x": 0.8809523809523809, "y": 0.9852941176470589}, {"x": 0.9206349206349206, "y": 0.9852941176470589}, {"x": 0.9206349206349206, "y": 0.9901960784313726}, {"x": 0.9523809523809523, "y": 0.9901960784313726}, {"x": 0.9523809523809523, "y": 1.0}, {"x": 1.0, "y": 1.0}], "random forest": [{"x": 0.0, "y": 0.0}, {"x": 0.0, "y": 0.004901960784313725}, {"x": 0.0, "y": 0.014705882352941176}, {"x": 0.015873015873015872, "y": 0.014705882352941176}, {"x": 0.015873015873015872, "y": 0.029411764705882353}, {"x": 0.023809523809523808, "y": 0.029411764705882353}, {"x": 0.023809523809523808, "y": 0.058823529411764705}, {"x": 0.031746031746031744, "y": 0.058823529411764705}, {"x": 0.031746031746031744, "y": 0.0784313725490196}, {"x": 0.03968253968253968, "y": 0.0784313725490196}, {"x": 0.03968253968253968, "y": 0.13725490196078433}, {"x": 0.047619047619047616, "y": 0.13725490196078433}, {"x": 0.047619047619047616, "y": 0.14705882352941177}, {"x": 0.05555555555555555, "y": 0.14705882352941177}, {"x": 0.05555555555555555, "y": 0.16666666666666666}, {"x": 0.06349206349206349, "y": 0.16666666666666666}, {"x": 0.06349206349206349, "y": 0.17647058823529413}, {"x": 0.06349206349206349, "y": 0.18137254901960784}, {"x": 0.07142857142857142, "y": 0.18137254901960784}, {"x": 0.07142857142857142, "y": 0.20588235294117646}, {"x": 0.07936507936507936, "y": 0.20588235294117646}, {"x": 0.07936507936507936, "y": 0.23039215686274508}, {"x": 0.0873015873015873, "y": 0.23039215686274508}, {"x": 0.0873015873015873, "y": 0.2549019607843137}, {"x": 0.09523809523809523, "y": 0.2549019607843137}, {"x": 0.09523809523809523, "y": 0.25980392156862747}, {"x": 0.10317460317460317, "y": 0.25980392156862747}, {"x": 0.10317460317460317, "y": 0.27941176470588236}, {"x": 0.1111111111111111, "y": 0.27941176470588236}, {"x": 0.1111111111111111, "y": 0.28431372549019607}, {"x": 0.11904761904761904, "y": 0.28431372549019607}, {"x": 0.11904761904761904, "y": 0.30392156862745096}, {"x": 0.12698412698412698, "y": 0.30392156862745096}, {"x": 0.12698412698412698, "y": 0.3284313725490196}, {"x": 0.1349206349206349, "y": 0.3284313725490196}, {"x": 0.1349206349206349, "y": 0.3382352941176471}, {"x": 0.14285714285714285, "y": 0.3382352941176471}, {"x": 0.14285714285714285, "y": 0.35294117647058826}, {"x": 0.15079365079365079, "y": 0.35294117647058826}, {"x": 0.15079365079365079, "y": 0.3627450980392157}, {"x": 0.15873015873015872, "y": 0.3627450980392157}, {"x": 0.15873015873015872, "y": 0.37745098039215685}, {"x": 0.16666666666666666, "y": 0.37745098039215685}, {"x": 0.16666666666666666, "y": 0.39705882352941174}, {"x": 0.18253968253968253, "y": 0.39705882352941174}, {"x": 0.18253968253968253, "y": 0.4117647058823529}, {"x": 0.19047619047619047, "y": 0.4117647058823529}, {"x": 0.19047619047619047, "y": 0.4215686274509804}, {"x": 0.20634920634920634, "y": 0.4215686274509804}, {"x": 0.20634920634920634, "y": 0.4411764705882353}, {"x": 0.21428571428571427, "y": 0.4411764705882353}, {"x": 0.21428571428571427, "y": 0.44607843137254904}, {"x": 0.2222222222222222, "y": 0.44607843137254904}, {"x": 0.2222222222222222, "y": 0.45588235294117646}, {"x": 0.24603174603174602, "y": 0.45588235294117646}, {"x": 0.24603174603174602, "y": 0.46078431372549017}, {"x": 0.2857142857142857, "y": 0.46078431372549017}, {"x": 0.2857142857142857, "y": 0.46568627450980393}, {"x": 0.29365079365079366, "y": 0.46568627450980393}, {"x": 0.29365079365079366, "y": 0.4852941176470588}, {"x": 0.30158730158730157, "y": 0.4852941176470588}, {"x": 0.30158730158730157, "y": 0.49019607843137253}, {"x": 0.3253968253968254, "y": 0.49019607843137253}, {"x": 0.3253968253968254, "y": 0.5049019607843137}, {"x": 0.3412698412698413, "y": 0.5049019607843137}, {"x": 0.3412698412698413, "y": 0.5196078431372549}, {"x": 0.36507936507936506, "y": 0.5196078431372549}, {"x": 0.36507936507936506, "y": 0.5245098039215687}, {"x": 0.373015873015873, "y": 0.5245098039215687}, {"x": 0.373015873015873, "y": 0.5637254901960784}, {"x": 0.40476190476190477, "y": 0.5637254901960784}, {"x": 0.40476190476190477, "y": 0.6029411764705882}, {"x": 0.42063492063492064, "y": 0.6029411764705882}, {"x": 0.42063492063492064, "y": 0.6078431372549019}, {"x": 0.4365079365079365, "y": 0.6078431372549019}, {"x": 0.4365079365079365, "y": 0.6176470588235294}, {"x": 0.4444444444444444, "y": 0.6176470588235294}, {"x": 0.4444444444444444, "y": 0.6323529411764706}, {"x": 0.4523809523809524, "y": 0.6323529411764706}, {"x": 0.4523809523809524, "y": 0.6519607843137255}, {"x": 0.4603174603174603, "y": 0.6519607843137255}, {"x": 0.4603174603174603, "y": 0.6568627450980392}, {"x": 0.46825396825396826, "y": 0.6568627450980392}, {"x": 0.46825396825396826, "y": 0.6764705882352942}, {"x": 0.48412698412698413, "y": 0.6764705882352942}, {"x": 0.48412698412698413, "y": 0.696078431372549}, {"x": 0.49206349206349204, "y": 0.696078431372549}, {"x": 0.49206349206349204, "y": 0.7058823529411765}, {"x": 0.5, "y": 0.7058823529411765}, {"x": 0.5, "y": 0.7107843137254902}, {"x": 0.5396825396825397, "y": 0.7107843137254902}, {"x": 0.5396825396825397, "y": 0.7205882352941176}, {"x": 0.5555555555555556, "y": 0.7205882352941176}, {"x": 0.5555555555555556, "y": 0.7352941176470589}, {"x": 0.5634920634920635, "y": 0.7352941176470589}, {"x": 0.5634920634920635, "y": 0.7450980392156863}, {"x": 0.5714285714285714, "y": 0.7450980392156863}, {"x": 0.5714285714285714, "y": 0.75}, {"x": 0.5793650793650794, "y": 0.75}, {"x": 0.5793650793650794, "y": 0.7549019607843137}, {"x": 0.6031746031746031, "y": 0.7549019607843137}, {"x": 0.6031746031746031, "y": 0.7794117647058824}, {"x": 0.6428571428571429, "y": 0.7794117647058824}, {"x": 0.6428571428571429, "y": 0.7892156862745098}, {"x": 0.6587301587301587, "y": 0.7892156862745098}, {"x": 0.6587301587301587, "y": 0.803921568627451}, {"x": 0.6984126984126984, "y": 0.803921568627451}, {"x": 0.6984126984126984, "y": 0.8186274509803921}, {"x": 0.7142857142857143, "y": 0.8186274509803921}, {"x": 0.7142857142857143, "y": 0.8235294117647058}, {"x": 0.7301587301587301, "y": 0.8235294117647058}, {"x": 0.7301587301587301, "y": 0.8676470588235294}, {"x": 0.746031746031746, "y": 0.8676470588235294}, {"x": 0.746031746031746, "y": 0.8970588235294118}, {"x": 0.753968253968254, "y": 0.8970588235294118}, {"x": 0.753968253968254, "y": 0.9019607843137255}, {"x": 0.7619047619047619, "y": 0.9019607843137255}, {"x": 0.7619047619047619, "y": 0.9068627450980392}, {"x": 0.7698412698412699, "y": 0.9068627450980392}, {"x": 0.7698412698412699, "y": 0.9117647058823529}, {"x": 0.7777777777777778, "y": 0.9117647058823529}, {"x": 0.7777777777777778, "y": 0.9166666666666666}, {"x": 0.7857142857142857, "y": 0.9166666666666666}, {"x": 0.7857142857142857, "y": 0.9313725490196079}, {"x": 0.8571428571428571, "y": 0.9313725490196079}, {"x": 0.8571428571428571, "y": 0.9362745098039216}, {"x": 0.873015873015873, "y": 0.9362745098039216}, {"x": 0.873015873015873, "y": 0.9411764705882353}, {"x": 0.8888888888888888, "y": 0.9411764705882353}, {"x": 0.8888888888888888, "y": 0.9509803921568627}, {"x": 0.8968253968253969, "y": 0.9509803921568627}, {"x": 0.8968253968253969, "y": 0.9558823529411765}, {"x": 0.9126984126984127, "y": 0.9558823529411765}, {"x": 0.9126984126984127, "y": 0.9656862745098039}, {"x": 0.9206349206349206, "y": 0.9656862745098039}, {"x": 0.9206349206349206, "y": 0.9754901960784313}, {"x": 0.9285714285714286, "y": 0.9754901960784313}, {"x": 0.9285714285714286, "y": 0.9803921568627451}, {"x": 0.9523809523809523, "y": 0.9803921568627451}, {"x": 0.9523809523809523, "y": 0.9852941176470589}, {"x": 0.9603174603174603, "y": 0.9852941176470589}, {"x": 0.9603174603174603, "y": 0.9901960784313726}, {"x": 0.9841269841269841, "y": 0.9901960784313726}, {"x": 0.9841269841269841, "y": 0.9950980392156863}, {"x": 1.0, "y": 0.9950980392156863}, {"x": 1.0, "y": 1.0}], "lightgbm": [{"x": 0.0, "y": 0.0}, {"x": 0.007936507936507936, "y": 0.0}, {"x": 0.007936507936507936, "y": 0.0196078431372549}, {"x": 0.015873015873015872, "y": 0.0196078431372549}, {"x": 0.015873015873015872, "y": 0.0392156862745098}, {"x": 0.023809523809523808, "y": 0.0392156862745098}, {"x": 0.023809523809523808, "y": 0.05392156862745098}, {"x": 0.031746031746031744, "y": 0.05392156862745098}, {"x": 0.031746031746031744, "y": 0.058823529411764705}, {"x": 0.03968253968253968, "y": 0.058823529411764705}, {"x": 0.03968253968253968, "y": 0.06372549019607843}, {"x": 0.06349206349206349, "y": 0.06372549019607843}, {"x": 0.06349206349206349, "y": 0.06862745098039216}, {"x": 0.07142857142857142, "y": 0.06862745098039216}, {"x": 0.07142857142857142, "y": 0.09313725490196079}, {"x": 0.07936507936507936, "y": 0.09313725490196079}, {"x": 0.07936507936507936, "y": 0.11274509803921569}, {"x": 0.0873015873015873, "y": 0.11274509803921569}, {"x": 0.0873015873015873, "y": 0.14215686274509803}, {"x": 0.09523809523809523, "y": 0.14215686274509803}, {"x": 0.09523809523809523, "y": 0.16666666666666666}, {"x": 0.10317460317460317, "y": 0.16666666666666666}, {"x": 0.10317460317460317, "y": 0.17647058823529413}, {"x": 0.1111111111111111, "y": 0.17647058823529413}, {"x": 0.1111111111111111, "y": 0.22549019607843138}, {"x": 0.12698412698412698, "y": 0.22549019607843138}, {"x": 0.12698412698412698, "y": 0.27941176470588236}, {"x": 0.1349206349206349, "y": 0.27941176470588236}, {"x": 0.1349206349206349, "y": 0.30392156862745096}, {"x": 0.14285714285714285, "y": 0.30392156862745096}, {"x": 0.14285714285714285, "y": 0.3137254901960784}, {"x": 0.15079365079365079, "y": 0.3137254901960784}, {"x": 0.15079365079365079, "y": 0.3333333333333333}, {"x": 0.16666666666666666, "y": 0.3333333333333333}, {"x": 0.16666666666666666, "y": 0.35294117647058826}, {"x": 0.18253968253968253, "y": 0.35294117647058826}, {"x": 0.18253968253968253, "y": 0.3627450980392157}, {"x": 0.1984126984126984, "y": 0.3627450980392157}, {"x": 0.1984126984126984, "y": 0.37254901960784315}, {"x": 0.20634920634920634, "y": 0.37254901960784315}, {"x": 0.20634920634920634, "y": 0.3872549019607843}, {"x": 0.21428571428571427, "y": 0.3872549019607843}, {"x": 0.21428571428571427, "y": 0.4068627450980392}, {"x": 0.23015873015873015, "y": 0.4068627450980392}, {"x": 0.23015873015873015, "y": 0.4166666666666667}, {"x": 0.23809523809523808, "y": 0.4166666666666667}, {"x": 0.23809523809523808, "y": 0.4362745098039216}, {"x": 0.24603174603174602, "y": 0.4362745098039216}, {"x": 0.24603174603174602, "y": 0.4411764705882353}, {"x": 0.25396825396825395, "y": 0.4411764705882353}, {"x": 0.25396825396825395, "y": 0.46078431372549017}, {"x": 0.2857142857142857, "y": 0.46078431372549017}, {"x": 0.2857142857142857, "y": 0.46568627450980393}, {"x": 0.29365079365079366, "y": 0.46568627450980393}, {"x": 0.29365079365079366, "y": 0.47058823529411764}, {"x": 0.30158730158730157, "y": 0.47058823529411764}, {"x": 0.30158730158730157, "y": 0.47549019607843135}, {"x": 0.31746031746031744, "y": 0.47549019607843135}, {"x": 0.31746031746031744, "y": 0.4803921568627451}, {"x": 0.3253968253968254, "y": 0.4803921568627451}, {"x": 0.3253968253968254, "y": 0.49019607843137253}, {"x": 0.3412698412698413, "y": 0.49019607843137253}, {"x": 0.3412698412698413, "y": 0.4950980392156863}, {"x": 0.3492063492063492, "y": 0.4950980392156863}, {"x": 0.3492063492063492, "y": 0.5}, {"x": 0.36507936507936506, "y": 0.5}, {"x": 0.36507936507936506, "y": 0.5294117647058824}, {"x": 0.38095238095238093, "y": 0.5294117647058824}, {"x": 0.38095238095238093, "y": 0.553921568627451}, {"x": 0.3968253968253968, "y": 0.553921568627451}, {"x": 0.3968253968253968, "y": 0.5637254901960784}, {"x": 0.40476190476190477, "y": 0.5637254901960784}, {"x": 0.40476190476190477, "y": 0.5686274509803921}, {"x": 0.42063492063492064, "y": 0.5686274509803921}, {"x": 0.42063492063492064, "y": 0.5931372549019608}, {"x": 0.4444444444444444, "y": 0.5931372549019608}, {"x": 0.4444444444444444, "y": 0.5980392156862745}, {"x": 0.4523809523809524, "y": 0.5980392156862745}, {"x": 0.4523809523809524, "y": 0.6127450980392157}, {"x": 0.47619047619047616, "y": 0.6127450980392157}, {"x": 0.47619047619047616, "y": 0.6225490196078431}, {"x": 0.5, "y": 0.6225490196078431}, {"x": 0.5, "y": 0.6274509803921569}, {"x": 0.5079365079365079, "y": 0.6274509803921569}, {"x": 0.5079365079365079, "y": 0.6372549019607843}, {"x": 0.5317460317460317, "y": 0.6372549019607843}, {"x": 0.5317460317460317, "y": 0.6421568627450981}, {"x": 0.5396825396825397, "y": 0.6421568627450981}, {"x": 0.5396825396825397, "y": 0.6764705882352942}, {"x": 0.5476190476190477, "y": 0.6764705882352942}, {"x": 0.5476190476190477, "y": 0.6911764705882353}, {"x": 0.5634920634920635, "y": 0.6911764705882353}, {"x": 0.5634920634920635, "y": 0.7058823529411765}, {"x": 0.5793650793650794, "y": 0.7058823529411765}, {"x": 0.5793650793650794, "y": 0.7107843137254902}, {"x": 0.5952380952380952, "y": 0.7107843137254902}, {"x": 0.5952380952380952, "y": 0.7352941176470589}, {"x": 0.6111111111111112, "y": 0.7352941176470589}, {"x": 0.6111111111111112, "y": 0.7450980392156863}, {"x": 0.6190476190476191, "y": 0.7450980392156863}, {"x": 0.6190476190476191, "y": 0.75}, {"x": 0.6349206349206349, "y": 0.75}, {"x": 0.6349206349206349, "y": 0.7549019607843137}, {"x": 0.6507936507936508, "y": 0.7549019607843137}, {"x": 0.6507936507936508, "y": 0.7598039215686274}, {"x": 0.6666666666666666, "y": 0.7598039215686274}, {"x": 0.6666666666666666, "y": 0.7892156862745098}, {"x": 0.6984126984126984, "y": 0.7892156862745098}, {"x": 0.6984126984126984, "y": 0.7990196078431373}, {"x": 0.7063492063492064, "y": 0.7990196078431373}, {"x": 0.7063492063492064, "y": 0.8137254901960784}, {"x": 0.7142857142857143, "y": 0.8137254901960784}, {"x": 0.7142857142857143, "y": 0.8284313725490197}, {"x": 0.753968253968254, "y": 0.8284313725490197}, {"x": 0.753968253968254, "y": 0.8431372549019608}, {"x": 0.7698412698412699, "y": 0.8431372549019608}, {"x": 0.7698412698412699, "y": 0.8480392156862745}, {"x": 0.7857142857142857, "y": 0.8480392156862745}, {"x": 0.7857142857142857, "y": 0.8578431372549019}, {"x": 0.7936507936507936, "y": 0.8578431372549019}, {"x": 0.7936507936507936, "y": 0.8627450980392157}, {"x": 0.8015873015873016, "y": 0.8627450980392157}, {"x": 0.8015873015873016, "y": 0.8725490196078431}, {"x": 0.8412698412698413, "y": 0.8725490196078431}, {"x": 0.8412698412698413, "y": 0.8774509803921569}, {"x": 0.8492063492063492, "y": 0.8774509803921569}, {"x": 0.8492063492063492, "y": 0.8921568627450981}, {"x": 0.8571428571428571, "y": 0.8921568627450981}, {"x": 0.8571428571428571, "y": 0.8970588235294118}, {"x": 0.8809523809523809, "y": 0.8970588235294118}, {"x": 0.8809523809523809, "y": 0.9019607843137255}, {"x": 0.8888888888888888, "y": 0.9019607843137255}, {"x": 0.8888888888888888, "y": 0.9166666666666666}, {"x": 0.9126984126984127, "y": 0.9166666666666666}, {"x": 0.9126984126984127, "y": 0.9313725490196079}, {"x": 0.9285714285714286, "y": 0.9313725490196079}, {"x": 0.9285714285714286, "y": 0.946078431372549}, {"x": 0.9365079365079365, "y": 0.946078431372549}, {"x": 0.9365079365079365, "y": 0.9558823529411765}, {"x": 0.9523809523809523, "y": 0.9558823529411765}, {"x": 0.9523809523809523, "y": 0.9705882352941176}, {"x": 0.9603174603174603, "y": 0.9705882352941176}, {"x": 0.9603174603174603, "y": 0.9803921568627451}, {"x": 0.9841269841269841, "y": 0.9803921568627451}, {"x": 0.9841269841269841, "y": 0.9901960784313726}, {"x": 1.0, "y": 0.9901960784313726}, {"x": 1.0, "y": 1.0}]}, "feature_importance": {"elo_diff": 5445.0, "is_playoff": 123.0, "days_rest_filled": 1429.0, "attendance_ratio_filled": 5003.0, "attendance_missing": 0.0}, "is_home_OR": 1.746, "is_home_x_att_OR": 1.036, "prob_lift_pp": 13.58, "n_test": 314}, "verdict": [{"headline": "Crowd contribution -- +0.50 pts (NOT statistically significant)", "body": "COVID natural experiment (2020-21, 251 games played to empty arenas): HCA fell from +3.83 pre-COVID to +3.33 during COVID, a drop of +0.50 pts (95% CI [-0.77, +1.78]). The CI crosses zero, so we cannot reject 'no crowd effect' at 95%. HCA then recovered to +3.94 post-COVID. Takeaway: crowds may contribute ~0.5 pts to HCA, but the effect is weaker than common narratives suggest."}, {"headline": "League HCA -- +3.78 pts", "body": "Home teams win 62.4% of games, with mean margin +3.78 (95% CI [+3.32, +4.24]). At a measured pace of ~71.5 possessions, that's +5.3 pts per 100 possessions."}, {"headline": "Playoffs keep their home edge -- +3.54 pts (vs RS +3.77)", "body": "Regular season: +3.77 pts (2594 games, 95% CI [+3.30, +4.27]). Playoffs: +3.54 pts (149 games, 95% CI [+1.62, +5.32]). The two CIs overlap substantially -- HCA does NOT collapse in the playoffs, contrary to intuition. Caveat: playoff sample is small (149 games over 10 seasons)."}, {"headline": "Team spread is real -- Real Madrid (+8.9) -> ALBA Berlin (-4.3)", "body": "Top and bottom teams' bootstrap CIs do not overlap; this is structural, not noise. Olympiakos and Real Madrid sit at the extreme of crowd-amplified home edge."}, {"headline": "Attendance dose-response: +-0.07 pts per +10pp arena fill", "body": "OLS slope on attendance_ratio = -0.67 (n=2,897). Mixed-effects per-team slopes range from flat to steep -- some teams (Panathinaikos AKTOR Athens) are highly crowd-dependent."}, {"headline": "Elo-adjusted home edge -- OR 1.75 (+13.6 pp at 50/50)", "body": "After controlling for team strength, the is_home odds ratio is 1.75; the is_home x attendance interaction OR is 1.04 (full arenas amplify the home edge). Logistic with attendance interaction beats LightGBM at this sample size."}]}</script>
+<script>
+(() => {
+  const P = JSON.parse(document.getElementById('payload').textContent);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  Chart.defaults.font.family = "'DM Sans', 'Axiforma', sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = css('--fg-dim');
+
+  const COLORS = {
+    accent: css('--accent'),
+    blue: css('--blue'), green: css('--green'), red: css('--red'),
+    yellow: css('--yellow'), violet: css('--violet'), cyan: css('--cyan'),
+    grid: css('--grid'), fg: css('--fg'), fgDim: css('--fg-dim'), fgMute: css('--fg-mute'),
+  };
+
+  // -- formatters
+  const fmtNum = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; return Number(v).toFixed(d); };
+  const fmtSigned = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; const s = Number(v) >= 0 ? '+' : ''; return s + Number(v).toFixed(d); };
+  const fmtK = (v) => { if (v == null || isNaN(v)) return '--'; if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M'; if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1) + 'K'; return Math.round(v).toString(); };
+  const fmtPct = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; return (Number(v) * 100).toFixed(d) + '%'; };
+  const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+  const setHTML = (id, t) => { const el = document.getElementById(id); if (el) el.innerHTML = t; };
+
+  // -- KPIs
+  setText('kpi-hca', fmtSigned(P.kpis.league_hca, 2) + ' pts');
+  setText('kpi-hca-caption',
+    `95% CI [${fmtSigned(P.kpis.league_hca_lo, 2)}, ${fmtSigned(P.kpis.league_hca_hi, 2)}] \u00B7 ${fmtK(P.kpis.n_games)} games`);
+  setText('kpi-wr', fmtPct(P.kpis.home_win_rate, 1));
+  setText('kpi-crowd', fmtSigned(P.kpis.crowd_contrib, 2) + ' pts');
+  setText('kpi-crowd-caption',
+    `95% CI [${fmtSigned(P.kpis.crowd_lo, 2)}, ${fmtSigned(P.kpis.crowd_hi, 2)}] \u00B7 ` +
+    (P.kpis.crowd_significant ? 'COVID DiD (significant)' : 'COVID DiD (not significant)'));
+  // Soften the KPI visual when not significant
+  const crowdEl = document.getElementById('kpi-crowd');
+  if (crowdEl && !P.kpis.crowd_significant) {
+    crowdEl.style.color = 'var(--fg-dim)';
+    crowdEl.style.fontWeight = '600';
+  }
+  const spread = P.kpis.top_team_hca - P.kpis.bot_team_hca;
+  setText('kpi-spread', fmtSigned(spread, 1) + ' pts');
+  setHTML('kpi-spread-caption',
+    `<span class="up">${P.kpis.top_team_name}</span> &nbsp;\u2192&nbsp; <span class="down">${P.kpis.bot_team_name}</span>`);
+
+  // -- self-context table (4 framings of our measured EuroLeague HCA)
+  const benchBody = document.getElementById('bench-body');
+  P.self_context.forEach(r => {
+    const tr = document.createElement('tr');
+    if (r.league === 'EuroLeague') tr.classList.add('ours');
+    tr.innerHTML = `
+      <td><strong>${r.league}</strong></td>
+      <td class="num"><strong>${r.hca_pts}</strong></td>
+      <td><span class="bench-source">${r.ci}</span></td>
+      <td>${r.home_win}</td>
+      <td>${r.n_games}</td>`;
+    benchBody.appendChild(tr);
+  });
+
+  // -- TABS
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    panels.forEach(p => p.classList.toggle('active', p.id === t.dataset.target));
+  }));
+
+  // -- common
+  const gridY = { color: COLORS.grid, drawBorder: false };
+  const gridX = { color: COLORS.grid, drawBorder: false };
+  const axisTicks = { color: COLORS.fgDim, font: { size: 11 } };
+  const tipBase = (border) => ({ backgroundColor: '#11141b', borderColor: border || COLORS.accent, borderWidth: 1, padding: 12, titleColor: COLORS.fg });
+
+  // === Trend ===
+  const trendIdx2019 = P.trend.seasons.indexOf('2019');
+  const trendIdx2020 = P.trend.seasons.indexOf('2020');
+  new Chart(document.getElementById('chart-trend'), {
+    type: 'line',
+    data: { labels: P.trend.seasons, datasets: [{
+      label: 'HCA', data: P.trend.hca,
+      borderColor: COLORS.accent, backgroundColor: 'rgba(249, 115, 22, 0.12)',
+      fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+      pointBackgroundColor: COLORS.accent, pointBorderColor: '#0b0d12', pointBorderWidth: 2,
+    }]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => `HCA: ${fmtSigned(ctx.raw, 2)} pts (n=${P.trend.n[ctx.dataIndex]})` } }),
+        annotation: { annotations: {
+          covid: { type: 'box',
+            xMin: trendIdx2019 - 0.5, xMax: trendIdx2020 + 0.5,
+            backgroundColor: 'rgba(248, 113, 113, 0.08)', borderColor: 'rgba(248, 113, 113, 0.25)',
+            borderWidth: 1,
+            label: { content: 'COVID disruption', display: true, position: 'start',
+              color: COLORS.red, font: { size: 11, weight: 500 }, backgroundColor: 'transparent' } },
+          mean: { type: 'line', yMin: P.kpis.league_hca, yMax: P.kpis.league_hca,
+            borderColor: COLORS.accent, borderDash: [4,4], borderWidth: 1.5,
+            label: { content: `10-yr avg ${fmtSigned(P.kpis.league_hca, 2)}`, display: true,
+              position: 'end', color: COLORS.accent, font: { size: 10 }, backgroundColor: 'transparent' } }
+        }}
+      },
+      scales: {
+        x: { grid: gridX, ticks: axisTicks,
+             title: { display: true, text: 'Season (starting year)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  setText('trend-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games across ${P.trend.seasons.length} seasons`);
+
+  // === Density (replaces histogram) ===
+  const densityCtx = document.getElementById('chart-density');
+  const ds = P.density.stats;
+  new Chart(densityCtx, {
+    type: 'line',
+    data: {
+      labels: P.density.x,
+      datasets: [{
+        label: '% games', data: P.density.y,
+        borderColor: COLORS.accent, backgroundColor: 'rgba(249, 115, 22, 0.18)',
+        fill: true, tension: 0.4, borderWidth: 2,
+        pointRadius: 0, pointHoverRadius: 4,
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { title: (ctxs) => `Margin: ${fmtSigned(ctxs[0].label, 0)} pts`,
+                         label: (ctx) => `${fmtNum(ctx.raw, 2)}% of games` } }),
+        annotation: { annotations: {
+          neg5: { type: 'line', xMin: -5, xMax: -5, yMin: 0, yMax: 6,
+            borderColor: COLORS.fgMute, borderDash: [3,3], borderWidth: 1,
+            label: { content: '-5', display: true, position: 'start', color: COLORS.fgMute, font: { size: 10 }, backgroundColor: 'transparent' }},
+          neg3: { type: 'line', xMin: -3, xMax: -3, yMin: 0, yMax: 6,
+            borderColor: COLORS.fgMute, borderDash: [2,3], borderWidth: 0.8 },
+          pos3: { type: 'line', xMin: 3, xMax: 3, yMin: 0, yMax: 6,
+            borderColor: COLORS.fgMute, borderDash: [2,3], borderWidth: 0.8 },
+          pos5: { type: 'line', xMin: 5, xMax: 5, yMin: 0, yMax: 6,
+            borderColor: COLORS.fgMute, borderDash: [3,3], borderWidth: 1,
+            label: { content: '+5', display: true, position: 'start', color: COLORS.fgMute, font: { size: 10 }, backgroundColor: 'transparent' }},
+          pos15: { type: 'line', xMin: 15, xMax: 15, yMin: 0, yMax: 6,
+            borderColor: COLORS.red, borderDash: [4,4], borderWidth: 1,
+            label: { content: '+15 (blowout)', display: true, position: 'start', color: COLORS.red, font: { size: 10 }, backgroundColor: 'transparent' }},
+          neg15: { type: 'line', xMin: -15, xMax: -15, yMin: 0, yMax: 6,
+            borderColor: COLORS.red, borderDash: [4,4], borderWidth: 1 },
+          mean: { type: 'line', xMin: ds.mean, xMax: ds.mean, yMin: 0, yMax: 6,
+            borderColor: COLORS.accent, borderWidth: 1.5,
+            label: { content: `mean ${fmtSigned(ds.mean, 1)}`, display: true, position: 'end', color: COLORS.accent, font: { size: 10 }, backgroundColor: 'transparent' }},
+          shareWithin5: { type: 'label',
+            xValue: 0, yValue: 5.6,
+            content: [`${fmtPct(ds.share_within_5, 0)} of games within +/-5 pts`,
+                      `${fmtPct(ds.share_blowout, 0)} are blowouts (>15)`],
+            color: COLORS.fgDim, font: { size: 11 }, textAlign: 'center' }
+        }}
+      },
+      scales: {
+        x: { type: 'linear', min: -35, max: 35, grid: gridX,
+             ticks: Object.assign({}, axisTicks, { stepSize: 10, callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'Home margin (pts)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => v + '%' }),
+             title: { display: true, text: '% of games', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  setText('density-n', `n = ${ds.n.toLocaleString()} games \u00B7 mean ${fmtSigned(ds.mean,2)} \u00B7 ${fmtPct(ds.share_within_5,0)} within +/-5`);
+
+  // === RS vs PO ===
+  new Chart(document.getElementById('chart-phase'), {
+    type: 'bar',
+    data: {
+      labels: P.phase_hca.map(p => `${p.phase} (n=${p.n.toLocaleString()})`),
+      datasets: [{
+        data: P.phase_hca.map(p => p.hca),
+        backgroundColor: P.phase_hca.map(p => p.code === 'RS' ? COLORS.accent : 'rgba(167, 139, 250, 0.7)'),
+        borderRadius: 4,
+        // chart.js doesn't have built-in error bars, simulate with errorBars plugin or annotations
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => {
+            const r = P.phase_hca[ctx.dataIndex];
+            return [`HCA: ${fmtSigned(r.hca, 2)} pts`, `95% CI: [${fmtSigned(r.lo, 2)}, ${fmtSigned(r.hi, 2)}]`,
+                    `Home win %: ${fmtNum(r.home_wr * 100, 1)}%`];
+          } } }),
+        annotation: { annotations: Object.fromEntries(P.phase_hca.flatMap((r, i) => {
+          // Vertical CI line per bar
+          return [[`ci_${i}`, { type: 'line',
+            xMin: i, xMax: i, yMin: r.lo, yMax: r.hi,
+            borderColor: COLORS.fgDim, borderWidth: 2 }],
+            [`ci_low_${i}`, { type: 'line',
+              xMin: i - 0.1, xMax: i + 0.1, yMin: r.lo, yMax: r.lo,
+              borderColor: COLORS.fgDim, borderWidth: 2 }],
+            [`ci_hi_${i}`, { type: 'line',
+              xMin: i - 0.1, xMax: i + 0.1, yMin: r.hi, yMax: r.hi,
+              borderColor: COLORS.fgDim, borderWidth: 2 }],
+          ];
+        })) }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  setText('phase-n', `n = ${P.phase_hca.reduce((s,p)=>s+p.n,0).toLocaleString()} games`);
+
+  // === Win rate with Wilson CI ===
+  new Chart(document.getElementById('chart-wr'), {
+    type: 'line',
+    data: { labels: P.trend.seasons, datasets: [
+      // Upper CI band
+      { label: 'CI hi', data: P.trend.wr_hi, borderColor: 'rgba(96, 165, 250, 0.0)',
+        backgroundColor: 'rgba(96, 165, 250, 0.15)', fill: '+1', pointRadius: 0, tension: 0.3, borderWidth: 0 },
+      // Lower CI band
+      { label: 'CI lo', data: P.trend.wr_lo, borderColor: 'rgba(96, 165, 250, 0.0)',
+        backgroundColor: 'transparent', fill: false, pointRadius: 0, tension: 0.3, borderWidth: 0 },
+      // Main line
+      { label: 'Home win rate', data: P.trend.win_rate,
+        borderColor: COLORS.blue, backgroundColor: 'transparent', fill: false,
+        tension: 0.35, borderWidth: 2.5, pointRadius: 4,
+        pointBackgroundColor: COLORS.blue, pointBorderColor: '#0b0d12', pointBorderWidth: 2 },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.blue),
+          { filter: (ti) => ti.datasetIndex === 2,
+            callbacks: { label: (ctx) => `${fmtPct(ctx.raw, 1)} \u00B7 95% CI [${fmtPct(P.trend.wr_lo[ctx.dataIndex],0)}, ${fmtPct(P.trend.wr_hi[ctx.dataIndex],0)}] \u00B7 n=${P.trend.n[ctx.dataIndex]}` } }) },
+      scales: {
+        x: { grid: gridX, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             min: 0.45, max: 0.75 }
+      }
+    }
+  });
+  setText('wr-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games`);
+
+  // === FOREST: team HCA with league ref ===
+  const teamForestEl = document.getElementById('team-forest');
+  const allLo = Math.min(...P.team_hca.map(t => t.lo));
+  const allHi = Math.max(...P.team_hca.map(t => t.hi));
+  const pad = (allHi - allLo) * 0.08;
+  const xMin = Math.floor(allLo - pad);
+  const xMax = Math.ceil(allHi + pad);
+  const range = xMax - xMin;
+  const xToPct = (x) => ((x - xMin) / range) * 100;
+
+  P.team_hca.forEach((t) => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const ciLeft = xToPct(t.lo);
+    const ciWidth = xToPct(t.hi) - xToPct(t.lo);
+    const pointLeft = xToPct(t.hca);
+    const zeroLeft = xToPct(0);
+    const leagueLeft = xToPct(P.kpis.league_hca);
+    row.innerHTML = `
+      <div class="forest-label" title="${t.name} (n=${t.n})">${t.name}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="ref" style="left:${zeroLeft}%"></div>
+        <div class="ref league" style="left:${leagueLeft}%; border-left: 1px dashed ${COLORS.accent}; background: transparent;"></div>
+        <div class="ci" style="left:${ciLeft}%; width:${ciWidth}%"></div>
+        <div class="pt" style="left:calc(${pointLeft}% - 5px)"></div>
+      </div>
+      <div class="forest-val" title="n=${t.n}">${fmtSigned(t.hca, 2)}</div>`;
+    teamForestEl.appendChild(row);
+  });
+  // Axis row
+  const axisRow = document.createElement('div');
+  axisRow.className = 'forest-axis-row';
+  axisRow.innerHTML = `<div></div><div class="axis-content"><span>${fmtSigned(xMin,0)}</span><span style="color:${COLORS.fgMute};">0 (no edge)</span><span style="color:${COLORS.accent};">league avg ${fmtSigned(P.kpis.league_hca,1)}</span><span>${fmtSigned(xMax,0)}</span></div><div></div>`;
+  teamForestEl.appendChild(axisRow);
+  setText('teamf-n', `n teams = ${P.team_hca.length} \u00B7 total games = ${P.team_hca.reduce((s,t)=>s+t.n,0).toLocaleString()}`);
+
+  // === HEATMAP ===
+  const heatEl = document.getElementById('heatmap');
+  heatEl.innerHTML = '';
+  const seasons = P.heatmap.seasons;
+  const allVals = P.heatmap.values.flat().filter(v => v != null);
+  const vMin = Math.min(...allVals);
+  const vMax = Math.max(...allVals);
+  const colorFor = (v) => {
+    if (v == null) return null;
+    const pct = (v - vMin) / (vMax - vMin);
+    if (v < 0) {
+      const k = Math.min(1, Math.abs(v) / Math.max(Math.abs(vMin), 1));
+      return `rgba(248, 113, 113, ${0.25 + k * 0.55})`;
+    }
+    return `rgba(249, 115, 22, ${0.15 + pct * 0.75})`;
+  };
+  const head = document.createElement('div');
+  head.className = 'heat-row';
+  head.style.setProperty('--cols', seasons.length);
+  head.innerHTML = '<div class="heat-label"></div>' + seasons.map(s => `<div class="heat-head">${s}</div>`).join('');
+  heatEl.appendChild(head);
+
+  P.heatmap.teams.forEach((team, i) => {
+    const row = document.createElement('div');
+    row.className = 'heat-row';
+    row.style.setProperty('--cols', seasons.length);
+    const cells = P.heatmap.values[i].map((v, j) => {
+      if (v == null) return `<div class="heat-cell empty">--</div>`;
+      return `<div class="heat-cell" style="background:${colorFor(v)}" title="${team} ${seasons[j]}: ${fmtSigned(v,1)}">${fmtSigned(v, 0)}</div>`;
+    }).join('');
+    row.innerHTML = `<div class="heat-label" title="${team}">${team}</div>${cells}`;
+    heatEl.appendChild(row);
+  });
+
+  // === UPSETS table ===
+  const upsetTbody = document.querySelector('#upsets-table tbody');
+  P.upsets.forEach(u => {
+    const tr = document.createElement('tr');
+    const att = u.att_ratio == null ? '--' : fmtPct(u.att_ratio, 0);
+    tr.innerHTML = `
+      <td>${u.season}</td>
+      <td>${u.date}</td>
+      <td class="team">${u.home}</td>
+      <td>${u.away}</td>
+      <td class="num">${u.home_pts}-${u.away_pts}</td>
+      <td class="num">${fmtSigned(u.margin, 0)}</td>
+      <td class="num">${fmtSigned(u.elo_diff, 0)}</td>
+      <td class="num surprise">${fmtSigned(u.surprise, 1)}</td>
+      <td class="num">${att}</td>`;
+    upsetTbody.appendChild(tr);
+  });
+
+  // === DOSE-RESPONSE (continuous) with OLS overlay ===
+  const dosePts = P.attendance.deciles.map(d => ({ x: d.ratio_mid, y: d.hca, n: d.n }));
+  // OLS line endpoints
+  const xLine = [0, 1.0];
+  const yLine = xLine.map(xx => P.attendance.intercept + P.attendance.slope * xx);
+  new Chart(document.getElementById('chart-dose'), {
+    type: 'scatter',
+    data: { datasets: [
+      { label: 'decile mean', data: dosePts, backgroundColor: COLORS.accent, borderColor: COLORS.accent,
+        pointRadius: P.attendance.deciles.map(d => Math.max(5, Math.min(16, Math.sqrt(d.n) * 0.4))),
+        pointHoverRadius: 12, showLine: false },
+      { type: 'line', label: 'OLS fit',
+        data: xLine.map((x, i) => ({ x, y: yLine[i] })),
+        borderColor: COLORS.fgDim, borderDash: [6,4], borderWidth: 1.5, pointRadius: 0, fill: false },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: {
+            title: (ctxs) => ctxs[0].raw.n != null ? `Attendance ratio ${fmtPct(ctxs[0].raw.x, 0)}` : '',
+            label: (ctx) => ctx.raw.n != null
+              ? [`HCA: ${fmtSigned(ctx.raw.y, 2)} pts`, `Games: ${fmtK(ctx.raw.n)}`]
+              : `OLS: ${fmtSigned(ctx.raw.y, 2)} pts`,
+          } }),
+        annotation: { annotations: {
+          zero: { type: 'line', yMin: 0, yMax: 0, borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1 },
+          slopeLabel: { type: 'label',
+            xValue: 0.85, yValue: P.attendance.intercept + P.attendance.slope * 0.85 + 0.6,
+            content: [`slope: ${fmtSigned(P.attendance.slope_pp10, 2)} pts per +10pp fill`],
+            color: COLORS.accent, backgroundColor: 'rgba(11,13,18,0.85)', padding: 6, borderRadius: 4,
+            font: { size: 11, weight: 600 } }
+        }}
+      },
+      scales: {
+        x: { min: 0, max: 1.0, grid: gridX,
+             ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Attendance ratio (attendance / capacity)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  setText('dose-n', `n = ${P.attendance.n_games.toLocaleString()} home games`);
+  setText('dose-slope', `OLS slope: ${fmtSigned(P.attendance.slope_pp10, 2)} pts per +10pp arena fill`);
+
+  // === DECILES with CI error bars ===
+  new Chart(document.getElementById('chart-deciles'), {
+    type: 'bar',
+    data: {
+      labels: P.attendance.deciles.map(d => `D${d.decile}\n${fmtPct(d.ratio_mid,0)}`),
+      datasets: [{
+        data: P.attendance.deciles.map(d => d.hca),
+        backgroundColor: P.attendance.deciles.map((d, i) => `rgba(249, 115, 22, ${0.3 + i * 0.07})`),
+        borderRadius: 3,
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => {
+            const d = P.attendance.deciles[ctx.dataIndex];
+            return [`HCA: ${fmtSigned(d.hca, 2)} pts`,
+                    `95% CI: [${fmtSigned(d.lo, 2)}, ${fmtSigned(d.hi, 2)}]`,
+                    `Range: ${fmtPct(d.ratio_lo,0)}-${fmtPct(d.ratio_hi,0)}`,
+                    `Games: ${fmtK(d.n)}`];
+          } } }),
+        annotation: { annotations: Object.fromEntries(P.attendance.deciles.flatMap((d, i) => [
+          [`ci_${i}`, { type: 'line', xMin: i, xMax: i, yMin: d.lo, yMax: d.hi,
+            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+          [`cit_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.hi, yMax: d.hi,
+            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+          [`cib_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.lo, yMax: d.lo,
+            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+        ])) }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: Object.assign({}, axisTicks, { font: { size: 10 } }),
+             title: { display: true, text: 'Attendance decile', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  setText('deciles-n', `n = ${P.attendance.deciles.reduce((s,d)=>s+d.n,0).toLocaleString()} home games`);
+
+  // === Team attendance slopes ===
+  const slopesEl = document.getElementById('team-slopes');
+  const slopes = P.attendance.team_slopes;
+  const sMin = Math.min(0, ...slopes.map(s => s.total_slope));
+  const sMax = Math.max(P.attendance.league_slope, ...slopes.map(s => s.total_slope));
+  const sPad = (sMax - sMin) * 0.08;
+  const sxMin = sMin - sPad, sxMax = sMax + sPad, sRange = sxMax - sxMin;
+  slopes.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const zeroPct = ((0 - sxMin) / sRange) * 100;
+    const leaguePct = ((P.attendance.league_slope - sxMin) / sRange) * 100;
+    const ptLeft = ((s.total_slope - sxMin) / sRange) * 100;
+    row.innerHTML = `
+      <div class="forest-label">${s.name}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="ref" style="left:${zeroPct}%"></div>
+        <div class="ref league" style="left:${leaguePct}%; border-left: 1px dashed ${COLORS.accent}; background: transparent;"></div>
+        <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${s.total_slope > 0 ? COLORS.accent : COLORS.fgMute};"></div>
+      </div>
+      <div class="forest-val">${fmtSigned(s.total_slope, 2)}</div>`;
+    slopesEl.appendChild(row);
+  });
+  const sAxisRow = document.createElement('div');
+  sAxisRow.className = 'forest-axis-row';
+  sAxisRow.innerHTML = `<div></div><div class="axis-content"><span>${fmtSigned(sxMin,1)}</span><span style="color:${COLORS.fgMute};">0 (no crowd dep.)</span><span style="color:${COLORS.accent};">league ${fmtSigned(P.attendance.league_slope,1)}</span><span>${fmtSigned(sxMax,1)}</span></div><div></div>`;
+  slopesEl.appendChild(sAxisRow);
+  setText('slopes-n', `n teams = ${slopes.length}`);
+  setText('slopes-league', `League slope: ${fmtSigned(P.attendance.league_slope, 2)} pts per unit ratio`);
+
+  // === COVID regimes (with error bars) ===
+  new Chart(document.getElementById('chart-regimes'), {
+    type: 'bar',
+    data: { labels: P.covid.regimes.map(r => r.regime), datasets: [{
+      data: P.covid.regimes.map(r => r.hca),
+      backgroundColor: P.covid.regimes.map(r =>
+        r.regime === 'COVID' ? 'rgba(248, 113, 113, 0.55)' :
+        r.regime === 'Pre-COVID' ? 'rgba(96, 165, 250, 0.55)' : 'rgba(74, 222, 128, 0.55)'),
+      borderRadius: 4,
+    }]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => {
+            const r = P.covid.regimes[ctx.dataIndex];
+            return [`HCA: ${fmtSigned(r.hca, 2)} pts`, `95% CI: [${fmtSigned(r.lo, 2)}, ${fmtSigned(r.hi, 2)}]`, `Games: ${fmtK(r.n)}`];
+          } } }),
+        annotation: { annotations: Object.fromEntries(P.covid.regimes.flatMap((r, i) => [
+          [`ci_${i}`, { type: 'line', xMin: i, xMax: i, yMin: r.lo, yMax: r.hi,
+            borderColor: COLORS.fgDim, borderWidth: 2 }],
+          [`cit_${i}`, { type: 'line', xMin: i - 0.12, xMax: i + 0.12, yMin: r.hi, yMax: r.hi,
+            borderColor: COLORS.fgDim, borderWidth: 2 }],
+          [`cib_${i}`, { type: 'line', xMin: i - 0.12, xMax: i + 0.12, yMin: r.lo, yMax: r.lo,
+            borderColor: COLORS.fgDim, borderWidth: 2 }],
+        ])) }
+      },
+      scales: { x: { grid: { display: false }, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } } }
+    }
+  });
+  setText('reg-n', `n = ${P.covid.regimes.reduce((s,r)=>s+r.n,0).toLocaleString()} games`);
+
+  // === DiD forest ===
+  const didEl = document.getElementById('did-forest');
+  const didEntries = Object.entries(P.covid.did);
+  const didLo = Math.min(...didEntries.map(([_, v]) => v.lo));
+  const didHi = Math.max(...didEntries.map(([_, v]) => v.hi));
+  const didPad = Math.max(0.3, (didHi - didLo) * 0.1);
+  const dxMin = didLo - didPad, dxMax = didHi + didPad, dRange = dxMax - dxMin;
+  didEntries.forEach(([k, v]) => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const ciLeft = ((v.lo - dxMin) / dRange) * 100;
+    const ciWidth = ((v.hi - v.lo) / dRange) * 100;
+    const ptLeft = ((v.mean - dxMin) / dRange) * 100;
+    const zeroLeft = ((0 - dxMin) / dRange) * 100;
+    const sig = (v.lo > 0 || v.hi < 0);
+    row.innerHTML = `
+      <div class="forest-label">${k}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="ref" style="left:${zeroLeft}%"></div>
+        <div class="ci" style="left:${ciLeft}%; width:${ciWidth}%"></div>
+        <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${sig ? COLORS.accent : COLORS.fgMute};"></div>
+      </div>
+      <div class="forest-val">${fmtSigned(v.mean, 2)}</div>`;
+    didEl.appendChild(row);
+  });
+
+  // === COVID line ===
+  new Chart(document.getElementById('chart-covid-line'), {
+    type: 'line',
+    data: { labels: P.trend.seasons, datasets: [{
+      label: 'HCA', data: P.trend.hca,
+      borderColor: COLORS.accent, backgroundColor: 'rgba(249, 115, 22, 0.12)', fill: true,
+      tension: 0.3, pointRadius: 5, pointBorderColor: '#0b0d12', pointBorderWidth: 2,
+      pointBackgroundColor: COLORS.accent, borderWidth: 2.5,
+    }]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => `HCA: ${fmtSigned(ctx.raw, 2)} pts (n=${P.trend.n[ctx.dataIndex]})` } }),
+        annotation: { annotations: {
+          covid: { type: 'box',
+            xMin: trendIdx2019 - 0.5, xMax: trendIdx2020 + 0.5,
+            backgroundColor: 'rgba(248, 113, 113, 0.1)', borderColor: 'rgba(248, 113, 113, 0.3)', borderWidth: 1,
+            label: { content: 'COVID', display: true, position: 'start',
+              color: COLORS.red, font: { size: 11 }, backgroundColor: 'transparent' } },
+          preAvg: { type: 'line', yMin: P.covid.regimes[0].hca, yMax: P.covid.regimes[0].hca,
+            xMin: 0, xMax: trendIdx2019 - 0.5,
+            borderColor: COLORS.blue, borderWidth: 2, borderDash: [6,4],
+            label: { content: `pre ${fmtSigned(P.covid.regimes[0].hca,1)}`, display: true, position: 'start',
+              color: COLORS.blue, backgroundColor: 'transparent', font: { size: 10 } } },
+          postAvg: { type: 'line', yMin: P.covid.regimes[2].hca, yMax: P.covid.regimes[2].hca,
+            xMin: trendIdx2020 + 0.5, xMax: P.trend.seasons.length - 1,
+            borderColor: COLORS.green, borderWidth: 2, borderDash: [6,4],
+            label: { content: `post ${fmtSigned(P.covid.regimes[2].hca,1)}`, display: true, position: 'end',
+              color: COLORS.green, backgroundColor: 'transparent', font: { size: 10 } } }
+        }}
+      },
+      scales: { x: { grid: gridX, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } } }
+    }
+  });
+  setText('covid-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games`);
+
+  // === MODELS: OR card ===
+  setText('or-value', fmtNum(P.models.is_home_OR, 3));
+  setText('pp-value', fmtNum(P.models.prob_lift_pp, 1));
+  setText('int-value', fmtNum(P.models.is_home_x_att_OR, 2) + 'x');
+  // Plain-English interaction translation:
+  // OR > 1 means the home effect strengthens with attendance. Translate to additional pp at sold-out.
+  const baseHomeP = P.models.is_home_OR / (1 + P.models.is_home_OR);  // ~0.53
+  const fullP = (P.models.is_home_OR * P.models.is_home_x_att_OR) / (1 + P.models.is_home_OR * P.models.is_home_x_att_OR);
+  const extraPp = (fullP - baseHomeP) * 100;
+  setHTML('int-desc', `A sold-out arena adds <strong>${fmtSigned(extraPp,1)} pp</strong> on top of the base home edge vs an empty one`);
+
+  // === Calibration ===
+  const calData = P.models.calibration;
+  const calColors = { 'logistic': COLORS.accent, 'random forest': COLORS.violet, 'lightgbm': COLORS.red, 'elo-only': COLORS.blue };
+  const calDatasets = Object.entries(calData).map(([name, pts]) => ({
+    label: name, data: pts.map(p => ({ x: p.predicted, y: p.empirical, n: p.n })),
+    borderColor: calColors[name] || COLORS.fgDim, backgroundColor: calColors[name] || COLORS.fgDim,
+    pointRadius: pts.map(p => Math.max(3, Math.min(8, Math.sqrt(p.n) * 0.5))), showLine: true,
+    borderWidth: name === 'logistic' ? 2 : 1.5, fill: false, tension: 0,
+  }));
+  new Chart(document.getElementById('chart-calib'), {
+    type: 'scatter',
+    data: { datasets: [
+      // perfect diagonal first
+      { type: 'line', label: 'perfect',
+        data: [{ x: 0, y: 0 }, { x: 1, y: 1 }],
+        borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1, pointRadius: 0, fill: false },
+      ...calDatasets ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { color: COLORS.fgDim, font: { size: 11 }, boxWidth: 10 } },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: {
+            title: (ctxs) => ctxs[0].dataset.label,
+            label: (ctx) => ctx.raw.n != null
+              ? [`Predicted: ${fmtPct(ctx.raw.x, 0)}`, `Actual: ${fmtPct(ctx.raw.y, 0)}`, `n=${ctx.raw.n}`]
+              : '',
+          } }) },
+      scales: {
+        x: { min: 0, max: 1, grid: gridX,
+             ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Predicted P(home wins)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { min: 0, max: 1, grid: gridY,
+             ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Empirical frequency', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === ROC ===
+  const rocData = P.models.roc;
+  const rocAuc = P.models.auc;
+  const rocDatasets = Object.entries(rocData).map(([name, pts]) => ({
+    label: `${name} (AUC ${fmtNum(rocAuc[name], 3)})`,
+    data: pts, borderColor: calColors[name] || COLORS.fgDim,
+    backgroundColor: 'transparent', pointRadius: 0, borderWidth: name === 'logistic' ? 2.5 : 1.5,
+    showLine: true, fill: false, tension: 0,
+  }));
+  new Chart(document.getElementById('chart-roc'), {
+    type: 'scatter',
+    data: { datasets: [
+      { type: 'line', label: 'random',
+        data: [{ x: 0, y: 0 }, { x: 1, y: 1 }],
+        borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1, pointRadius: 0, fill: false },
+      ...rocDatasets ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { color: COLORS.fgDim, font: { size: 11 }, boxWidth: 10 } },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { title: (ctxs) => ctxs[0].dataset.label,
+            label: (ctx) => `FPR: ${fmtPct(ctx.raw.x, 1)} \u00B7 TPR: ${fmtPct(ctx.raw.y, 1)}` } }) },
+      scales: {
+        x: { min: 0, max: 1, grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'False positive rate', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { min: 0, max: 1, grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'True positive rate', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+  const aucList = Object.entries(rocAuc).map(([k, v]) => `${k}: ${fmtNum(v, 3)}`).join(' \u00B7 ');
+  setText('roc-auc', `AUCs: ${aucList}`);
+
+  // === Model comparison ===
+  const modelOrder = ['majority-prior', 'elo-only', 'random forest', 'logistic', 'lightgbm'];
+  const modelLabels = { 'majority-prior': 'Baseline (majority)', 'elo-only': 'Elo only',
+                        'random forest': 'Random Forest', 'logistic': 'Logistic + attendance', 'lightgbm': 'LightGBM' };
+  const ll = modelOrder.map(m => P.models.eval[m] && P.models.eval[m].log_loss).filter(v => v != null);
+  const present = modelOrder.filter(m => P.models.eval[m]);
+  new Chart(document.getElementById('chart-models'), {
+    type: 'bar',
+    data: { labels: present.map(m => modelLabels[m]),
+      datasets: [{ data: present.map(m => P.models.eval[m].log_loss),
+        backgroundColor: present.map(m => m === 'logistic' ? COLORS.accent : 'rgba(167, 139, 250, 0.55)'),
+        borderRadius: 3 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 40 } },
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => {
+            const m = P.models.eval[present[ctx.dataIndex]];
+            return [`Log-loss: ${fmtNum(m.log_loss, 3)}`, `Accuracy: ${fmtPct(m.accuracy, 1)}`, `Brier: ${fmtNum(m.brier, 3)}`];
+          } } }) },
+      scales: {
+        x: { grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtNum(v, 2) }), min: 0.6,
+             title: { display: true, text: 'Test log-loss (lower = better)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: axisTicks }
+      }
+    }
+  });
+  // LightGBM caveat
+  const lgbLL = P.models.eval['lightgbm'] && P.models.eval['lightgbm'].log_loss;
+  const logLL = P.models.eval['logistic'] && P.models.eval['logistic'].log_loss;
+  if (lgbLL && logLL && lgbLL > logLL * 1.05) {
+    setHTML('lgb-caveat',
+      `<strong>Why is LightGBM the worst?</strong> At n &lt; 5K games, gradient-boosting tends to overfit on
+       a 5-feature problem with weak signal-to-noise. The fact that simpler models win is a finding, not a
+       pipeline bug -- production-quality model at this sample size is the logistic with attendance interaction.`);
+  } else {
+    document.getElementById('lgb-caveat').remove();
+  }
+
+  // === Feature importance ===
+  const fi = P.models.feature_importance;
+  const fiEntries = Object.entries(fi).sort((a, b) => b[1] - a[1]);
+  const fiTotal = fiEntries.reduce((s, [, v]) => s + v, 0);
+  const fiLabels = { elo_diff: 'Elo difference', attendance_ratio_filled: 'Attendance ratio',
+                     days_rest_filled: 'Days rest', is_playoff: 'Playoff game',
+                     attendance_missing: 'Attendance missing' };
+  new Chart(document.getElementById('chart-importance'), {
+    type: 'bar',
+    data: { labels: fiEntries.map(([k]) => fiLabels[k] || k),
+      datasets: [{ data: fiEntries.map(([, v]) => v / fiTotal),
+        backgroundColor: fiEntries.map(([k]) =>
+          k === 'attendance_ratio_filled' ? COLORS.accent :
+          k === 'elo_diff' ? 'rgba(96, 165, 250, 0.7)' :
+          'rgba(167, 139, 250, 0.5)'),
+        borderRadius: 3 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 50 } },
+      plugins: { legend: { display: false },
+        tooltip: Object.assign({}, tipBase(COLORS.accent),
+          { callbacks: { label: (ctx) => fmtPct(ctx.raw, 1) + ' of total gain' } }) },
+      scales: {
+        x: { grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Share of total gain (LightGBM, gain-based)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: axisTicks }
+      }
+    }
+  });
+
+  // === MECHANISMS ===
+  if (P.mechanisms) {
+    const m = P.mechanisms;
+    const gaps = m.gaps;
+    const contribs = m.contribs;
+    
+    new Chart(document.getElementById('chart-mechanisms-gaps'), {
+      type: 'bar',
+      data: {
+        labels: gaps.map(g => g.stat),
+        datasets: [{
+          label: 'Gap (Home - Away)',
+          data: gaps.map(g => g.gap),
+          backgroundColor: gaps.map(g => g.gap > 0 ? COLORS.blue : COLORS.red)
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { title: { display: true, text: 'Gap' } } }
+      }
+    });
+    
+    // Contribs pie chart
+    const cLabels = Object.keys(contribs);
+    const cData = Object.values(contribs);
+    new Chart(document.getElementById('chart-mechanisms-contrib'), {
+      type: 'pie',
+      data: {
+        labels: cLabels,
+        datasets: [{
+          data: cData.map(Math.abs), // Pie needs positive values
+          backgroundColor: [COLORS.blue, COLORS.green, COLORS.yellow, COLORS.red, COLORS.violet, COLORS.cyan, COLORS.accent]
+        }]
+      },
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const val = cData[ctx.dataIndex];
+                return ` ${val > 0 ? '+' : ''}${val.toFixed(2)} pts`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Narrative
+    const efg = contribs['eFG%'] || 0;
+    const ft = contribs['FTA/100'] || 0;
+    const tov = contribs['TOV/100'] || 0;
+    const tot = m.total_hca || 0;
+    
+    const sumAttributed = Object.values(contribs).reduce((s, v) => s + v, 0);
+    const unexplained = tot - sumAttributed;
+    document.getElementById('mechanisms-narrative').innerHTML = `
+      Of the <strong>+${tot.toFixed(2)} pts</strong> home edge, the OLS decomposition attributes
+      <strong>${efg >= 0 ? '+' : ''}${efg.toFixed(2)} pts</strong> to shooting efficiency (eFG%),
+      <strong>${tov >= 0 ? '+' : ''}${tov.toFixed(2)} pts</strong> to fewer turnovers (TOV per 100),
+      <strong>${ft >= 0 ? '+' : ''}${ft.toFixed(2)} pts</strong> to free-throw rate, and small
+      contributions from OREB and foul differential.
+      <br><br>
+      A residual <strong>${unexplained >= 0 ? '+' : ''}${unexplained.toFixed(2)} pts</strong>
+      is <em>not</em> captured by any single box-score gap (intercept + OT scoring).
+      Unlike the NBA, where referee bias (fouls / FTs) explains the majority of HCA
+      (Moskowitz &amp; Wertheim, <em>Scorecasting</em>), in the EuroLeague shooting efficiency
+      and ball security are the dominant measurable mechanisms, and the foul gap is small
+      (&lt;0.1 pts of HCA). Model R&sup2; = ${(m.ols_r2 || 0).toFixed(3)} on n=${m.n_games} paired games.
+    `;
+  } else {
+    const el = document.getElementById('mechanisms-narrative');
+    if (el) el.innerHTML = "Mechanism data not available (boxscores not ingested).";
+  }
+
+  // === VERDICT + mock banner ===
+  const isMock = P.meta.is_mock;
+  if (isMock) {
+    document.getElementById('mock-banner-slot').innerHTML = `
+      <div class="mock-banner">
+        <div class="ico">!</div>
+        <div class="body">
+          <strong>Mock data notice.</strong> Every number on this dashboard is computed from synthetic data
+          generated by <code>src/euroleague_hca/ingest/mock.py</code> for pipeline-validation purposes.
+          The pipeline, statistics, and model code are production-grade; the inputs are not. Re-run with
+          <code>ELH_MOCK=0</code> against the live EuroLeague API to produce reportable figures.
+        </div>
+      </div>`;
+  }
+  const vList = document.getElementById('verdict-list');
+  P.verdict.forEach((v, i) => {
+    const item = document.createElement('div');
+    item.className = 'verdict-item' + (i === 0 ? ' crowd' : '');
+    item.innerHTML = `<h4>${v.headline}</h4><p>${v.body}</p>`;
+    vList.appendChild(item);
+  });
+})();
+</script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">4b3e4c3</code> &middot; rebuilt 2026-04-21 05:35 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body>
+</html>

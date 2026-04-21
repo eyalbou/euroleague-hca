@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EuroLeague Home-Court Advantage</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/500.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/700.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #11141b;
+    --panel-2: #161a23;
+    --border: rgba(255,255,255,0.06);
+    --border-2: rgba(255,255,255,0.12);
+    --fg: #f1f3f8;
+    --fg-dim: #a7aec0;
+    --fg-mute: #6b7280;
+    --accent: #f97316;          /* basketball orange */
+    --accent-soft: rgba(249, 115, 22, 0.12);
+    --blue: #60a5fa;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #facc15;
+    --violet: #a78bfa;
+    --grid: rgba(255,255,255,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+               font-family: 'DM Sans', 'Axiforma', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               font-feature-settings: "ss01", "tnum"; -webkit-font-smoothing: antialiased; }
+  .app { max-width: 1280px; margin: 0 auto; padding: 32px 32px 96px 32px; }
+
+  /* HERO */
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end;
+          padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+  .hero-eyebrow { text-transform: uppercase; letter-spacing: 0.14em; font-size: 12px;
+                  color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  h1 { font-size: 40px; letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 12px 0; font-weight: 600; }
+  h1 .accent { color: var(--accent); }
+  .hero-sub { color: var(--fg-dim); font-size: 15px; max-width: 620px; line-height: 1.55; margin: 0; }
+  .hero-mode { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+               border: 1px solid var(--border-2); border-radius: 999px; font-size: 12px; color: var(--fg-dim); }
+  .hero-mode .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); }
+
+  /* KPI strip */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+         padding: 24px; position: relative; overflow: hidden; }
+  .kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+  .kpi-label { color: var(--fg-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;
+               font-weight: 500; margin-bottom: 12px; }
+  .kpi-value { font-size: 40px; letter-spacing: -0.02em; font-weight: 600; line-height: 1; margin-bottom: 8px; }
+  .kpi-caption { color: var(--fg-mute); font-size: 13px; line-height: 1.5; }
+  .kpi-caption .up { color: var(--green); }
+  .kpi-caption .down { color: var(--red); }
+
+  /* Benchmark bar */
+  .bench { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+           padding: 20px 24px; margin-bottom: 32px; }
+  .bench-title { font-size: 13px; color: var(--fg-dim); text-transform: uppercase;
+                 letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 500; }
+  .bench-rows { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .bench-row { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px;
+               border-left: 2px solid var(--border); }
+  .bench-row.ours { border-left-color: var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+  .bench-sport { font-size: 11px; color: var(--fg-mute); text-transform: uppercase; letter-spacing: 0.08em; }
+  .bench-value { font-size: 18px; font-weight: 600; }
+  .bench-metric { font-size: 11px; color: var(--fg-mute); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--panel);
+          border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow-x: auto; }
+  .tab { flex: 1; background: transparent; border: 0; color: var(--fg-dim); padding: 10px 16px;
+         border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500;
+         cursor: pointer; white-space: nowrap; transition: all 0.15s ease; }
+  .tab:hover { color: var(--fg); background: var(--panel-2); }
+  .tab.active { background: var(--accent); color: #111; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade 0.2s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .card.span-2 { grid-column: span 2; }
+  .card h3 { margin: 0 0 4px 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+  .card .sub { color: var(--fg-dim); font-size: 13px; margin: 0 0 20px 0; line-height: 1.5; }
+  .chart-wrap { position: relative; height: 340px; }
+  .chart-wrap.tall { height: 460px; }
+  .chart-wrap.xtall { height: 620px; }
+
+  /* Heatmap */
+  .heat { display: grid; gap: 2px; font-size: 11px; }
+  .heat-row { display: grid; grid-template-columns: 160px repeat(var(--cols), 1fr); gap: 2px; align-items: center; }
+  .heat-label { color: var(--fg-dim); padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .heat-cell { height: 26px; border-radius: 3px; display: flex; align-items: center; justify-content: center;
+               font-weight: 600; color: #0b0d12; cursor: default; }
+  .heat-cell.empty { background: var(--panel-2); color: var(--fg-mute); }
+  .heat-head { color: var(--fg-mute); font-size: 11px; text-align: center; }
+
+  /* Verdict */
+  .verdict { background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%);
+             border: 1px solid var(--accent); border-radius: 16px; padding: 32px; }
+  .verdict h3 { color: var(--accent); font-size: 14px; text-transform: uppercase;
+                letter-spacing: 0.12em; margin: 0 0 16px 0; font-weight: 600; }
+  .verdict ol { margin: 0; padding: 0; list-style: none; counter-reset: item; }
+  .verdict li { counter-increment: item; padding: 14px 0 14px 44px; border-bottom: 1px solid var(--border);
+                position: relative; font-size: 15px; line-height: 1.6; }
+  .verdict li:last-child { border-bottom: 0; }
+  .verdict li::before { content: counter(item); position: absolute; left: 0; top: 14px;
+                        width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+                        color: #0b0d12; font-weight: 600; font-size: 13px;
+                        display: flex; align-items: center; justify-content: center; }
+
+  /* Forest plot */
+  .forest { font-size: 12px; }
+  .forest-row { display: grid; grid-template-columns: 180px 1fr 60px; gap: 12px; align-items: center;
+                padding: 4px 0; }
+  .forest-label { color: var(--fg-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .forest-bar { position: relative; height: 18px; }
+  .forest-bar .axis { position: absolute; inset: 50% 0 auto 0; height: 1px; background: var(--grid); }
+  .forest-bar .zero { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--fg-mute); }
+  .forest-bar .ci { position: absolute; height: 2px; top: 50%; margin-top: -1px; background: var(--fg-dim); border-radius: 1px; }
+  .forest-bar .pt { position: absolute; width: 10px; height: 10px; border-radius: 50%;
+                    top: 50%; margin-top: -5px; background: var(--accent);
+                    border: 2px solid var(--bg); }
+  .forest-val { text-align: right; color: var(--fg); font-variant-numeric: tabular-nums;
+                font-weight: 500; }
+
+  /* Fine print */
+  .footer { color: var(--fg-mute); font-size: 12px; padding-top: 32px; text-align: center; line-height: 1.6; }
+  .footer a { color: var(--fg-dim); }
+
+  @media (max-width: 900px) {
+    h1 { font-size: 30px; }
+    .kpis { grid-template-columns: 1fr; }
+    .bench-rows { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .card.span-2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div>
+      <div class="hero-eyebrow">EuroLeague Basketball &mdash; 10 seasons, 3,106 games</div>
+      <h1>The crowd, the court, and the count.<br><span class="accent">What actually moves home-court advantage?</span></h1>
+      <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2024-25).
+        Combines bootstrap inference, a mixed-effects model with per-team crowd sensitivity, and a natural experiment
+        built around the 2020-21 empty-arena regime.</p>
+    </div>
+    <div class="hero-mode"><span class="dot"></span> MOCK DATA</div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">League HCA</div>
+      <div class="kpi-value" id="kpi-hca">--</div>
+      <div class="kpi-caption" id="kpi-hca-caption">95% bootstrap CI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Home win rate</div>
+      <div class="kpi-value" id="kpi-wr">--</div>
+      <div class="kpi-caption">across 3,106 games</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Team spread</div>
+      <div class="kpi-value" id="kpi-spread">--</div>
+      <div class="kpi-caption" id="kpi-spread-caption"></div>
+    </div>
+  </section>
+
+  <section class="bench">
+    <div class="bench-title">For context &mdash; long-run HCA in other leagues</div>
+    <div class="bench-rows" id="bench-rows"></div>
+  </section>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-target="tab-overview">1. The league</button>
+    <button class="tab" data-target="tab-teams">2. Per team</button>
+    <button class="tab" data-target="tab-attendance">3. Attendance</button>
+    <button class="tab" data-target="tab-covid">4. COVID experiment</button>
+    <button class="tab" data-target="tab-models">5. Models</button>
+    <button class="tab" data-target="tab-verdict">6. Verdict</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="tab-overview">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>HCA held steady around +3 pts, except the empty-arena 2020-21 shock</h3>
+        <p class="sub">League-wide home point-differential per season. The 2020-21 season (shaded) is the regime when most arenas were closed or severely capacity-limited.</p>
+        <div class="chart-wrap tall"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Most games are decided by less than two possessions</h3>
+        <p class="sub">Distribution of home point differential across all games. Positive = home win.</p>
+        <div class="chart-wrap"><canvas id="chart-hist"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Home win rate tracks HCA tightly -- except when crowds left</h3>
+        <p class="sub">Season-level home win rate. Mild dip in 2020-21 despite schedule disruption.</p>
+        <div class="chart-wrap"><canvas id="chart-wr"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAMS -->
+  <section class="panel" id="tab-teams">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>HCA by team &mdash; 95% bootstrap intervals reveal real separation</h3>
+        <p class="sub">Each team's mean home point-differential. The top and bottom tiers are statistically distinct, not noise.</p>
+        <div class="forest" id="team-forest"></div>
+      </div>
+      <div class="card span-2">
+        <h3>Team &times; Season heatmap &mdash; who is consistently high?</h3>
+        <p class="sub">Color = home point differential. Darker orange = larger HCA. White = data missing.</p>
+        <div id="heatmap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section class="panel" id="tab-attendance">
+    <div class="grid-2">
+      <div class="card span-2">
+        <h3>Dose-response: fuller arenas deliver bigger home margins</h3>
+        <p class="sub">Binned mean of home point-differential across attendance-ratio deciles (bin size shown as point area).</p>
+        <div class="chart-wrap tall"><canvas id="chart-dose"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Attendance buckets &mdash; discrete view of the same story</h3>
+        <p class="sub">Mean HCA per attendance bucket with 95% CI. Clear monotone lift from empty to sold-out.</p>
+        <div class="chart-wrap"><canvas id="chart-buckets"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Which teams depend most on the crowd?</h3>
+        <p class="sub">Mixed-effects random slope on attendance_ratio per team. Higher = more crowd-sensitive.</p>
+        <div class="forest" id="team-slopes"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COVID -->
+  <section class="panel" id="tab-covid">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Three regimes, one natural experiment</h3>
+        <p class="sub">Mean HCA per regime with 95% CI. COVID removed a sizeable chunk; post-COVID returned to pre-COVID levels.</p>
+        <div class="chart-wrap"><canvas id="chart-regimes"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Difference-in-differences</h3>
+        <p class="sub">Delta HCA between regimes with bootstrap CI. A non-zero covid-pre estimate is the causal leverage.</p>
+        <div class="forest" id="did-forest"></div>
+      </div>
+      <div class="card span-2">
+        <h3>HCA timeline with COVID shock highlighted</h3>
+        <p class="sub">The 2020-21 season is the left endpoint of the attendance dose-response curve.</p>
+        <div class="chart-wrap"><canvas id="chart-covid-line"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODELS -->
+  <section class="panel" id="tab-models">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Elo-adjusted odds: home still wins at a neutral matchup</h3>
+        <p class="sub">Logistic regression controlling for team strength. The odds-ratio on <code>is_home</code> is the clean HCA estimate.</p>
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+          <div style="padding:20px; background:var(--panel-2); border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--fg-dim);">Odds ratio</div>
+              <div style="font-size:28px; font-weight:600; color:var(--accent);" id="or-value">--</div>
+              <div style="font-size:12px; color:var(--fg-mute);">is_home, Elo-adjusted</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--fg-dim);">Prob lift at 50/50</div>
+              <div style="font-size:28px; font-weight:600;" id="pp-value">--</div>
+              <div style="font-size:12px; color:var(--fg-mute);">percentage points</div>
+            </div>
+          </div>
+          <div style="padding:20px; background:var(--panel-2); border-radius:12px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--fg-dim); margin-bottom:8px;">Interaction: is_home &times; attendance_ratio</div>
+            <div style="font-size:22px; font-weight:600;" id="int-value">--</div>
+            <div style="font-size:12px; color:var(--fg-mute); margin-top:4px;">&gt;1 means full arenas amplify home advantage</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Model comparison &mdash; simpler beats fancier at this sample size</h3>
+        <p class="sub">Held-out test log-loss (lower = better) and accuracy. Logistic with attendance interaction tops the table.</p>
+        <div class="chart-wrap"><canvas id="chart-models"></canvas></div>
+      </div>
+      <div class="card span-2">
+        <h3>Feature importance -- Elo dominates, attendance is a clear second</h3>
+        <p class="sub">Relative feature importance from LightGBM (gain-based). Elo captures raw team quality; attendance captures the crowd effect.</p>
+        <div class="chart-wrap"><canvas id="chart-importance"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERDICT -->
+  <section class="panel" id="tab-verdict">
+    <div class="verdict">
+      <h3>Bottom line</h3>
+      <ol id="verdict-list"></ol>
+    </div>
+  </section>
+
+  <footer class="footer">
+    Generated by <code>scripts/10_analyst_dashboard.py</code> &middot; MOCK DATA &middot; 10 seasons, 3,106 games, 18 teams.<br>
+    Methodology: bootstrap 95% CI (1,000 resamples), mixed-effects (<code>statsmodels.mixedlm</code>), Difference-in-Differences, time-based CV for ML. Full detail in <code>reports/final_report.md</code>.
+  </footer>
+</div>
+
+<script id="payload" type="application/json">{"meta": {"n_games": 3106, "n_teams": 18, "seasons": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "mode": "MOCK"}, "kpis": {"league_hca": 3.0051513200257567, "league_hca_lo": 2.641645202833226, "league_hca_hi": 3.350635866065679, "home_win_rate": 0.6300708306503542, "n_games": 3106, "top_team_name": "Olympiakos Pireus", "top_team_hca": 7.028248587570621, "bot_team_name": "Alba Berlin", "bot_team_hca": -1.4911242603550297}, "benchmarks": [{"sport": "EuroLeague", "value": 3.01, "metric": "pts/game", "ours": true}, {"sport": "NBA", "value": 2.5, "metric": "pts/game", "ours": false}, {"sport": "NFL", "value": 2.7, "metric": "pts/game", "ours": false}, {"sport": "NHL", "value": 0.3, "metric": "goals/game", "ours": false}, {"sport": "EPL", "value": 0.3, "metric": "goals/game", "ours": false}, {"sport": "MLB", "value": 0.1, "metric": "runs/game", "ours": false}], "trend": {"seasons": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], "hca": [2.429, 3.519, 4.328, 3.146, 2.537, 0.535, 2.003, 2.961, 4.355, 4.21], "win_rate": [0.612, 0.629, 0.691, 0.634, 0.628, 0.538, 0.582, 0.619, 0.7, 0.666], "n": [312, 310, 311, 309, 309, 312, 306, 310, 313, 314]}, "histogram": {"labels": ["-40 to -35", "-35 to -30", "-30 to -25", "-25 to -20", "-20 to -15", "-15 to -10", "-10 to -5", "-5 to 0", "0 to 5", "5 to 10", "10 to 15", "15 to 20", "20 to 25", "25 to 30", "30 to 35", "35 to 40"], "counts": [0, 0, 2, 20, 72, 197, 318, 540, 625, 548, 400, 218, 116, 40, 7, 2]}, "team_hca": [{"team_id": "E_OL", "name": "Olympiakos Pireus", "hca": 7.028, "n": 177, "lo": 5.723, "hi": 8.294}, {"team_id": "E_RM", "name": "Real Monarcas", "hca": 6.581, "n": 179, "lo": 5.1, "hi": 8.123}, {"team_id": "E_BC", "name": "Barca Basquete", "hca": 6.5, "n": 178, "lo": 5.051, "hi": 7.927}, {"team_id": "E_RC", "name": "Crvena Zvezda", "hca": 4.766, "n": 167, "lo": 3.185, "hi": 6.336}, {"team_id": "E_EF", "name": "Efes SK", "hca": 4.348, "n": 178, "lo": 2.983, "hi": 5.736}, {"team_id": "E_PBG", "name": "Partizan Bgrd", "hca": 4.32, "n": 178, "lo": 2.96, "hi": 5.686}, {"team_id": "E_FB", "name": "Fenerbahce BSK", "hca": 3.73, "n": 178, "lo": 2.393, "hi": 5.011}, {"team_id": "E_BA", "name": "Baskonia Vita", "hca": 3.371, "n": 178, "lo": 2.089, "hi": 4.747}, {"team_id": "E_ZS", "name": "Zalgiris Kaunas", "hca": 2.994, "n": 167, "lo": 1.545, "hi": 4.503}, {"team_id": "E_PA", "name": "Panathenakos", "hca": 2.757, "n": 169, "lo": 1.402, "hi": 4.125}, {"team_id": "E_MA", "name": "Maccabi Telaviv", "hca": 2.488, "n": 170, "lo": 0.976, "hi": 3.942}, {"team_id": "E_MO", "name": "Monaco Rocca", "hca": 1.706, "n": 177, "lo": 0.203, "hi": 3.22}, {"team_id": "E_VB", "name": "Virtus Bolonia", "hca": 1.327, "n": 168, "lo": -0.185, "hi": 2.744}, {"team_id": "E_BM", "name": "Bayern Munchen", "hca": 1.325, "n": 169, "lo": -0.237, "hi": 2.911}, {"team_id": "E_PA2", "name": "Paris Olympique", "hca": 1.149, "n": 168, "lo": -0.268, "hi": 2.637}, {"team_id": "E_EA", "name": "EA7 Milano", "hca": 0.607, "n": 168, "lo": -0.774, "hi": 2.03}, {"team_id": "E_AS", "name": "Asvel Lyonnais", "hca": -0.173, "n": 168, "lo": -1.744, "hi": 1.31}, {"team_id": "E_AL", "name": "Alba Berlin", "hca": -1.491, "n": 169, "lo": -2.699, "hi": -0.083}], "heatmap": {"teams": ["Olympiakos Pireus", "Real Monarcas", "Barca Basquete", "Crvena Zvezda", "Efes SK", "Partizan Bgrd", "Fenerbahce BSK", "Baskonia Vita", "Zalgiris Kaunas", "Panathenakos", "Maccabi Telaviv", "Monaco Rocca", "Virtus Bolonia", "Bayern Munchen", "Paris Olympique", "EA7 Milano", "Asvel Lyonnais", "Alba Berlin"], "seasons": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], "values": [[7.39, 9.28, 6.28, 8.65, 6.56, 1.89, 4.47, 9.24, 6.78, 9.83], [7.39, 4.89, 7.0, 13.83, 3.59, 5.5, 4.94, 6.44, 6.33, 5.72], [7.06, 11.41, 4.89, 5.83, 4.22, 3.35, 2.94, 5.44, 8.83, 11.11], [3.18, 2.12, 10.76, 7.24, 5.5, -1.41, 1.56, 7.25, 3.65, 7.82], [6.24, 4.72, 3.22, 4.0, 5.0, 4.89, 3.35, 3.94, 2.22, 5.94], [6.44, 4.06, 7.24, 4.67, 5.56, -2.33, 1.83, 2.33, 6.47, 7.22], [1.83, 1.83, 7.89, 2.56, 1.33, 5.33, 1.5, 3.28, 5.22, 6.28], [1.28, 4.83, 4.71, 0.56, 2.0, -1.56, 4.65, 6.06, 4.33, 7.0], [-0.62, 6.35, 7.56, 1.41, 3.35, 1.65, 0.81, -0.35, 7.24, 2.47], [3.35, 3.47, 2.71, -1.06, 6.12, -1.0, 2.65, 3.29, 4.35, 3.47], [1.29, 3.0, 4.82, -0.82, 0.41, -2.06, 6.59, 4.47, 5.29, 1.88], [-0.39, 2.35, 3.5, 3.65, -0.76, 1.5, 1.67, 1.67, 2.61, 1.28], [1.06, 3.47, -0.18, 3.82, 3.56, 1.06, -0.88, -0.41, 1.29, 0.59], [0.71, 4.06, 4.12, 2.59, -1.35, -1.0, -0.35, 0.94, 1.35, 2.18], [-0.82, 0.65, 4.29, 2.31, -0.76, 0.82, 0.06, 5.82, 0.76, -1.65], [-0.65, 2.38, 1.35, -1.59, -1.29, -2.53, 5.12, -0.81, 2.76, 1.35], [1.88, -3.88, -1.65, 0.69, 4.06, -3.65, -2.65, -4.06, 6.82, 1.0], [-3.88, -2.56, -0.82, -2.88, -1.65, -1.47, -2.65, -1.82, 1.71, 1.06]]}, "attendance": {"buckets": [{"bucket": "empty", "hca": 0.5352564102564102, "n": 312, "lo": -0.5673076923076923, "hi": 1.6669871794871793}, {"bucket": "low", "hca": 2.3877551020408165, "n": 147, "lo": 0.8566326530612245, "hi": 4.102210884353741}, {"bucket": "medium", "hca": 3.3759505703422055, "n": 2104, "lo": 2.9709600760456274, "hi": 3.8498574144486692}, {"bucket": "high", "hca": 3.74025974025974, "n": 385, "lo": 2.7453896103896107, "hi": 4.717012987012986}, {"bucket": "sold out", "hca": 1.0, "n": 3, "lo": -4.0, "hi": 5.0}], "continuous": {"x": [0.0, 0.376, 0.465, 0.553, 0.656, 0.748, 0.837, 0.935], "y": [0.535, 2.167, 2.397, 1.918, 3.677, 3.538, 3.601, 5.133], "n": [312, 6, 141, 279, 802, 1023, 358, 30]}, "team_slopes": [{"team_id": "E_AL", "name": "Alba Berlin", "total_slope": 1.916, "total_intercept": -2.285}, {"team_id": "E_EA", "name": "EA7 Milano", "total_slope": 2.813, "total_intercept": -0.982}, {"team_id": "E_AS", "name": "Asvel Lyonnais", "total_slope": 2.827, "total_intercept": -1.535}, {"team_id": "E_PA2", "name": "Paris Olympique", "total_slope": 3.038, "total_intercept": -0.612}, {"team_id": "E_VB", "name": "Virtus Bolonia", "total_slope": 3.231, "total_intercept": -0.559}, {"team_id": "E_BM", "name": "Bayern Munchen", "total_slope": 3.233, "total_intercept": -0.558}, {"team_id": "E_MO", "name": "Monaco Rocca", "total_slope": 3.382, "total_intercept": -0.081}, {"team_id": "E_MA", "name": "Maccabi Telaviv", "total_slope": 3.894, "total_intercept": 0.159}, {"team_id": "E_ZS", "name": "Zalgiris Kaunas", "total_slope": 3.961, "total_intercept": 0.497}, {"team_id": "E_PA", "name": "Panathenakos", "total_slope": 4.081, "total_intercept": 0.303}, {"team_id": "E_FB", "name": "Fenerbahce BSK", "total_slope": 4.207, "total_intercept": 1.133}, {"team_id": "E_BA", "name": "Baskonia Vita", "total_slope": 4.506, "total_intercept": 0.843}, {"team_id": "E_EF", "name": "Efes SK", "total_slope": 4.575, "total_intercept": 1.511}, {"team_id": "E_RC", "name": "Crvena Zvezda", "total_slope": 5.097, "total_intercept": 1.543}, {"team_id": "E_PBG", "name": "Partizan Bgrd", "total_slope": 5.172, "total_intercept": 1.421}, {"team_id": "E_RM", "name": "Real Monarcas", "total_slope": 5.724, "total_intercept": 2.886}, {"team_id": "E_BC", "name": "Barca Basquete", "total_slope": 5.769, "total_intercept": 2.865}, {"team_id": "E_OL", "name": "Olympiakos Pireus", "total_slope": 6.201, "total_intercept": 3.149}], "league_slope": 4.091}, "covid": {"regimes": [{"regime": "Pre-COVID", "hca": 3.355, "lo": 2.836, "hi": 3.895, "n": 1242}, {"regime": "COVID", "hca": 1.531, "lo": 0.792, "hi": 2.366, "n": 621}, {"regime": "Post-COVID", "hca": 3.392, "lo": 2.839, "hi": 3.914, "n": 1243}], "did": {"covid - pre": {"mean": -1.824, "lo": -2.813, "hi": -0.878}, "post - covid": {"mean": 1.86, "lo": 0.933, "hi": 2.821}, "post - pre": {"mean": 0.037, "lo": -0.74, "hi": 0.81}}}, "models": {"eval": {"home-always": {"accuracy": 0.6656050955414012, "log_loss": 2.3105841046587363, "brier": 0.3337271146496815}, "majority-prior": {"accuracy": 0.6656050955414012, "log_loss": 0.6423822759154274, "brier": 0.224958748535786}, "elo-only": {"accuracy": 0.6624203821656051, "log_loss": 0.6366306556328651, "brier": 0.2224766425480399}, "logistic": {"accuracy": 0.6687898089171974, "log_loss": 0.6317826352739682, "brier": 0.22032654321588166}, "random forest": {"accuracy": 0.6687898089171974, "log_loss": 0.6369203598185308, "brier": 0.2230953669982509}, "lightgbm": {"accuracy": 0.5955414012738853, "log_loss": 0.7145042517897344, "brier": 0.25192002334432795}}, "feature_importance": {"elo_diff": 6357.0, "is_playoff": 84.0, "days_rest_filled": 588.0, "attendance_ratio_filled": 4950.0, "attendance_missing": 21.0}, "is_home_OR": 1.127, "is_home_x_att_OR": 1.629, "prob_lift_pp": 2.98, "mean_test_log_loss": 0.65, "baseline_majority": 0.63}, "verdict": ["EuroLeague HCA is +3.0 pts, comparable to NBA (~2.5) but with a wider per-team spread.", "Olympiakos Pireus has the largest home edge (+7.0 pts); Alba Berlin the smallest (+-1.5).", "Attendance matters: league slope = +4.1 pts per unit attendance ratio (empty to sold-out).", "COVID natural experiment: HCA fell 1.8 pts when crowds left, and fully rebounded (post-vs-pre = +0.04 pts).", "Controlling for team strength (Elo), the home-team odds-ratio is 1.13: +3.0 pp at a 50/50 matchup.", "Logistic with attendance beats tree ensembles at this sample size; interpretable models win on ~3K rows."]}</script>
+<script>
+(() => {
+  const P = JSON.parse(document.getElementById('payload').textContent);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  Chart.defaults.font.family = "'DM Sans', 'Axiforma', sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = css('--fg-dim');
+
+  const COLORS = {
+    accent: css('--accent'),
+    blue: css('--blue'),
+    green: css('--green'),
+    red: css('--red'),
+    yellow: css('--yellow'),
+    violet: css('--violet'),
+    grid: css('--grid'),
+    fg: css('--fg'),
+    fgDim: css('--fg-dim'),
+    fgMute: css('--fg-mute'),
+  };
+
+  // -- formatters (null-safe, deterministic)
+  const fmtNum = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; return Number(v).toFixed(d); };
+  const fmtSigned = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; const s = Number(v) >= 0 ? '+' : ''; return s + Number(v).toFixed(d); };
+  const fmtK = (v) => { if (v == null || isNaN(v)) return '--'; if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M'; if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1) + 'K'; return Math.round(v).toString(); };
+  const fmtPct = (v, d = 1) => { if (v == null || isNaN(v)) return '--'; return (Number(v) * 100).toFixed(d) + '%'; };
+
+  // -- KPIs
+  document.getElementById('kpi-hca').textContent = fmtSigned(P.kpis.league_hca, 2) + ' pts';
+  document.getElementById('kpi-hca-caption').textContent =
+    `95% CI [${fmtSigned(P.kpis.league_hca_lo, 2)}, ${fmtSigned(P.kpis.league_hca_hi, 2)}] &middot; ${fmtK(P.kpis.n_games)} games`.replace('&middot;', '·');
+  document.getElementById('kpi-wr').textContent = fmtPct(P.kpis.home_win_rate, 1);
+  const spread = P.kpis.top_team_hca - P.kpis.bot_team_hca;
+  document.getElementById('kpi-spread').textContent = fmtSigned(spread, 1) + ' pts';
+  document.getElementById('kpi-spread-caption').innerHTML =
+    `<span class="up">${P.kpis.top_team_name}</span> &nbsp;&rarr;&nbsp; <span class="down">${P.kpis.bot_team_name}</span>`;
+
+  // -- benchmarks
+  const benchEl = document.getElementById('bench-rows');
+  P.benchmarks.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'bench-row' + (b.ours ? ' ours' : '');
+    row.innerHTML = `
+      <div class="bench-sport">${b.sport}${b.ours ? ' &mdash; ours' : ''}</div>
+      <div class="bench-value">${b.ours ? '+' : ''}${fmtNum(b.value, 2)}</div>
+      <div class="bench-metric">${b.metric}</div>`;
+    benchEl.appendChild(row);
+  });
+
+  // -- TABS
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    panels.forEach(p => p.classList.toggle('active', p.id === t.dataset.target));
+  }));
+
+  // -- common chart options
+  const gridY = { color: COLORS.grid, drawBorder: false };
+  const gridX = { color: COLORS.grid, drawBorder: false };
+  const axisTicks = { color: COLORS.fgDim, font: { size: 11 } };
+
+  // === CHART: season trend (HCA) ===
+  const trendCtx = document.getElementById('chart-trend').getContext('2d');
+  new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: P.trend.seasons,
+      datasets: [{
+        label: 'HCA (pts)',
+        data: P.trend.hca,
+        borderColor: COLORS.accent,
+        backgroundColor: 'rgba(249, 115, 22, 0.12)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: COLORS.accent,
+        pointBorderColor: '#0b0d12',
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 16, right: 16 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 12, titleColor: COLORS.fg,
+          callbacks: { label: (ctx) => `HCA: ${fmtSigned(ctx.raw, 2)} pts (n=${P.trend.n[ctx.dataIndex]})` }
+        },
+        annotation: {
+          annotations: {
+            covid: {
+              type: 'box',
+              xMin: P.trend.seasons.indexOf('2020') - 0.5,
+              xMax: P.trend.seasons.indexOf('2020') + 0.5,
+              backgroundColor: 'rgba(248, 113, 113, 0.08)',
+              borderColor: 'rgba(248, 113, 113, 0.25)',
+              borderWidth: 1,
+              label: { content: 'COVID', display: true, position: 'start',
+                color: COLORS.red, font: { size: 11, weight: 500 }, backgroundColor: 'transparent' }
+            },
+            mean: {
+              type: 'line', yMin: P.kpis.league_hca, yMax: P.kpis.league_hca,
+              borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1,
+              label: { content: `10-yr avg ${fmtSigned(P.kpis.league_hca, 1)}`,
+                display: true, position: 'end', color: COLORS.fgMute, font: { size: 10 },
+                backgroundColor: 'transparent' }
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: gridX, ticks: axisTicks, title: { display: true, text: 'Season (starting year)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === CHART: histogram ===
+  const histCtx = document.getElementById('chart-hist').getContext('2d');
+  const histColors = P.histogram.labels.map((l) => {
+    const lo = parseInt(l.split(' ')[0]);
+    if (lo < 0) return 'rgba(248, 113, 113, 0.65)';
+    if (lo < 5) return 'rgba(250, 204, 21, 0.55)';
+    return 'rgba(249, 115, 22, 0.75)';
+  });
+  new Chart(histCtx, {
+    type: 'bar',
+    data: {
+      labels: P.histogram.labels,
+      datasets: [{ label: 'games', data: P.histogram.counts, backgroundColor: histColors, borderRadius: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+        callbacks: { label: (ctx) => `${fmtK(ctx.raw)} games` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: Object.assign({}, axisTicks, { maxRotation: 45, minRotation: 45 }),
+             title: { display: true, text: 'Home margin (pts)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtK(v) }),
+             title: { display: true, text: 'Games', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === CHART: win rate ===
+  const wrCtx = document.getElementById('chart-wr').getContext('2d');
+  new Chart(wrCtx, {
+    type: 'line',
+    data: {
+      labels: P.trend.seasons,
+      datasets: [{
+        label: 'home win rate', data: P.trend.win_rate,
+        borderColor: COLORS.blue, backgroundColor: 'rgba(96, 165, 250, 0.12)', fill: true,
+        tension: 0.35, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: COLORS.blue,
+        pointBorderColor: '#0b0d12', pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.blue, borderWidth: 1, padding: 10,
+        callbacks: { label: (ctx) => `${fmtPct(ctx.raw, 1)}` } } },
+      scales: {
+        x: { grid: gridX, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             min: 0.4, max: 0.75 }
+      }
+    }
+  });
+
+  // === FOREST: team HCA ===
+  const teamForestEl = document.getElementById('team-forest');
+  const allLo = Math.min(...P.team_hca.map(t => t.lo));
+  const allHi = Math.max(...P.team_hca.map(t => t.hi));
+  const pad = (allHi - allLo) * 0.08;
+  const xMin = Math.floor(allLo - pad);
+  const xMax = Math.ceil(allHi + pad);
+  const range = xMax - xMin;
+  const xToPct = (x) => ((x - xMin) / range) * 100;
+
+  P.team_hca.forEach((t) => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const ciLeft = xToPct(t.lo);
+    const ciWidth = xToPct(t.hi) - xToPct(t.lo);
+    const pointLeft = xToPct(t.hca);
+    const zeroLeft = xToPct(0);
+    row.innerHTML = `
+      <div class="forest-label">${t.name}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="zero" style="left:${zeroLeft}%"></div>
+        <div class="ci" style="left:${ciLeft}%; width:${ciWidth}%"></div>
+        <div class="pt" style="left:calc(${pointLeft}% - 5px)"></div>
+      </div>
+      <div class="forest-val">${fmtSigned(t.hca, 2)}</div>`;
+    teamForestEl.appendChild(row);
+  });
+
+  // === HEATMAP ===
+  const heatEl = document.getElementById('heatmap');
+  heatEl.innerHTML = '';
+  const seasons = P.heatmap.seasons;
+  const allVals = P.heatmap.values.flat().filter(v => v != null);
+  const vMin = Math.min(...allVals);
+  const vMax = Math.max(...allVals);
+  const colorFor = (v) => {
+    if (v == null) return null;
+    const pct = (v - vMin) / (vMax - vMin);
+    if (v < 0) {
+      const k = Math.min(1, Math.abs(v) / Math.max(Math.abs(vMin), 1));
+      return `rgba(248, 113, 113, ${0.25 + k * 0.55})`;
+    }
+    return `rgba(249, 115, 22, ${0.15 + pct * 0.75})`;
+  };
+  const head = document.createElement('div');
+  head.className = 'heat-row';
+  head.style.setProperty('--cols', seasons.length);
+  head.innerHTML = '<div class="heat-label"></div>' + seasons.map(s => `<div class="heat-head">${s}</div>`).join('');
+  heatEl.appendChild(head);
+
+  P.heatmap.teams.forEach((team, i) => {
+    const row = document.createElement('div');
+    row.className = 'heat-row';
+    row.style.setProperty('--cols', seasons.length);
+    const cells = P.heatmap.values[i].map(v => {
+      if (v == null) return `<div class="heat-cell empty">--</div>`;
+      return `<div class="heat-cell" style="background:${colorFor(v)}" title="${team} ${seasons[i]}: ${fmtSigned(v,1)}">${fmtSigned(v, 0)}</div>`;
+    }).join('');
+    row.innerHTML = `<div class="heat-label" title="${team}">${team}</div>${cells}`;
+    heatEl.appendChild(row);
+  });
+
+  // === CHART: dose-response ===
+  const doseCtx = document.getElementById('chart-dose').getContext('2d');
+  new Chart(doseCtx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'binned mean HCA',
+        data: P.attendance.continuous.x.map((x, i) => ({ x, y: P.attendance.continuous.y[i], n: P.attendance.continuous.n[i] })),
+        backgroundColor: COLORS.accent,
+        borderColor: COLORS.accent,
+        pointRadius: P.attendance.continuous.n.map(n => Math.max(4, Math.min(16, Math.sqrt(n) * 0.4))),
+        pointHoverRadius: 10,
+        showLine: true,
+        tension: 0.2,
+        borderWidth: 2.5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 16, right: 16 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 12,
+          callbacks: {
+            title: (ctxs) => `Attendance ratio ${fmtPct(ctxs[0].raw.x, 0)}`,
+            label: (ctx) => [`HCA: ${fmtSigned(ctx.raw.y, 2)} pts`, `Games: ${fmtK(ctx.raw.n)}`]
+          }
+        },
+        annotation: { annotations: {
+          zero: { type: 'line', yMin: 0, yMax: 0, borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1 }
+        }}
+      },
+      scales: {
+        x: { min: 0, max: 1.0, grid: gridX,
+             ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Attendance ratio (attendance / capacity)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === CHART: buckets ===
+  const bucketsCtx = document.getElementById('chart-buckets').getContext('2d');
+  const bucketData = P.attendance.buckets.filter(b => b.n > 0);
+  new Chart(bucketsCtx, {
+    type: 'bar',
+    data: {
+      labels: bucketData.map(b => b.bucket),
+      datasets: [{
+        data: bucketData.map(b => b.hca),
+        backgroundColor: bucketData.map((b) => {
+          if (b.bucket === 'empty') return 'rgba(248, 113, 113, 0.55)';
+          if (b.bucket === 'low') return 'rgba(250, 204, 21, 0.55)';
+          return `rgba(249, 115, 22, ${0.4 + bucketData.indexOf(b) * 0.1})`;
+        }),
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 40 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+        callbacks: {
+          label: (ctx) => {
+            const b = bucketData[ctx.dataIndex];
+            return [`HCA: ${fmtSigned(b.hca, 2)} pts`, `95% CI: [${fmtSigned(b.lo, 1)}, ${fmtSigned(b.hi, 1)}]`, `Games: ${fmtK(b.n)}`];
+          }
+        } } },
+      scales: {
+        x: { grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: axisTicks }
+      }
+    }
+  });
+
+  // === FOREST: team attendance slopes ===
+  const slopesEl = document.getElementById('team-slopes');
+  const slopes = P.attendance.team_slopes;
+  const sMin = Math.min(...slopes.map(s => s.total_slope));
+  const sMax = Math.max(...slopes.map(s => s.total_slope));
+  const sPad = (sMax - sMin) * 0.08;
+  const sxMin = sMin - sPad, sxMax = sMax + sPad;
+  const sRange = sxMax - sxMin;
+  slopes.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const leaguePct = ((P.attendance.league_slope - sxMin) / sRange) * 100;
+    const ptLeft = ((s.total_slope - sxMin) / sRange) * 100;
+    row.innerHTML = `
+      <div class="forest-label">${s.name}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="zero" style="left:${leaguePct}%; background:${COLORS.fgMute};"></div>
+        <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${COLORS.accent};"></div>
+      </div>
+      <div class="forest-val">${fmtSigned(s.total_slope, 2)}</div>`;
+    slopesEl.appendChild(row);
+  });
+
+  // === CHART: COVID regimes ===
+  const regCtx = document.getElementById('chart-regimes').getContext('2d');
+  const regColors = ['rgba(96, 165, 250, 0.6)', 'rgba(248, 113, 113, 0.6)', 'rgba(74, 222, 128, 0.6)'];
+  new Chart(regCtx, {
+    type: 'bar',
+    data: {
+      labels: P.covid.regimes.map(r => r.regime),
+      datasets: [{
+        data: P.covid.regimes.map(r => r.hca),
+        backgroundColor: regColors,
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 20 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+        callbacks: {
+          label: (ctx) => {
+            const r = P.covid.regimes[ctx.dataIndex];
+            return [`HCA: ${fmtSigned(r.hca, 2)} pts`, `95% CI: [${fmtSigned(r.lo, 1)}, ${fmtSigned(r.hi, 1)}]`, `Games: ${fmtK(r.n)}`];
+          }
+        } } },
+      scales: {
+        x: { grid: { display: false }, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === FOREST: DiD ===
+  const didEl = document.getElementById('did-forest');
+  const didEntries = Object.entries(P.covid.did);
+  const didLo = Math.min(...didEntries.map(([_, v]) => v.lo));
+  const didHi = Math.max(...didEntries.map(([_, v]) => v.hi));
+  const didPad = Math.max(0.3, (didHi - didLo) * 0.1);
+  const dxMin = didLo - didPad, dxMax = didHi + didPad, dRange = dxMax - dxMin;
+  didEntries.forEach(([k, v]) => {
+    const row = document.createElement('div');
+    row.className = 'forest-row';
+    const ciLeft = ((v.lo - dxMin) / dRange) * 100;
+    const ciWidth = ((v.hi - v.lo) / dRange) * 100;
+    const ptLeft = ((v.mean - dxMin) / dRange) * 100;
+    const zeroLeft = ((0 - dxMin) / dRange) * 100;
+    const sig = (v.lo > 0 || v.hi < 0);
+    row.innerHTML = `
+      <div class="forest-label">${k}</div>
+      <div class="forest-bar">
+        <div class="axis"></div>
+        <div class="zero" style="left:${zeroLeft}%"></div>
+        <div class="ci" style="left:${ciLeft}%; width:${ciWidth}%"></div>
+        <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${sig ? COLORS.accent : COLORS.fgMute};"></div>
+      </div>
+      <div class="forest-val">${fmtSigned(v.mean, 2)}</div>`;
+    didEl.appendChild(row);
+  });
+
+  // === CHART: covid line ===
+  const clCtx = document.getElementById('chart-covid-line').getContext('2d');
+  new Chart(clCtx, {
+    type: 'line',
+    data: {
+      labels: P.trend.seasons,
+      datasets: [{
+        label: 'HCA', data: P.trend.hca, borderColor: COLORS.accent,
+        backgroundColor: 'rgba(249, 115, 22, 0.12)', fill: true,
+        tension: 0.3, pointRadius: 5, pointBorderColor: '#0b0d12', pointBorderWidth: 2, pointBackgroundColor: COLORS.accent,
+        borderWidth: 2.5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 16 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+          callbacks: { label: (ctx) => `HCA: ${fmtSigned(ctx.raw, 2)} pts` } },
+        annotation: {
+          annotations: {
+            covid: {
+              type: 'box',
+              xMin: P.trend.seasons.indexOf('2020') - 0.5,
+              xMax: P.trend.seasons.indexOf('2020') + 0.5,
+              backgroundColor: 'rgba(248, 113, 113, 0.1)',
+              borderColor: 'rgba(248, 113, 113, 0.3)',
+              borderWidth: 1,
+            },
+            preAvg: {
+              type: 'line', yMin: P.covid.regimes[0].hca, yMax: P.covid.regimes[0].hca,
+              xMin: 0, xMax: 3.5,
+              borderColor: COLORS.blue, borderWidth: 2, borderDash: [6,4],
+              label: { content: 'pre avg', display: true, position: 'start', color: COLORS.blue, backgroundColor: 'transparent', font: { size: 10 } }
+            },
+            postAvg: {
+              type: 'line', yMin: P.covid.regimes[2].hca, yMax: P.covid.regimes[2].hca,
+              xMin: 5.5, xMax: 9,
+              borderColor: COLORS.green, borderWidth: 2, borderDash: [6,4],
+              label: { content: 'post avg', display: true, position: 'end', color: COLORS.green, backgroundColor: 'transparent', font: { size: 10 } }
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: gridX, ticks: axisTicks },
+        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+      }
+    }
+  });
+
+  // === MODELS: OR card ===
+  document.getElementById('or-value').textContent = fmtNum(P.models.is_home_OR, 3);
+  document.getElementById('pp-value').textContent = '+' + fmtNum(P.models.prob_lift_pp, 1) + ' pp';
+  document.getElementById('int-value').textContent = fmtNum(P.models.is_home_x_att_OR, 2) + 'x';
+
+  // === CHART: model comparison ===
+  const modCtx = document.getElementById('chart-models').getContext('2d');
+  const modelOrder = ['majority-prior', 'elo-only', 'random forest', 'logistic', 'lightgbm'];
+  const modelLabels = { 'majority-prior': 'Baseline (majority)', 'elo-only': 'Elo only',
+                        'random forest': 'Random Forest', 'logistic': 'Logistic + attendance', 'lightgbm': 'LightGBM' };
+  const ll = modelOrder.map(m => P.models.eval[m].log_loss);
+  new Chart(modCtx, {
+    type: 'bar',
+    data: {
+      labels: modelOrder.map(m => modelLabels[m]),
+      datasets: [{
+        data: ll,
+        backgroundColor: modelOrder.map(m => m === 'logistic' ? COLORS.accent : 'rgba(167, 139, 250, 0.55)'),
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 40 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+        callbacks: {
+          label: (ctx) => {
+            const m = P.models.eval[modelOrder[ctx.dataIndex]];
+            return [`Log-loss: ${fmtNum(m.log_loss, 3)}`, `Accuracy: ${fmtPct(m.accuracy, 1)}`, `Brier: ${fmtNum(m.brier, 3)}`];
+          }
+        } } },
+      scales: {
+        x: { grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtNum(v, 2) }), min: 0.6,
+             title: { display: true, text: 'Test log-loss (lower = better)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: axisTicks }
+      }
+    }
+  });
+
+  // === CHART: feature importance ===
+  const fi = P.models.feature_importance;
+  const fiEntries = Object.entries(fi).sort((a, b) => b[1] - a[1]);
+  const fiTotal = fiEntries.reduce((s, [, v]) => s + v, 0);
+  const fiLabels = { elo_diff: 'Elo difference', attendance_ratio_filled: 'Attendance ratio',
+                     days_rest_filled: 'Days rest', is_playoff: 'Playoff game',
+                     attendance_missing: 'Attendance missing' };
+  const impCtx = document.getElementById('chart-importance').getContext('2d');
+  new Chart(impCtx, {
+    type: 'bar',
+    data: {
+      labels: fiEntries.map(([k]) => fiLabels[k] || k),
+      datasets: [{
+        data: fiEntries.map(([, v]) => v / fiTotal),
+        backgroundColor: fiEntries.map(([k]) =>
+          k === 'attendance_ratio_filled' ? COLORS.accent :
+          k === 'elo_diff' ? 'rgba(96, 165, 250, 0.7)' :
+          'rgba(167, 139, 250, 0.5)'),
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 50 } },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#11141b', borderColor: COLORS.accent, borderWidth: 1, padding: 10,
+        callbacks: { label: (ctx) => fmtPct(ctx.raw, 1) + ' of total gain' } } },
+      scales: {
+        x: { grid: gridX, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+             title: { display: true, text: 'Share of total gain (LightGBM)', color: COLORS.fgMute, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: axisTicks }
+      }
+    }
+  });
+
+  // === VERDICT ===
+  const vList = document.getElementById('verdict-list');
+  P.verdict.forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    vList.appendChild(li);
+  });
+})();
+</script>
+</body>
+</html>

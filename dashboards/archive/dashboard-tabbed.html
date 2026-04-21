@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EuroLeague HCA -- integrated dashboard</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body { margin: 0; background: var(--bg, #0f1218); }
+  .app-header { padding: 20px 32px; border-bottom: 1px solid var(--border, #2a2f3a); }
+  .app-header h1 { margin: 0 0 4px 0; font-size: 22px; }
+  .app-header p { margin: 0; color: var(--muted, #9aa4b2); font-size: 13px; }
+  .tabs { display: flex; gap: 8px; padding: 12px 32px; overflow-x: auto; border-bottom: 1px solid var(--border, #2a2f3a); background: rgba(255,255,255,0.02); }
+  .tab { background: transparent; border: 1px solid var(--border, #2a2f3a); color: var(--muted, #9aa4b2); padding: 8px 16px; border-radius: 999px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .tab:hover { color: var(--fg, #e7ecf3); border-color: var(--accent, #4f8cff); }
+  .tab.active { background: var(--accent, #4f8cff); color: #fff; border-color: var(--accent, #4f8cff); }
+  .panels { position: relative; }
+  .panel { display: none; padding: 0; }
+  .panel.active { display: block; }
+  .panel-head { padding: 16px 32px 8px; display: flex; align-items: baseline; gap: 16px; }
+  .panel-head h2 { margin: 0; font-size: 18px; }
+  .panel-sub { margin: 0; color: var(--muted, #9aa4b2); font-size: 13px; flex: 1; }
+  .panel-open { color: var(--accent, #4f8cff); text-decoration: none; font-size: 12px; }
+  iframe { width: 100%; height: calc(100vh - 160px); border: 0; background: var(--bg, #0f1218); }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <h1>EuroLeague Home-Court Advantage</h1>
+  <p>Integrated dashboard -- 10 seasons, MOCK DATA -- click any tab to open that phase</p>
+</header>
+<nav class="tabs">
+  <button class="tab" data-target="phase-01-ingest">Phase 1 -- Ingest</button>
+<button class="tab" data-target="phase-02-coverage">Phase 2 -- Validate</button>
+<button class="tab" data-target="phase-04-descriptive">Phase 4 -- Descriptive HCA</button>
+<button class="tab" data-target="phase-04b-descriptive-ext">Phase 4b -- Ext descriptive</button>
+<button class="tab" data-target="phase-05-tests">Phase 5 -- Hypothesis tests</button>
+<button class="tab" data-target="phase-06-ml-logistic">Phase 6a -- Logistic</button>
+<button class="tab" data-target="phase-07-ml-trees">Phase 6b -- Trees + SHAP</button>
+<button class="tab" data-target="phase-07c-mixedlm">Phase 6b.5 -- Mixed effects</button>
+<button class="tab" data-target="phase-07b-hierarchical">Phase 6c -- Bayesian (optional)</button>
+<button class="tab" data-target="phase-08-covid">Phase 7 -- COVID experiment</button>
+</nav>
+<div class="panels">
+  <section class="panel" id="phase-01-ingest"><header class="panel-head"><h2>Phase 1 -- Ingest</h2><p class="panel-sub">Raw -> bronze coverage</p><a class="panel-open" href="phase-01-ingest.html" target="_blank">open full &#8599;</a></header><iframe src="phase-01-ingest.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-02-coverage"><header class="panel-head"><h2>Phase 2 -- Validate</h2><p class="panel-sub">Silver tables, warehouse coverage, integrity</p><a class="panel-open" href="phase-02-coverage.html" target="_blank">open full &#8599;</a></header><iframe src="phase-02-coverage.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-04-descriptive"><header class="panel-head"><h2>Phase 4 -- Descriptive HCA</h2><p class="panel-sub">League + per-team HCA, attendance dose-response, D04-1..D04-16</p><a class="panel-open" href="phase-04-descriptive.html" target="_blank">open full &#8599;</a></header><iframe src="phase-04-descriptive.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-04b-descriptive-ext"><header class="panel-head"><h2>Phase 4b -- Ext descriptive</h2><p class="panel-sub">PBP/shot/geo/referee placeholders + head-to-head</p><a class="panel-open" href="phase-04b-descriptive-ext.html" target="_blank">open full &#8599;</a></header><iframe src="phase-04b-descriptive-ext.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-05-tests"><header class="panel-head"><h2>Phase 5 -- Hypothesis tests</h2><p class="panel-sub">Permutation, paired t / Wilcoxon, Spearman</p><a class="panel-open" href="phase-05-tests.html" target="_blank">open full &#8599;</a></header><iframe src="phase-05-tests.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-06-ml-logistic"><header class="panel-head"><h2>Phase 6a -- Logistic</h2><p class="panel-sub">Baselines + logistic + attendance interaction</p><a class="panel-open" href="phase-06-ml-logistic.html" target="_blank">open full &#8599;</a></header><iframe src="phase-06-ml-logistic.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-07-ml-trees"><header class="panel-head"><h2>Phase 6b -- Trees + SHAP</h2><p class="panel-sub">RF + LightGBM, feature importance, PDP</p><a class="panel-open" href="phase-07-ml-trees.html" target="_blank">open full &#8599;</a></header><iframe src="phase-07-ml-trees.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-07c-mixedlm"><header class="panel-head"><h2>Phase 6b.5 -- Mixed effects</h2><p class="panel-sub">Per-team random intercept + slope</p><a class="panel-open" href="phase-07c-mixedlm.html" target="_blank">open full &#8599;</a></header><iframe src="phase-07c-mixedlm.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-07b-hierarchical"><header class="panel-head"><h2>Phase 6c -- Bayesian (optional)</h2><p class="panel-sub">PyMC partial pooling (skipped if PyMC missing)</p><a class="panel-open" href="phase-07b-hierarchical.html" target="_blank">open full &#8599;</a></header><iframe src="phase-07b-hierarchical.html" loading="lazy"></iframe></section>
+<section class="panel" id="phase-08-covid"><header class="panel-head"><h2>Phase 7 -- COVID experiment</h2><p class="panel-sub">DiD across pre / covid / post</p><a class="panel-open" href="phase-08-covid.html" target="_blank">open full &#8599;</a></header><iframe src="phase-08-covid.html" loading="lazy"></iframe></section>
+</div>
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  function activate(id) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.target === id));
+    panels.forEach(p => p.classList.toggle('active', p.id === id));
+    history.replaceState(null, '', '#' + id);
+  }
+  tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.target)));
+  const fromHash = location.hash.replace('#', '');
+  activate(fromHash || 'phase-01-ingest');
+</script>
+</body>
+</html>

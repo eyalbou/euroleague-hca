@@ -1,0 +1,74 @@
+{
+  "is_home_odds": 1.7456504971044204,
+  "prob_lift_pp": 13.578758437951011,
+  "mean_test_log_loss": 0.6207151463058851,
+  "mean_test_accuracy": 0.6570958757263454,
+  "mean_test_brier": 0.21557002270515874,
+  "baseline_home_always_acc": 1.0,
+  "baseline_majority_acc": 0.6244390749050742,
+  "interaction_ORs": {
+    "is_home": 1.7456504971044204,
+    "elo_diff_team": 1.9949162806689162,
+    "is_playoff": 1.0001860557105222,
+    "days_rest_filled": 0.9874868936630754,
+    "attendance_ratio_filled": 0.9864120036740535,
+    "attendance_missing": 1.0,
+    "is_home_x_att": 1.0360800499704046
+  },
+  "calibration_full": [
+    {
+      "bin_mid": 0.15000000000000002,
+      "predicted": 0.1876312012319485,
+      "empirical": 0.2857142857142857,
+      "n": 7
+    },
+    {
+      "bin_mid": 0.25,
+      "predicted": 0.26766582224963076,
+      "empirical": 0.3090909090909091,
+      "n": 55
+    },
+    {
+      "bin_mid": 0.35000000000000003,
+      "predicted": 0.36010943197506734,
+      "empirical": 0.3850267379679144,
+      "n": 187
+    },
+    {
+      "bin_mid": 0.45,
+      "predicted": 0.4565189601891795,
+      "empirical": 0.4511494252873563,
+      "n": 348
+    },
+    {
+      "bin_mid": 0.55,
+      "predicted": 0.5533847852984355,
+      "empirical": 0.5300171526586621,
+      "n": 583
+    },
+    {
+      "bin_mid": 0.6500000000000001,
+      "predicted": 0.649122310186714,
+      "empirical": 0.664,
+      "n": 750
+    },
+    {
+      "bin_mid": 0.75,
+      "predicted": 0.7479886186810251,
+      "empirical": 0.7281553398058253,
+      "n": 618
+    },
+    {
+      "bin_mid": 0.8500000000000001,
+      "predicted": 0.8407482892224362,
+      "empirical": 0.871875,
+      "n": 320
+    },
+    {
+      "bin_mid": 0.95,
+      "predicted": 0.9154615493542185,
+      "empirical": 0.8928571428571429,
+      "n": 28
+    }
+  ]
+}
