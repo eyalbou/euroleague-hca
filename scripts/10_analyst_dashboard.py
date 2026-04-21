@@ -96,6 +96,12 @@ team_name = dict(zip(dim_team["team_id"], dim_team["name_current"]))
 data_sources = games["data_source"].dropna().unique().tolist()
 is_mock = "mock" in data_sources
 
+# Exclude neutral-site games from EVERY home-court calculation below. They're scheduled
+# (Final Four) and their "home team" is an API assignment, not a real home advantage.
+# Currently 2 such games exist (2024 FF in Berlin). Excluding them shifts league HCA by
+# -0.003 pts (invisible at displayed precision), but the consistency matters.
+games = games[games["is_neutral"] == 0].copy()
+
 # -- overall
 n_games = int(len(games))
 margin_vals = games["home_margin"].values.astype(float)
@@ -185,8 +191,77 @@ upset_df["away_name"] = upset_df["away_team_id"].map(team_name).fillna(upset_df[
 upset_df["expected_margin"] = upset_df["elo_diff"] / 28.0  # Elo-to-margin rough conversion
 upset_df["surprise"] = upset_df["home_margin"] - upset_df["expected_margin"]
 
+# -- per team-season home-fort rankings (answers "best home fort in Europe per year")
+# For each (team, season) we need both home and away records to compute the HCA-dependence gap.
+# Include playoffs too (fortress = a team that wins at home; phase-agnostic by design).
+fgt_clean = fgt[fgt["is_neutral"] == 0].copy() if "is_neutral" in fgt.columns else fgt.copy()
+fgt_clean["team_win"] = (fgt_clean["point_diff"] > 0).astype(int)
+fort_agg = (
+    fgt_clean.groupby(["team_id", "season", "is_home"])
+    .agg(n=("game_id", "count"), wins=("team_win", "sum"),
+         margin_sum=("point_diff", "sum"))
+    .reset_index()
+)
+# Pivot to get home and away columns side-by-side per (team, season)
+fort_pivot = fort_agg.pivot_table(
+    index=["team_id", "season"], columns="is_home",
+    values=["n", "wins", "margin_sum"], fill_value=0,
+)
+fort_pivot.columns = [f"{a}_{'home' if b == 1 else 'away'}" for a, b in fort_pivot.columns]
+fort_pivot = fort_pivot.reset_index()
+
+# Require a minimum sample per side so ratios are meaningful
+MIN_HOME = 5
+MIN_AWAY = 5
+fort_pivot = fort_pivot[(fort_pivot["n_home"] >= MIN_HOME) & (fort_pivot["n_away"] >= MIN_AWAY)].copy()
+
+fort_pivot["home_wr"] = fort_pivot["wins_home"] / fort_pivot["n_home"]
+fort_pivot["away_wr"] = fort_pivot["wins_away"] / fort_pivot["n_away"]
+fort_pivot["home_margin_mean"] = fort_pivot["margin_sum_home"] / fort_pivot["n_home"]
+fort_pivot["away_margin_mean"] = fort_pivot["margin_sum_away"] / fort_pivot["n_away"]
+fort_pivot["win_gap"] = fort_pivot["home_wr"] - fort_pivot["away_wr"]
+fort_pivot["margin_gap"] = fort_pivot["home_margin_mean"] - fort_pivot["away_margin_mean"]
+# Overall win rate for the season (used as quality baseline)
+fort_pivot["overall_wr"] = (
+    (fort_pivot["wins_home"] + fort_pivot["wins_away"])
+    / (fort_pivot["n_home"] + fort_pivot["n_away"])
+)
+# "Fortress score" -- rewards teams that (a) win a lot at home AND (b) rely on it heavily.
+# Defined as home_wr multiplied by the home-minus-away gap. A team that wins everywhere
+# (top team) scores lower than a team that wins at home but loses on the road (true fort).
+fort_pivot["fortress_score"] = fort_pivot["home_wr"] * fort_pivot["win_gap"]
+
+fort_pivot["name"] = fort_pivot["team_id"].map(team_name).fillna(fort_pivot["team_id"])
+fort_pivot = fort_pivot.sort_values("fortress_score", ascending=False).reset_index(drop=True)
+
+
+def _fort_row(r: pd.Series) -> dict:
+    return {
+        "team_id": r["team_id"],
+        "name": r["name"],
+        "season": int(r["season"]),
+        "season_label": f"{int(r['season'])}-{str(int(r['season']) + 1)[-2:]}",
+        "n_home": int(r["n_home"]),
+        "n_away": int(r["n_away"]),
+        "wins_home": int(r["wins_home"]),
+        "wins_away": int(r["wins_away"]),
+        "home_wr": round(float(r["home_wr"]), 4),
+        "away_wr": round(float(r["away_wr"]), 4),
+        "home_margin_mean": round(float(r["home_margin_mean"]), 2),
+        "away_margin_mean": round(float(r["away_margin_mean"]), 2),
+        "win_gap": round(float(r["win_gap"]), 4),
+        "margin_gap": round(float(r["margin_gap"]), 2),
+        "overall_wr": round(float(r["overall_wr"]), 4),
+        "fortress_score": round(float(r["fortress_score"]), 4),
+    }
+
+
+home_forts = [_fort_row(r) for _, r in fort_pivot.iterrows()]
+
 # -- attendance dose-response: deciles (replaces buckets)
-att_fg = fgt[fgt["is_home"] == 1].copy()
+# Exclude neutral-site home rows too (2024 FF in Berlin) -- their "is_home=1" assignment
+# is arbitrary and would inject non-home-court signal into the dose-response.
+att_fg = fgt[(fgt["is_home"] == 1) & (fgt["is_neutral"] == 0)].copy()
 att_valid = att_fg[att_fg["attendance_ratio"].notna()].copy()
 # Use 10 quantile bins (deciles); empty arenas become the leftmost bin
 att_valid["decile"] = pd.qcut(
@@ -296,36 +371,47 @@ else:
 
 hca_per_100 = league_hca / EUROLEAGUE_PACE_MEASURED * 100
 
-# -- cross-league context: EuroLeague vs EuroCup
+# -- cross-league context: NBA vs EuroLeague (apples-to-apples)
+# Rules for fair comparison:
+#   - Regular season only (phase_code=RS for EuroLeague; NBA feed already RS-only)
+#   - Last 10 COMPLETED seasons (2015-16 through 2024-25) for both leagues
+#   - Identical statistical code (same boot_mean_ci, same point-differential metric)
+# Data provenance:
+#   - NBA: official stats.nba.com API via nba_api (see scripts/10b_nba_context.py)
+#   - EuroLeague: official EuroLeague live API (see scripts/01_ingest.py)
+# NOTE: EuroCup was dropped from this panel on 2026-04-16. The data/U bronze files
+# turned out to be a partial copy of EuroLeague (investigated: season=2016 U bronze
+# contains PAN-TEL, OLY-BAR, DAR-IST -- all EuroLeague matchups). Fixing the EuroCup
+# ingest is tracked separately; showing a contaminated row here would be dishonest.
+CTX_SEASONS = list(range(2015, 2025))  # 2015-16 through 2024-25, 10 completed seasons
 cross_league = []
 
-# EuroLeague (current)
-cross_league.append({
-    "league": "EuroLeague",
-    "hca_pts": f"{league_hca:+.2f}",
-    "ci": f"[{league_hca_lo:+.2f}, {league_hca_hi:+.2f}]",
-    "home_win": f"{home_win_rate*100:.1f}%",
-    "n_games": f"{len(margin_vals):,}"
-})
 
-# Try to load EuroCup
-if config.COMPETITION == "E":
-    eurocup_path = config.PROJECT_ROOT / "data" / "U" / "silver" / "fact_game.parquet"
-    if eurocup_path.exists():
-        try:
-            df_u = pd.read_parquet(eurocup_path)
-            u_margins = df_u["home_margin"].values.astype(float)
-            u_hca, u_hca_lo, u_hca_hi = boot_mean_ci(u_margins, n_boot=2000)
-            u_win = (u_margins > 0).mean()
-            cross_league.append({
-                "league": "EuroCup",
-                "hca_pts": f"{u_hca:+.2f}",
-                "ci": f"[{u_hca_lo:+.2f}, {u_hca_hi:+.2f}]",
-                "home_win": f"{u_win*100:.1f}%",
-                "n_games": f"{len(u_margins):,}"
-            })
-        except Exception as e:
-            print(f"Failed to load EuroCup data: {e}")
+def _ctx_row(label: str, margins: np.ndarray) -> dict:
+    m, lo, hi = boot_mean_ci(margins, n_boot=2000, seed=11)
+    return {
+        "league": label,
+        "hca_pts": f"{m:+.2f}",
+        "ci": f"[{lo:+.2f}, {hi:+.2f}]",
+        "home_win": f"{(margins > 0).mean() * 100:.1f}%",
+        "n_games": f"{len(margins):,}",
+    }
+
+
+# NBA -- official stats.nba.com via nba_api, RS only by construction.
+nba_path = config.PROJECT_ROOT / "data" / "NBA" / "silver" / "fact_game.parquet"
+if nba_path.exists():
+    df_nba = pd.read_parquet(nba_path)
+    df_nba = df_nba[df_nba["season"].isin(CTX_SEASONS)]
+    nba_margins = df_nba["home_margin"].values.astype(float)
+    cross_league.append(_ctx_row("NBA", nba_margins))
+else:
+    print(f"NBA parquet missing at {nba_path} -- run scripts/10b_nba_context.py first")
+
+# EuroLeague -- filter to RS only + same season window for fair comparison.
+el_rs = games[(games["phase_code"] == "RS") & (games["season"].isin(CTX_SEASONS))]
+el_margins = el_rs["home_margin"].values.astype(float)
+cross_league.append(_ctx_row("EuroLeague", el_margins))
 
 self_context = cross_league
 
@@ -412,7 +498,32 @@ PAYLOAD = {
         ).to_dict("records"),
         "league_slope": round(float(mixed_out["fixed_effects"]["attendance_ratio"]), 3),
         "n_games": int(len(att_valid)),
+        # Raw per-home-game rows: powers interactive filtering. Each object is minimal to
+        # keep page weight <150 KB total. Only rows with known attendance_ratio are shipped.
+        "raw": [
+            {
+                "team_id": str(r["team_id"]),
+                "name": team_name.get(r["team_id"], str(r["team_id"])),
+                "season": int(r["season"]),
+                "att": round(float(r["attendance_ratio"]), 4),
+                "margin": int(r["point_diff"]),
+            }
+            for _, r in att_valid[
+                ["team_id", "season", "attendance_ratio", "point_diff"]
+            ].iterrows()
+        ],
+        # Sorted list of teams + seasons to populate the filter chips
+        "teams": [
+            {"team_id": tid, "name": team_name.get(tid, tid), "n": int(cnt)}
+            for tid, cnt in sorted(
+                att_valid.groupby("team_id").size().items(),
+                key=lambda x: team_name.get(x[0], x[0]),
+            )
+        ],
+        "seasons": sorted(int(s) for s in att_valid["season"].unique()),
     },
+    # Per team-season home-fort rankings. Shipped whole so the UI can re-sort/re-filter.
+    "home_forts": home_forts,
     "covid": {
         "regimes": [{"regime": r["regime"], "hca": round(r["hca"], 3),
                      "lo": round(r["lo"], 3), "hi": round(r["hi"], 3), "n": r["n"]}
@@ -474,8 +585,8 @@ PAYLOAD = {
             "body": "Top and bottom teams' bootstrap CIs do not overlap; this is structural, not noise. Olympiakos and Real Madrid sit at the extreme of crowd-amplified home edge."
         },
         {
-            "headline": f"Attendance dose-response: +{slope_pp10:.2f} pts per +10pp arena fill",
-            "body": f"OLS slope on attendance_ratio = {slope:+.2f} (n={len(att_valid):,}). Mixed-effects per-team slopes range from flat to steep -- some teams ({team_slopes.iloc[-1]['name']}) are highly crowd-dependent."
+            "headline": f"Attendance dose-response: {slope_pp10:+.2f} pts per +10pp arena fill",
+            "body": f"OLS slope on attendance_ratio = {slope:+.2f} (n={len(att_valid):,}). At league level the dose-response is essentially flat, but mixed-effects per-team slopes span a wide range -- a few teams (notably {team_slopes.iloc[-1]['name']}) show a real crowd dependence."
         },
         {
             "headline": f"Elo-adjusted home edge -- OR {log_out['interaction_ORs']['is_home']:.2f} (+{log_out['prob_lift_pp']:.1f} pp at 50/50)",
@@ -635,6 +746,51 @@ TEMPLATE = r"""<!doctype html>
                      border-top: 1px solid var(--border); margin-top: 4px; }
   .forest-axis-row .axis-content { display: flex; justify-content: space-between; }
 
+  /* Interactive filter bar (used by attendance + home-forts panels) */
+  .filterbar { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+               padding: 16px; margin-bottom: 20px;
+               display: grid; grid-template-columns: 1fr 2fr auto; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .filterbar { grid-template-columns: 1fr; } }
+  .filter-group h4 { margin: 0 0 8px 0; font-size: 10px; color: var(--fg-mute); text-transform: uppercase;
+                     letter-spacing: 0.08em; font-weight: 500; }
+  .filter-group .chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 126px; overflow-y: auto;
+                         padding: 2px; }
+  .chip { padding: 5px 10px; font-size: 12px; font-weight: 500; border-radius: 14px;
+          background: var(--panel-2); color: var(--fg-dim); border: 1px solid var(--border);
+          cursor: pointer; transition: all 0.12s; user-select: none; white-space: nowrap; }
+  .chip:hover { border-color: var(--accent); color: var(--fg); }
+  .chip.active { background: var(--accent); color: #0b0d10; border-color: var(--accent); font-weight: 600; }
+  .filter-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch;
+                    min-width: 110px; }
+  .btn { padding: 7px 12px; font-size: 12px; font-weight: 600; border-radius: 8px;
+         background: var(--panel-2); color: var(--fg-dim); border: 1px solid var(--border);
+         cursor: pointer; }
+  .btn:hover { border-color: var(--accent); color: var(--fg); }
+  .filter-scope { color: var(--fg-mute); font-size: 11px; margin-top: 8px;
+                  font-variant-numeric: tabular-nums; }
+  .filter-scope strong { color: var(--fg); }
+
+  /* Home-forts table (Best home fort in Europe per year) */
+  .forts-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .forts-table th { text-align: left; padding: 10px 12px; color: var(--fg-mute); font-weight: 500;
+                    text-transform: uppercase; letter-spacing: 0.06em; font-size: 10.5px;
+                    border-bottom: 1px solid var(--border-2); background: var(--panel-2);
+                    cursor: pointer; user-select: none; position: sticky; top: 0; }
+  .forts-table th.num { text-align: right; }
+  .forts-table th.sortable:hover { color: var(--fg); }
+  .forts-table th.sorted { color: var(--accent); }
+  .forts-table th.sorted::after { content: " \25BC"; font-size: 9px; color: var(--accent); }
+  .forts-table th.sorted.asc::after { content: " \25B2"; }
+  .forts-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--fg-dim); }
+  .forts-table td.num { text-align: right; color: var(--fg); font-weight: 500; }
+  .forts-table td.team { color: var(--fg); font-weight: 500; }
+  .forts-table tr.top3 td { background: rgba(249, 115, 22, 0.06); }
+  .forts-table tr.top3 td.team { color: var(--warn); }
+  .forts-table td.gap-pos { color: var(--green); font-weight: 600; }
+  .forts-table td.gap-big { color: var(--warn); font-weight: 600; }
+  .forts-wrap { max-height: 560px; overflow: auto; border: 1px solid var(--border); border-radius: 10px;
+                background: var(--panel); }
+
   /* Upsets table */
   .upsets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .upsets-table th { text-align: left; padding: 8px 10px; color: var(--fg-mute); font-weight: 500;
@@ -738,9 +894,10 @@ TEMPLATE = r"""<!doctype html>
   </section>
 
   <section class="bench">
-    <div class="bench-title">For context &middot; EuroLeague vs EuroCup</div>
-    <p class="bench-sub">Both leagues measured on the exact same pipeline using live API data. 
-      EuroCup teams generally play in smaller arenas and travel less, which might explain the difference.</p>
+    <div class="bench-title">For context &middot; NBA vs EuroLeague</div>
+    <p class="bench-sub">Apples-to-apples: regular season only, last 10 completed seasons (2015-16 through 2024-25). 
+      NBA from the official stats.nba.com API; EuroLeague from the official EuroLeague live API -- identical 
+      statistical code on both. EuroLeague's home edge is ~1.7x the NBA's in this window.</p>
     <table class="bench-table">
       <thead>
         <tr>
@@ -791,7 +948,7 @@ TEMPLATE = r"""<!doctype html>
   <section class="panel active" id="tab-overview">
     <div class="grid-2">
       <div class="card span-2">
-        <h3>HCA held steady around +3 pts; the empty-arena 2020-21 shock is the exception</h3>
+        <h3>HCA held steady around +3.7 pts; the empty-arena 2020-21 shock is the exception</h3>
         <p class="sub">League-wide home point-differential per season. The COVID-affected window (mid-2019-20 onwards) is shaded.
           The dashed orange line marks the 10-year average.</p>
         <div class="chart-wrap tall"><canvas id="chart-trend"></canvas></div>
@@ -810,9 +967,9 @@ TEMPLATE = r"""<!doctype html>
         </div>
       </div>
       <div class="card">
-        <h3>Regular season vs Playoffs: home edge collapses when stakes peak</h3>
-        <p class="sub">95% bootstrap CIs. Playoffs sample is small (eight teams) so the CI is wide -- but the point estimate
-          is essentially zero, a major directional finding.</p>
+        <h3>Regular season vs Playoffs: HCA holds, contrary to intuition</h3>
+        <p class="sub">95% bootstrap CIs. Regular season +3.71 (n=2,974), playoffs +3.54 (n=149). CIs overlap
+          heavily -- the common belief that home advantage shrinks in big games is not supported here.</p>
         <div class="chart-wrap"><canvas id="chart-phase"></canvas></div>
         <div class="n-cap">
           <span id="phase-n">n=...</span>
@@ -854,6 +1011,39 @@ TEMPLATE = r"""<!doctype html>
         </div>
       </div>
       <div class="card span-2">
+        <h3>Best home fort in Europe &mdash; filterable by team &amp; season</h3>
+        <p class="sub">
+          Each row is one <em>team x season</em>. <strong>Win gap</strong> = home win rate minus away win rate.
+          <strong>Fortress score</strong> = home_wr x win_gap &mdash; rewards teams that (a) win a lot at home AND
+          (b) rely on it. A team that wins everywhere (overall title contender) scores lower than a team that
+          dominates at home but loses on the road. Use the filters at the top of the Attendance tab to scope
+          this table too. Click any column header to sort.
+        </p>
+        <div class="forts-wrap">
+          <table class="forts-table" id="forts-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th data-sort="name" class="sortable">Team</th>
+                <th data-sort="season" class="sortable">Season</th>
+                <th class="num sortable" data-sort="home_wr">Home rec</th>
+                <th class="num sortable" data-sort="away_wr">Away rec</th>
+                <th class="num sortable" data-sort="home_margin_mean">Home margin</th>
+                <th class="num sortable" data-sort="away_margin_mean">Away margin</th>
+                <th class="num sortable" data-sort="win_gap">Win gap</th>
+                <th class="num sortable" data-sort="margin_gap">Margin gap</th>
+                <th class="num sortable sorted" data-sort="fortress_score">Fortress</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="n-cap">
+          <span id="forts-n">...</span>
+          <span>Min 5 home + 5 away games to qualify. All phases (RS + playoffs).</span>
+        </div>
+      </div>
+      <div class="card span-2">
         <h3>Biggest home-court upsets &mdash; where the crowd may have mattered most</h3>
         <p class="sub">Top RS wins where the home team was an Elo underdog. <code>Surprise</code> = actual margin minus
           Elo-expected margin. Useful for hypothesis-generating about specific arenas.</p>
@@ -883,6 +1073,26 @@ TEMPLATE = r"""<!doctype html>
 
   <!-- ATTENDANCE -->
   <section class="panel" id="tab-attendance">
+    <div class="filterbar" id="att-filterbar">
+      <div class="filter-group">
+        <h4>Seasons (click to toggle)</h4>
+        <div class="chips" id="filter-seasons"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Teams (click to toggle; empty = all teams)</h4>
+        <div class="chips" id="filter-teams"></div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn" id="btn-all-seasons">All seasons</button>
+        <button class="btn" id="btn-clear-teams">All teams</button>
+        <button class="btn" id="btn-reset">Reset</button>
+        <div class="filter-scope" id="filter-scope">Scope: <strong>...</strong></div>
+      </div>
+    </div>
+    <p class="sub" style="margin:-8px 0 14px 4px;font-size:12px">
+      Filters below apply to all three charts on this tab <strong>and</strong> to the "Best home fort" table
+      on the Per-team tab.
+    </p>
     <div class="grid-2">
       <div class="card span-2">
         <h3>Dose-response: fuller arenas deliver bigger home margins</h3>
@@ -904,8 +1114,8 @@ TEMPLATE = r"""<!doctype html>
       </div>
       <div class="card">
         <h3>Which teams depend most on the crowd?</h3>
-        <p class="sub">Per-team random slope on attendance_ratio (mixedlm). Reference line = zero (no crowd dependence).
-          Higher = more crowd-sensitive.</p>
+        <p class="sub">Per-team OLS slope on attendance_ratio, recomputed live on the filtered in-scope games.
+          Reference line = zero (no crowd dependence). Higher = more crowd-sensitive.</p>
         <div class="forest" id="team-slopes"></div>
         <div class="n-cap">
           <span id="slopes-n">n teams: ...</span>
@@ -1384,121 +1594,353 @@ TEMPLATE = r"""<!doctype html>
     upsetTbody.appendChild(tr);
   });
 
-  // === DOSE-RESPONSE (continuous) with OLS overlay ===
-  const dosePts = P.attendance.deciles.map(d => ({ x: d.ratio_mid, y: d.hca, n: d.n }));
-  // OLS line endpoints
-  const xLine = [0, 1.0];
-  const yLine = xLine.map(xx => P.attendance.intercept + P.attendance.slope * xx);
-  new Chart(document.getElementById('chart-dose'), {
-    type: 'scatter',
-    data: { datasets: [
-      { label: 'decile mean', data: dosePts, backgroundColor: COLORS.accent, borderColor: COLORS.accent,
-        pointRadius: P.attendance.deciles.map(d => Math.max(5, Math.min(16, Math.sqrt(d.n) * 0.4))),
-        pointHoverRadius: 12, showLine: false },
-      { type: 'line', label: 'OLS fit',
-        data: xLine.map((x, i) => ({ x, y: yLine[i] })),
-        borderColor: COLORS.fgDim, borderDash: [6,4], borderWidth: 1.5, pointRadius: 0, fill: false },
-    ] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false },
-        tooltip: Object.assign({}, tipBase(COLORS.accent),
-          { callbacks: {
+  // === INTERACTIVE FILTER + ATTENDANCE + HOME FORTS (shared scope) ===
+  // Filter state. Empty teamSet = all teams; seasonSet controls which seasons are active.
+  const ATT = P.attendance;
+  const FORTS = P.home_forts || [];
+  const filter = {
+    seasons: new Set(ATT.seasons),  // start with all
+    teams: new Set(),               // empty = all
+    fortsSort: { col: 'fortress_score', dir: 'desc' },
+  };
+  let doseChart = null, decilesChart = null;
+
+  function matchesFilter(row) {
+    if (filter.seasons.size > 0 && !filter.seasons.has(row.season)) return false;
+    if (filter.teams.size > 0 && !filter.teams.has(row.team_id)) return false;
+    return true;
+  }
+
+  // Compute deciles + OLS + per-team simple slopes from filtered rows.
+  function computeAttStats(rows) {
+    const n = rows.length;
+    if (n < 10) return null;
+    const xs = rows.map(r => r.att);
+    const ys = rows.map(r => r.margin);
+    // OLS
+    const mx = xs.reduce((s,v)=>s+v,0) / n;
+    const my = ys.reduce((s,v)=>s+v,0) / n;
+    let num = 0, den = 0;
+    for (let i = 0; i < n; i++) { const dx = xs[i]-mx; num += dx*(ys[i]-my); den += dx*dx; }
+    const slope = den > 0 ? num / den : 0;
+    const intercept = my - slope * mx;
+    // Deciles via quantile sort
+    const sorted = rows.slice().sort((a,b) => a.att - b.att);
+    const binCount = Math.min(10, Math.max(4, Math.floor(n / 30)));  // fewer bins when fewer games
+    const deciles = [];
+    for (let i = 0; i < binCount; i++) {
+      const lo = Math.floor(i * n / binCount);
+      const hi = Math.floor((i + 1) * n / binCount);
+      const sub = sorted.slice(lo, hi);
+      if (sub.length === 0) continue;
+      const m = sub.map(r => r.margin);
+      const mMean = m.reduce((s,v)=>s+v,0) / m.length;
+      // Bootstrap 95% CI (B=500; fast enough for <2000 rows)
+      const B = 500;
+      const boots = new Float64Array(B);
+      for (let b = 0; b < B; b++) {
+        let s = 0;
+        for (let k = 0; k < m.length; k++) s += m[(Math.random() * m.length) | 0];
+        boots[b] = s / m.length;
+      }
+      boots.sort();
+      deciles.push({
+        decile: i + 1,
+        ratio_lo: sub[0].att, ratio_hi: sub[sub.length-1].att,
+        ratio_mid: sub.reduce((s,r)=>s+r.att,0) / sub.length,
+        hca: mMean, lo: boots[Math.floor(B*0.025)], hi: boots[Math.floor(B*0.975)],
+        n: sub.length,
+      });
+    }
+    // Per-team simple OLS slopes (when filtered teams changes we still show all in-scope teams)
+    const byTeam = new Map();
+    for (const r of rows) {
+      if (!byTeam.has(r.team_id)) byTeam.set(r.team_id, { id: r.team_id, name: r.name, xs: [], ys: [] });
+      const t = byTeam.get(r.team_id);
+      t.xs.push(r.att); t.ys.push(r.margin);
+    }
+    const teamSlopes = [];
+    for (const t of byTeam.values()) {
+      if (t.xs.length < 8) continue;
+      const mxt = t.xs.reduce((s,v)=>s+v,0) / t.xs.length;
+      const myt = t.ys.reduce((s,v)=>s+v,0) / t.ys.length;
+      let num2 = 0, den2 = 0;
+      for (let i = 0; i < t.xs.length; i++) { const dx = t.xs[i]-mxt; num2 += dx*(t.ys[i]-myt); den2 += dx*dx; }
+      const tslope = den2 > 0 ? num2 / den2 : 0;
+      teamSlopes.push({ team_id: t.id, name: t.name, total_slope: tslope, n: t.xs.length });
+    }
+    teamSlopes.sort((a,b) => a.total_slope - b.total_slope);
+    return { n, slope, intercept, slope_pp10: slope * 0.10, deciles, team_slopes: teamSlopes };
+  }
+
+  function renderDose(stats) {
+    if (doseChart) { doseChart.destroy(); doseChart = null; }
+    const el = document.getElementById('chart-dose');
+    if (!stats) {
+      setText('dose-n', 'n = 0 (filter too narrow)');
+      setText('dose-slope', '--');
+      return;
+    }
+    const dosePts = stats.deciles.map(d => ({ x: d.ratio_mid, y: d.hca, n: d.n }));
+    const xLine = [0, 1.0];
+    const yLine = xLine.map(xx => stats.intercept + stats.slope * xx);
+    doseChart = new Chart(el, {
+      type: 'scatter',
+      data: { datasets: [
+        { label: 'decile mean', data: dosePts, backgroundColor: COLORS.accent, borderColor: COLORS.accent,
+          pointRadius: stats.deciles.map(d => Math.max(5, Math.min(16, Math.sqrt(d.n) * 0.4))),
+          pointHoverRadius: 12, showLine: false },
+        { type: 'line', label: 'OLS fit', data: xLine.map((x, i) => ({ x, y: yLine[i] })),
+          borderColor: COLORS.fgDim, borderDash: [6,4], borderWidth: 1.5, pointRadius: 0, fill: false },
+      ] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false },
+          tooltip: Object.assign({}, tipBase(COLORS.accent), { callbacks: {
             title: (ctxs) => ctxs[0].raw.n != null ? `Attendance ratio ${fmtPct(ctxs[0].raw.x, 0)}` : '',
             label: (ctx) => ctx.raw.n != null
               ? [`HCA: ${fmtSigned(ctx.raw.y, 2)} pts`, `Games: ${fmtK(ctx.raw.n)}`]
               : `OLS: ${fmtSigned(ctx.raw.y, 2)} pts`,
           } }),
-        annotation: { annotations: {
-          zero: { type: 'line', yMin: 0, yMax: 0, borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1 },
-          slopeLabel: { type: 'label',
-            xValue: 0.85, yValue: P.attendance.intercept + P.attendance.slope * 0.85 + 0.6,
-            content: [`slope: ${fmtSigned(P.attendance.slope_pp10, 2)} pts per +10pp fill`],
-            color: COLORS.accent, backgroundColor: 'rgba(11,13,18,0.85)', padding: 6, borderRadius: 4,
-            font: { size: 11, weight: 600 } }
-        }}
-      },
-      scales: {
-        x: { min: 0, max: 1.0, grid: gridX,
-             ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
-             title: { display: true, text: 'Attendance ratio (attendance / capacity)', color: COLORS.fgMute, font: { size: 11 } } },
-        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
-             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+          annotation: { annotations: {
+            zero: { type: 'line', yMin: 0, yMax: 0, borderColor: COLORS.fgMute, borderDash: [4,4], borderWidth: 1 },
+            slopeLabel: { type: 'label', xValue: 0.85,
+              yValue: stats.intercept + stats.slope * 0.85 + 0.6,
+              content: [`slope: ${fmtSigned(stats.slope_pp10, 2)} pts per +10pp fill`],
+              color: COLORS.accent, backgroundColor: 'rgba(11,13,18,0.85)', padding: 6, borderRadius: 4,
+              font: { size: 11, weight: 600 } }
+          }}
+        },
+        scales: {
+          x: { min: 0, max: 1.0, grid: gridX,
+               ticks: Object.assign({}, axisTicks, { callback: (v) => fmtPct(v, 0) }),
+               title: { display: true, text: 'Attendance ratio (attendance / capacity)', color: COLORS.fgMute, font: { size: 11 } } },
+          y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+               title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+        }
       }
-    }
-  });
-  setText('dose-n', `n = ${P.attendance.n_games.toLocaleString('en-US')} home games`);
-  setText('dose-slope', `OLS slope: ${fmtSigned(P.attendance.slope_pp10, 2)} pts per +10pp arena fill`);
+    });
+    setText('dose-n', `n = ${stats.n.toLocaleString('en-US')} home games`);
+    setText('dose-slope', `OLS slope: ${fmtSigned(stats.slope_pp10, 2)} pts per +10pp arena fill`);
+  }
 
-  // === DECILES with CI error bars ===
-  new Chart(document.getElementById('chart-deciles'), {
-    type: 'bar',
-    data: {
-      labels: P.attendance.deciles.map(d => `D${d.decile}\n${fmtPct(d.ratio_mid,0)}`),
-      datasets: [{
-        data: P.attendance.deciles.map(d => d.hca),
-        backgroundColor: P.attendance.deciles.map((d, i) => `rgba(249, 115, 22, ${0.3 + i * 0.07})`),
-        borderRadius: 3,
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false },
-        tooltip: Object.assign({}, tipBase(COLORS.accent),
-          { callbacks: { label: (ctx) => {
-            const d = P.attendance.deciles[ctx.dataIndex];
+  function renderDeciles(stats) {
+    if (decilesChart) { decilesChart.destroy(); decilesChart = null; }
+    const el = document.getElementById('chart-deciles');
+    if (!stats) { setText('deciles-n', 'n = 0'); return; }
+    decilesChart = new Chart(el, {
+      type: 'bar',
+      data: {
+        labels: stats.deciles.map(d => `D${d.decile}\n${fmtPct(d.ratio_mid,0)}`),
+        datasets: [{
+          data: stats.deciles.map(d => d.hca),
+          backgroundColor: stats.deciles.map((d, i) => `rgba(249, 115, 22, ${0.3 + i * 0.07})`),
+          borderRadius: 3,
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false },
+          tooltip: Object.assign({}, tipBase(COLORS.accent), { callbacks: { label: (ctx) => {
+            const d = stats.deciles[ctx.dataIndex];
             return [`HCA: ${fmtSigned(d.hca, 2)} pts`,
                     `95% CI: [${fmtSigned(d.lo, 2)}, ${fmtSigned(d.hi, 2)}]`,
                     `Range: ${fmtPct(d.ratio_lo,0)}-${fmtPct(d.ratio_hi,0)}`,
                     `Games: ${fmtK(d.n)}`];
           } } }),
-        annotation: { annotations: Object.fromEntries(P.attendance.deciles.flatMap((d, i) => [
-          [`ci_${i}`, { type: 'line', xMin: i, xMax: i, yMin: d.lo, yMax: d.hi,
-            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
-          [`cit_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.hi, yMax: d.hi,
-            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
-          [`cib_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.lo, yMax: d.lo,
-            borderColor: COLORS.fgDim, borderWidth: 1.5 }],
-        ])) }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: Object.assign({}, axisTicks, { font: { size: 10 } }),
-             title: { display: true, text: 'Attendance decile', color: COLORS.fgMute, font: { size: 11 } } },
-        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
-             title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+          annotation: { annotations: Object.fromEntries(stats.deciles.flatMap((d, i) => [
+            [`ci_${i}`, { type: 'line', xMin: i, xMax: i, yMin: d.lo, yMax: d.hi,
+              borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+            [`cit_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.hi, yMax: d.hi,
+              borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+            [`cib_${i}`, { type: 'line', xMin: i - 0.15, xMax: i + 0.15, yMin: d.lo, yMax: d.lo,
+              borderColor: COLORS.fgDim, borderWidth: 1.5 }],
+          ])) }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: Object.assign({}, axisTicks, { font: { size: 10 } }),
+               title: { display: true, text: 'Attendance decile', color: COLORS.fgMute, font: { size: 11 } } },
+          y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
+               title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } }
+        }
       }
-    }
-  });
-  setText('deciles-n', `n = ${P.attendance.deciles.reduce((s,d)=>s+d.n,0).toLocaleString('en-US')} home games`);
+    });
+    setText('deciles-n', `n = ${stats.deciles.reduce((s,d)=>s+d.n,0).toLocaleString('en-US')} home games \u00B7 ${stats.deciles.length} bins`);
+  }
 
-  // === Team attendance slopes ===
-  const slopesEl = document.getElementById('team-slopes');
-  const slopes = P.attendance.team_slopes;
-  const sMin = Math.min(0, ...slopes.map(s => s.total_slope));
-  const sMax = Math.max(P.attendance.league_slope, ...slopes.map(s => s.total_slope));
-  const sPad = (sMax - sMin) * 0.08;
-  const sxMin = sMin - sPad, sxMax = sMax + sPad, sRange = sxMax - sxMin;
-  slopes.forEach(s => {
-    const row = document.createElement('div');
-    row.className = 'forest-row';
-    const zeroPct = ((0 - sxMin) / sRange) * 100;
-    const leaguePct = ((P.attendance.league_slope - sxMin) / sRange) * 100;
-    const ptLeft = ((s.total_slope - sxMin) / sRange) * 100;
-    row.innerHTML = `
-      <div class="forest-label">${s.name}</div>
-      <div class="forest-bar">
-        <div class="axis"></div>
-        <div class="ref" style="left:${zeroPct}%"></div>
-        <div class="ref league" style="left:${leaguePct}%; border-left: 1px dashed ${COLORS.accent}; background: transparent;"></div>
-        <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${s.total_slope > 0 ? COLORS.accent : COLORS.fgMute};"></div>
-      </div>
-      <div class="forest-val">${fmtSigned(s.total_slope, 2)}</div>`;
-    slopesEl.appendChild(row);
+  function renderTeamSlopes(stats) {
+    const el = document.getElementById('team-slopes');
+    el.innerHTML = '';
+    if (!stats || stats.team_slopes.length === 0) {
+      el.innerHTML = '<div style="color:var(--fg-mute);font-size:12px;padding:12px">Not enough games in scope to estimate per-team slopes (need at least 8 games per team).</div>';
+      setText('slopes-n', 'n teams = 0');
+      setText('slopes-league', '');
+      return;
+    }
+    const slopes = stats.team_slopes;
+    const sMin = Math.min(0, ...slopes.map(s => s.total_slope));
+    const sMax = Math.max(stats.slope, ...slopes.map(s => s.total_slope));
+    const sPad = Math.max(0.1, (sMax - sMin) * 0.08);
+    const sxMin = sMin - sPad, sxMax = sMax + sPad, sRange = sxMax - sxMin;
+    slopes.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'forest-row';
+      const zeroPct = ((0 - sxMin) / sRange) * 100;
+      const leaguePct = ((stats.slope - sxMin) / sRange) * 100;
+      const ptLeft = ((s.total_slope - sxMin) / sRange) * 100;
+      row.innerHTML = `
+        <div class="forest-label" title="${s.name} (n=${s.n})">${s.name}</div>
+        <div class="forest-bar">
+          <div class="axis"></div>
+          <div class="ref" style="left:${zeroPct}%"></div>
+          <div class="ref league" style="left:${leaguePct}%; border-left: 1px dashed ${COLORS.accent}; background: transparent;"></div>
+          <div class="pt" style="left:calc(${ptLeft}% - 5px); background:${s.total_slope > 0 ? COLORS.accent : COLORS.fgMute};"></div>
+        </div>
+        <div class="forest-val" title="n=${s.n}">${fmtSigned(s.total_slope, 2)}</div>`;
+      el.appendChild(row);
+    });
+    const sAxisRow = document.createElement('div');
+    sAxisRow.className = 'forest-axis-row';
+    sAxisRow.innerHTML = `<div></div><div class="axis-content"><span>${fmtSigned(sxMin,1)}</span><span style="color:${COLORS.fgMute};">0 (no crowd dep.)</span><span style="color:${COLORS.accent};">in-scope avg ${fmtSigned(stats.slope,1)}</span><span>${fmtSigned(sxMax,1)}</span></div><div></div>`;
+    el.appendChild(sAxisRow);
+    setText('slopes-n', `n teams = ${slopes.length}`);
+    setText('slopes-league', `In-scope slope: ${fmtSigned(stats.slope, 2)} pts per unit ratio`);
+  }
+
+  // === HOME FORTS TABLE ===
+  function renderForts() {
+    const rows = FORTS.filter(matchesFilter);
+    const { col, dir } = filter.fortsSort;
+    rows.sort((a, b) => {
+      const va = a[col], vb = b[col];
+      if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+      return dir === 'asc' ? (va - vb) : (vb - va);
+    });
+    const tbody = document.querySelector('#forts-table tbody');
+    tbody.innerHTML = '';
+    const top = rows.slice(0, 50);
+    top.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      if (i < 3) tr.className = 'top3';
+      const homeRec = `${r.wins_home}-${r.n_home - r.wins_home} <span style="color:var(--fg-mute)">(${(r.home_wr*100).toFixed(0)}%)</span>`;
+      const awayRec = `${r.wins_away}-${r.n_away - r.wins_away} <span style="color:var(--fg-mute)">(${(r.away_wr*100).toFixed(0)}%)</span>`;
+      const gapPP = r.win_gap * 100;
+      const gapClass = gapPP >= 50 ? 'gap-big' : (gapPP >= 30 ? 'gap-pos' : '');
+      tr.innerHTML = `
+        <td class="num">${i + 1}</td>
+        <td class="team">${r.name}</td>
+        <td>${r.season_label}</td>
+        <td class="num">${homeRec}</td>
+        <td class="num">${awayRec}</td>
+        <td class="num">${fmtSigned(r.home_margin_mean, 1)}</td>
+        <td class="num">${fmtSigned(r.away_margin_mean, 1)}</td>
+        <td class="num ${gapClass}">${fmtSigned(gapPP, 0)}pp</td>
+        <td class="num">${fmtSigned(r.margin_gap, 1)}</td>
+        <td class="num">${r.fortress_score.toFixed(3)}</td>`;
+      tbody.appendChild(tr);
+    });
+    // Sorted header marker
+    document.querySelectorAll('#forts-table th.sortable').forEach(th => {
+      th.classList.remove('sorted', 'asc');
+      if (th.dataset.sort === col) {
+        th.classList.add('sorted');
+        if (dir === 'asc') th.classList.add('asc');
+      }
+    });
+    setText('forts-n', `n team-seasons in scope = ${rows.length.toLocaleString('en-US')} \u00B7 showing top ${Math.min(50, rows.length)}`);
+  }
+
+  document.querySelectorAll('#forts-table th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      if (filter.fortsSort.col === col) {
+        filter.fortsSort.dir = filter.fortsSort.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        filter.fortsSort.col = col;
+        filter.fortsSort.dir = (col === 'name' || col === 'season') ? 'asc' : 'desc';
+      }
+      renderForts();
+    });
   });
-  const sAxisRow = document.createElement('div');
-  sAxisRow.className = 'forest-axis-row';
-  sAxisRow.innerHTML = `<div></div><div class="axis-content"><span>${fmtSigned(sxMin,1)}</span><span style="color:${COLORS.fgMute};">0 (no crowd dep.)</span><span style="color:${COLORS.accent};">league ${fmtSigned(P.attendance.league_slope,1)}</span><span>${fmtSigned(sxMax,1)}</span></div><div></div>`;
-  slopesEl.appendChild(sAxisRow);
-  setText('slopes-n', `n teams = ${slopes.length}`);
-  setText('slopes-league', `League slope: ${fmtSigned(P.attendance.league_slope, 2)} pts per unit ratio`);
+
+  // === FILTER UI ===
+  function updateScope() {
+    const rows = ATT.raw.filter(matchesFilter);
+    const seasons = [...filter.seasons].sort();
+    const teams = [...filter.teams];
+    const parts = [];
+    parts.push(`<strong>${rows.length.toLocaleString('en-US')}</strong> games`);
+    if (seasons.length === ATT.seasons.length) parts.push('all seasons');
+    else if (seasons.length === 1) parts.push(`season ${seasons[0]}-${String(seasons[0]+1).slice(-2)}`);
+    else parts.push(`${seasons.length} seasons`);
+    if (teams.length === 0) parts.push('all teams');
+    else if (teams.length === 1) {
+      const name = (ATT.teams.find(t => t.team_id === teams[0]) || {}).name || teams[0];
+      parts.push(`team: ${name}`);
+    } else parts.push(`${teams.length} teams`);
+    document.getElementById('filter-scope').innerHTML = 'Scope: ' + parts.join(' \u00B7 ');
+  }
+
+  function renderAll() {
+    const rows = ATT.raw.filter(matchesFilter);
+    const stats = computeAttStats(rows);
+    renderDose(stats);
+    renderDeciles(stats);
+    renderTeamSlopes(stats);
+    renderForts();
+    updateScope();
+  }
+
+  function buildFilterUI() {
+    const seasonsEl = document.getElementById('filter-seasons');
+    const teamsEl = document.getElementById('filter-teams');
+    seasonsEl.innerHTML = '';
+    ATT.seasons.forEach(s => {
+      const chip = document.createElement('div');
+      chip.className = 'chip active';
+      chip.textContent = `${s}-${String(s + 1).slice(-2)}`;
+      chip.dataset.season = s;
+      chip.addEventListener('click', () => {
+        if (filter.seasons.has(s)) { filter.seasons.delete(s); chip.classList.remove('active'); }
+        else { filter.seasons.add(s); chip.classList.add('active'); }
+        renderAll();
+      });
+      seasonsEl.appendChild(chip);
+    });
+    teamsEl.innerHTML = '';
+    ATT.teams.forEach(t => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = t.name.length > 20 ? t.name.slice(0, 20) + '\u2026' : t.name;
+      chip.title = `${t.name} (n=${t.n})`;
+      chip.dataset.teamId = t.team_id;
+      chip.addEventListener('click', () => {
+        if (filter.teams.has(t.team_id)) { filter.teams.delete(t.team_id); chip.classList.remove('active'); }
+        else { filter.teams.add(t.team_id); chip.classList.add('active'); }
+        renderAll();
+      });
+      teamsEl.appendChild(chip);
+    });
+    document.getElementById('btn-all-seasons').addEventListener('click', () => {
+      filter.seasons = new Set(ATT.seasons);
+      document.querySelectorAll('#filter-seasons .chip').forEach(c => c.classList.add('active'));
+      renderAll();
+    });
+    document.getElementById('btn-clear-teams').addEventListener('click', () => {
+      filter.teams.clear();
+      document.querySelectorAll('#filter-teams .chip').forEach(c => c.classList.remove('active'));
+      renderAll();
+    });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      filter.seasons = new Set(ATT.seasons);
+      filter.teams.clear();
+      filter.fortsSort = { col: 'fortress_score', dir: 'desc' };
+      document.querySelectorAll('#filter-seasons .chip').forEach(c => c.classList.add('active'));
+      document.querySelectorAll('#filter-teams .chip').forEach(c => c.classList.remove('active'));
+      renderAll();
+    });
+  }
+
+  buildFilterUI();
+  renderAll();
 
   // === COVID regimes (with error bars) ===
   new Chart(document.getElementById('chart-regimes'), {

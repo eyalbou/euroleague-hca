@@ -24,6 +24,7 @@ dependencies = [
 ml = ["lightgbm>=4.1", "shap>=0.45"]
 bayes = ["pymc>=5.10"]
 dev = ["pytest>=8.0", "ruff>=0.3"]
+nba = ["nba_api>=1.4"]  # used by scripts/10b_nba_context.py for cross-league context
 
 [tool.setuptools.packages.find]
 where = ["src"]
