@@ -1,5 +1,5 @@
 {
-  "built_at_utc": "2026-04-21T14:01:43.839828Z",
+  "built_at_utc": "2026-04-21T14:21:29.152705Z",
   "dashboards": [
     {
       "href": "index.html",
@@ -18,6 +18,10 @@
       "title": "Referee-bias audit (Phase F)"
     },
     {
+      "href": "rebound_rates.html",
+      "title": "Rebound rates by miss type (Phase H)"
+    },
+    {
       "href": "walkthrough.mp4",
       "title": "3-minute walkthrough video (Phase G)"
     },
@@ -34,5 +38,5 @@
       "title": "LLM engineering lessons (Phase E)"
     }
   ],
-  "reports_count": 15
+  "reports_count": 17
 }

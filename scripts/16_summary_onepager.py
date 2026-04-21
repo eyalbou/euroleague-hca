@@ -163,8 +163,13 @@ HTML = """<!doctype html>
     <div class="desc">Per-referee home-vs-away call asymmetry on __N_ELIGIBLE__ EuroLeague officials. Funnel plot + Holm correction. Null result, honestly reported: zero biased refs after correction.</div>
     <span class="arrow">Open →</span>
   </a>
+  <a class="card" href="rebound_rates.html">
+    <div class="title">4. Rebound rates by miss type</div>
+    <div class="desc">OREB vs DREB after missed 3s, missed 2s, and terminal missed FTs. 2PT misses get offensive-rebounded 3.8pp more often than 3PT misses. Wilson 95% CIs + pairwise z-tests.</div>
+    <span class="arrow">Open →</span>
+  </a>
   <a class="card" href="final_report.html">
-    <div class="title">4. Written report</div>
+    <div class="title">5. Written report</div>
     <div class="desc">The full narrative + all numbers traced back to JSON outputs. ~6 KB of text, ~10 min read.</div>
     <span class="arrow">Open →</span>
   </a>

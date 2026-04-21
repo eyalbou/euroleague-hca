@@ -758,6 +758,9 @@ TEMPLATE = r"""<!doctype html>
     <a class="tab" href="referees.html" style="text-decoration:none;display:inline-flex;align-items:center">
       9. Referees &rarr;
     </a>
+    <a class="tab" href="rebound_rates.html" style="text-decoration:none;display:inline-flex;align-items:center">
+      10. Rebound rates &rarr;
+    </a>
   </nav>
 
   <!-- OVERVIEW -->

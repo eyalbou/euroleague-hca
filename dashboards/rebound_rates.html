@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rebound rates by miss type -- EuroLeague HCA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+<style>
+  :root{--bg:#0b0d10;--panel:#13171d;--panel2:#1a1f27;--ink:#e7ecf1;--muted:#b6bfcc;
+    --dim:#7a8595;--accent:#6eb0ff;--pos:#3ccf8e;--neg:#ef5a5a;--warn:#f5b73a;
+    --hair:rgba(255,255,255,.07)}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;
+    letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+  .back{color:var(--accent);font-size:13px;text-decoration:none}
+  .hero{padding:24px 0 16px;border-bottom:1px solid var(--hair)}
+  .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  h1{font-size:30px;font-weight:700;line-height:1.08;letter-spacing:-0.02em;margin:0 0 8px}
+  h1 .lead{color:var(--accent)}
+  .sub{color:var(--muted);max-width:780px;margin:0}
+  .meta{color:var(--dim);font-size:12px;margin-top:12px}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:28px 0}
+  .kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:16px}
+  .kpi .v{font-size:26px;font-weight:700;letter-spacing:-0.02em;line-height:1.1;display:block;font-variant-numeric:tabular-nums}
+  .kpi .v.pos{color:var(--pos)} .kpi .v.neu{color:var(--accent)} .kpi .v.warn{color:var(--warn)}
+  .kpi .k{color:var(--dim);font-size:12px;margin-top:4px;display:block}
+  .kpi .n{color:var(--dim);font-size:11px;margin-top:8px;display:block;font-variant-numeric:tabular-nums}
+
+  h2{font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:36px 0 8px}
+  .card{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:20px;margin-top:16px}
+  .card h3{margin:0 0 8px;font-size:15px;font-weight:600}
+  .card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .chart-wrap{position:relative;width:100%;height:360px}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  table.tbl th,table.tbl td{padding:8px 10px;border-bottom:1px solid var(--hair);text-align:left}
+  table.tbl th{color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  table.tbl td.num{font-variant-numeric:tabular-nums;text-align:right}
+  table.tbl td.name{color:var(--ink);font-weight:500}
+  .chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;
+    background:rgba(255,255,255,.05);color:var(--muted);font-weight:500}
+  .chip.up{background:rgba(60,207,142,.12);color:var(--pos)}
+  .chip.down{background:rgba(239,90,90,.12);color:var(--neg)}
+
+  .splitbtns{display:inline-flex;gap:4px;background:var(--panel2);padding:4px;border-radius:8px;margin-bottom:12px}
+  .splitbtns button{background:transparent;border:none;color:var(--muted);padding:6px 12px;border-radius:6px;
+    font-family:inherit;font-size:12px;cursor:pointer;font-weight:500}
+  .splitbtns button.active{background:var(--panel);color:var(--ink)}
+
+  .reading{background:rgba(110,176,255,.04);border-left:3px solid var(--accent);
+    padding:14px 18px;border-radius:4px;margin-top:16px;color:var(--muted);font-size:13.5px;line-height:1.65}
+  .reading strong{color:var(--ink)}
+
+  .statsgrid{display:grid;grid-template-columns:140px 1fr;gap:12px 20px;margin-top:12px}
+  .statsgrid dt{color:var(--ink);font-weight:600;font-size:13px}
+  .statsgrid dd{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+  .statsgrid dd code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px}
+
+  footer{margin-top:48px;color:var(--dim);font-size:12px;border-top:1px solid var(--hair);padding-top:16px}
+  code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
+    background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px}
+
+  @media (max-width:640px){ h1{font-size:24px} .wrap{padding:24px 16px 64px}
+    .statsgrid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; back to dashboard index</a>
+
+  <div class="hero">
+    <div class="eyebrow">Phase H &middot; Rebound rates by miss type</div>
+    <h1>2-point misses are rebounded by the offense <span class="lead">3.8pp more often</span> than 3-point misses.</h1>
+    <p class="sub">Terminal free-throw misses are the hardest to offensive-rebound -- only 16.6% of them end on an OREB, vs 28-32% for field goals. Every rate is reported with a Wilson 95% CI; pairwise differences use a pooled two-proportion z-test.</p>
+    <div class="meta">2,896 games &middot; 10 seasons &middot; 201k rebound-eligible misses</div>
+  </div>
+
+  <div class="kpis" id="kpi-strip"></div>
+
+  <h2>OREB vs DREB by miss type</h2>
+  <div class="splitbtns">
+    <button class="split-btn active" data-split="all">All shots</button>
+    <button class="split-btn" data-split="home">Home shooter</button>
+    <button class="split-btn" data-split="away">Away shooter</button>
+  </div>
+  <div class="card">
+    <h3>Rebound-outcome probability after each miss type</h3>
+    <p class="sub">Bars show OREB% and DREB%. Thin lines on each bar are the 95% Wilson confidence interval. "Other" is shot-clock violations, ball out of bounds, period endings -- rebound-eligible but neither OREB nor DREB.</p>
+    <div class="chart-wrap"><canvas id="bars"></canvas></div>
+  </div>
+
+  <h2>Exact numbers</h2>
+  <div class="card">
+    <p class="sub">Conditional interpretation: "of rebounded" shows the share assuming a rebound actually happened (n_D / (n_D + n_O)). Useful because "other" varies across miss types.</p>
+    <table class="tbl"><thead><tr>
+      <th>Miss type</th><th class="num">n</th>
+      <th class="num">OREB %</th><th class="num">OREB 95% CI</th>
+      <th class="num">DREB %</th><th class="num">DREB 95% CI</th>
+      <th class="num">OREB share of rebounded</th>
+    </tr></thead><tbody id="table-body"></tbody></table>
+  </div>
+
+  <h2>Pairwise comparisons (all-split)</h2>
+  <div class="card">
+    <p class="sub">Pooled two-proportion z-test on the OREB rate. Z measures how many standard errors apart the two rates are; p is the two-sided significance. Differences larger than about +/- 0.5 pp are statistically resolvable at this sample size.</p>
+    <table class="tbl"><thead><tr>
+      <th>Comparison</th>
+      <th class="num">OREB rate A</th><th class="num">OREB rate B</th>
+      <th class="num">A - B</th><th class="num">z</th><th class="num">p</th>
+    </tr></thead><tbody id="comp-body"></tbody></table>
+  </div>
+
+  <h2>How to read the numbers</h2>
+  <div class="card">
+    <dl class="statsgrid">
+      <dt>OREB rate</dt>
+      <dd>P(offensive rebound | miss of this type). Computed as count of OREBs divided by count of misses.</dd>
+
+      <dt>DREB rate</dt>
+      <dd>P(defensive rebound | miss of this type).</dd>
+
+      <dt>"other"</dt>
+      <dd>Miss was followed by a non-rebound possession-ending event within the next 3 PBP rows: shot-clock violation, ball out of bounds, end of period, etc. Small on FG misses (~2-5%), small on FT misses (~4%).</dd>
+
+      <dt>Wilson 95% CI</dt>
+      <dd>A proportion confidence interval that behaves correctly near the boundaries (0% and 100%). Much more honest than the textbook normal-approx when the probability is far from 50%. Interpretation: if you reran 10 more seasons, the true probability would land inside <code>[lo, hi]</code> 95% of the time.</dd>
+
+      <dt>Two-proportion z-test</dt>
+      <dd>Tests whether two rates are different. Formula: <code>z = (p1 - p2) / sqrt(p_pool (1 - p_pool) (1/n1 + 1/n2))</code>. Convert to a two-sided p-value with the standard normal CDF. On our sample sizes (80k+ each), any diff &gt; ~0.3 pp is statistically significant. Significance here is a very weak claim; look at the magnitude.</dd>
+
+      <dt>"Of rebounded" share</dt>
+      <dd>If the miss was rebounded (by either team), the share that went to the offense. This controls for the "other" bucket varying across miss types. On FG misses, 30% of rebounds go to the offense; on FT misses, only 17%.</dd>
+
+      <dt>Terminal FT</dt>
+      <dd>We only count the last FT in a trip. Earlier FTs in a 2-of-2 or 3-of-3 sequence are not rebound-eligible -- the next PBP event is the next FT in the same trip, not a rebound. Detection: an FT is "terminal" if the next PBP event is not another FT by the same shooter.</dd>
+
+      <dt>Lookahead window</dt>
+      <dd>For each miss we look at the next 3 events to classify the rebound. This handles the common case where a missed 2 is recorded with a block annotation (AG/FV) just before the actual rebound. Window &lt;= 3 captures the rebound but avoids bleeding into the next possession.</dd>
+    </dl>
+  </div>
+
+  <h2>What this means</h2>
+  <div class="card">
+    <div class="reading">
+      <strong>Why 2PT misses get offensive-rebounded more than 3PT misses.</strong> A 2-pointer miss comes from closer to the rim, so the ball is more likely to come off short, bouncing back toward offensive players already positioned near the paint. 3PT misses produce longer, less predictable trajectories, which favor the defender who is already facing the ball and has better angles. The commonly-quoted "long rebounds favor the offense" intuition is contradicted by our data: in EuroLeague, longer shots favor the defense.
+      <br/><br/>
+      <strong>Why terminal FT misses almost always go to the defense.</strong> Defensive players occupy the two box positions on the lane; the shooter is at the line and can't follow their own shot quickly; the ball trajectory is predictable. The 17% OREB rate is basically the rate at which the ball either bounces unpredictably off the rim or a defender loses positioning.
+      <br/><br/>
+      <strong>A small home-court rebounding signal.</strong> Home shooters OREB their own misses 29.1% of the time (on 3PT) vs 27.7% when shooting on the road -- a 1.4 pp home edge. On 2PT misses the home-away gap is smaller (32.4% vs 31.9%). This is a minor contributor to the league-wide +3.88pt HCA, consistent with our mechanism decomposition finding that possession-level efficiency, not rebound margin, drives the bulk of home-court advantage.
+    </div>
+  </div>
+
+  <footer>
+    Data: silver-layer PBP (<code>fact_game_event.parquet</code>), 1.51M events across 2,896 games and 10 EuroLeague seasons.
+    Methodology: terminal-FT detection via forward lookup, rebound outcome classified via 3-event forward window, Wilson 95% CIs, pooled two-proportion z-test for pairwise comparisons.
+    <br/>Build <code>5cb34d4</code> &middot; see <a href="reports/rebound_rates.json" style="color:var(--accent)">rebound_rates.json</a> for all 9 rows.
+  </footer>
+</div>
+
+<script>
+const DATA = {"meta": {"n_games": 2896, "seasons": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "built_by": "scripts/23_rebound_rates.py", "sample": false}, "rates": [{"shot_type": "3FGA", "split": "all", "n_eligible": 88523, "n_dreb": 59346, "n_oreb": 25165, "n_other": 4012, "p_dreb": 0.6704, "p_oreb": 0.2843, "lo_dreb": 0.6673, "hi_dreb": 0.6735, "lo_oreb": 0.2813, "hi_oreb": 0.2873, "dreb_share_of_rebounded": 0.7022, "oreb_share_of_rebounded": 0.2978}, {"shot_type": "3FGA", "split": "home", "n_eligible": 43893, "n_dreb": 29132, "n_oreb": 12790, "n_other": 1971, "p_dreb": 0.6637, "p_oreb": 0.2914, "lo_dreb": 0.6593, "hi_dreb": 0.6681, "lo_oreb": 0.2872, "hi_oreb": 0.2957, "dreb_share_of_rebounded": 0.6949, "oreb_share_of_rebounded": 0.3051}, {"shot_type": "3FGA", "split": "away", "n_eligible": 44630, "n_dreb": 30214, "n_oreb": 12375, "n_other": 2041, "p_dreb": 0.677, "p_oreb": 0.2773, "lo_dreb": 0.6726, "hi_dreb": 0.6813, "lo_oreb": 0.2731, "hi_oreb": 0.2815, "dreb_share_of_rebounded": 0.7094, "oreb_share_of_rebounded": 0.2906}, {"shot_type": "2FGA", "split": "all", "n_eligible": 100253, "n_dreb": 66129, "n_oreb": 32265, "n_other": 1859, "p_dreb": 0.6596, "p_oreb": 0.3218, "lo_dreb": 0.6567, "hi_dreb": 0.6625, "lo_oreb": 0.319, "hi_oreb": 0.3247, "dreb_share_of_rebounded": 0.6721, "oreb_share_of_rebounded": 0.3279}, {"shot_type": "2FGA", "split": "home", "n_eligible": 49753, "n_dreb": 32694, "n_oreb": 16135, "n_other": 924, "p_dreb": 0.6571, "p_oreb": 0.3243, "lo_dreb": 0.6529, "hi_dreb": 0.6613, "lo_oreb": 0.3202, "hi_oreb": 0.3284, "dreb_share_of_rebounded": 0.6696, "oreb_share_of_rebounded": 0.3304}, {"shot_type": "2FGA", "split": "away", "n_eligible": 50500, "n_dreb": 33435, "n_oreb": 16130, "n_other": 935, "p_dreb": 0.6621, "p_oreb": 0.3194, "lo_dreb": 0.6579, "hi_dreb": 0.6662, "lo_oreb": 0.3154, "hi_oreb": 0.3235, "dreb_share_of_rebounded": 0.6746, "oreb_share_of_rebounded": 0.3254}, {"shot_type": "FTA_terminal", "split": "all", "n_eligible": 12017, "n_dreb": 9533, "n_oreb": 1997, "n_other": 487, "p_dreb": 0.7933, "p_oreb": 0.1662, "lo_dreb": 0.786, "hi_dreb": 0.8004, "lo_oreb": 0.1596, "hi_oreb": 0.1729, "dreb_share_of_rebounded": 0.8268, "oreb_share_of_rebounded": 0.1732}, {"shot_type": "FTA_terminal", "split": "home", "n_eligible": 6119, "n_dreb": 4807, "n_oreb": 1037, "n_other": 275, "p_dreb": 0.7856, "p_oreb": 0.1695, "lo_dreb": 0.7751, "hi_dreb": 0.7957, "lo_oreb": 0.1603, "hi_oreb": 0.1791, "dreb_share_of_rebounded": 0.8226, "oreb_share_of_rebounded": 0.1774}, {"shot_type": "FTA_terminal", "split": "away", "n_eligible": 5898, "n_dreb": 4726, "n_oreb": 960, "n_other": 212, "p_dreb": 0.8013, "p_oreb": 0.1628, "lo_dreb": 0.7909, "hi_dreb": 0.8113, "lo_oreb": 0.1536, "hi_oreb": 0.1724, "dreb_share_of_rebounded": 0.8312, "oreb_share_of_rebounded": 0.1688}], "comparisons": [{"a": "3FGA", "b": "2FGA", "oreb_rate_a": 0.2843, "oreb_rate_b": 0.3218, "diff_pp": -3.75, "z": -17.673, "p": 0.0, "n_a": 88523, "n_b": 100253}, {"a": "3FGA", "b": "FTA_terminal", "oreb_rate_a": 0.2843, "oreb_rate_b": 0.1662, "diff_pp": 11.81, "z": 27.357, "p": 0.0, "n_a": 88523, "n_b": 12017}, {"a": "2FGA", "b": "FTA_terminal", "oreb_rate_a": 0.3218, "oreb_rate_b": 0.1662, "diff_pp": 15.56, "z": 35.005, "p": 0.0, "n_a": 100253, "n_b": 12017}]};
+const rates = DATA.rates;
+const comparisons = DATA.comparisons;
+
+const SHOT_LABELS = {
+  "3FGA": "Missed 3-pointer",
+  "2FGA": "Missed 2-pointer",
+  "FTA_terminal": "Missed terminal FT",
+};
+
+const COLORS = {
+  pos: 'rgba(60,207,142,0.85)',
+  neg: 'rgba(239,90,90,0.85)',
+  other: 'rgba(122,133,149,0.5)',
+};
+
+// ---- KPI strip (all-split) ----
+const allRows = rates.filter(r => r.split === 'all');
+const kpiHtml = allRows.map(r => {
+  const label = SHOT_LABELS[r.shot_type] || r.shot_type;
+  return `<div class="kpi">
+    <span class="v neu">${(r.p_oreb*100).toFixed(1)}%</span>
+    <span class="k">OREB rate after ${label.toLowerCase()}</span>
+    <span class="n">n = ${r.n_eligible.toLocaleString()} &middot; CI [${(r.lo_oreb*100).toFixed(1)}-${(r.hi_oreb*100).toFixed(1)}]</span>
+  </div>`;
+}).join('');
+document.getElementById('kpi-strip').innerHTML = kpiHtml;
+
+// ---- Bar chart with CI error bars ----
+// Custom error-bar plugin
+const errorBarPlugin = {
+  id: 'errorBars',
+  afterDatasetsDraw(chart) {
+    const {ctx, data, chartArea, scales} = chart;
+    const yScale = scales.y;
+    data.datasets.forEach((ds, dsi) => {
+      if (!ds._errorBars) return;
+      const meta = chart.getDatasetMeta(dsi);
+      meta.data.forEach((bar, i) => {
+        const eb = ds._errorBars[i];
+        if (!eb) return;
+        const yLo = yScale.getPixelForValue(eb.lo * 100);
+        const yHi = yScale.getPixelForValue(eb.hi * 100);
+        const x = bar.x;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, yLo); ctx.lineTo(x, yHi);
+        ctx.moveTo(x-5, yLo); ctx.lineTo(x+5, yLo);
+        ctx.moveTo(x-5, yHi); ctx.lineTo(x+5, yHi);
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+  }
+};
+
+let chart = null;
+function renderChart(split) {
+  const rows = rates.filter(r => r.split === split);
+  const labels = rows.map(r => SHOT_LABELS[r.shot_type] || r.shot_type);
+  const orebPct = rows.map(r => +(r.p_oreb*100).toFixed(2));
+  const drebPct = rows.map(r => +(r.p_dreb*100).toFixed(2));
+  const otherPct = rows.map(r => +((1 - r.p_oreb - r.p_dreb)*100).toFixed(2));
+  const orebCI = rows.map(r => ({lo: r.lo_oreb, hi: r.hi_oreb}));
+  const drebCI = rows.map(r => ({lo: r.lo_dreb, hi: r.hi_dreb}));
+
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('bars').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {label: 'OREB %', data: orebPct, backgroundColor: COLORS.pos, _errorBars: orebCI},
+        {label: 'DREB %', data: drebPct, backgroundColor: COLORS.neg, _errorBars: drebCI},
+        {label: 'Other %', data: otherPct, backgroundColor: COLORS.other},
+      ],
+    },
+    plugins: [errorBarPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom', labels: {color:'#b6bfcc', font:{family:'DM Sans', size:12}}},
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const ds = ctx.dataset;
+              const i = ctx.dataIndex;
+              const v = ctx.parsed.y;
+              const row = rows[i];
+              let extra = '';
+              if (ds._errorBars) {
+                const eb = ds._errorBars[i];
+                extra = `  CI [${(eb.lo*100).toFixed(2)}-${(eb.hi*100).toFixed(2)}]`;
+              }
+              return `${ds.label}: ${v.toFixed(2)}%${extra}  (n=${row.n_eligible.toLocaleString()})`;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {beginAtZero: true, max: 100, title:{display:true, text:'Probability (%)', color:'#b6bfcc'},
+            ticks:{color:'#7a8595', callback:(v)=>v+'%'}, grid:{color:'rgba(255,255,255,0.05)'}},
+        x: {ticks:{color:'#b6bfcc', font:{size:12, weight:500}}, grid:{display:false}},
+      },
+    },
+  });
+}
+renderChart('all');
+document.querySelectorAll('.split-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.split-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderChart(b.dataset.split);
+  });
+});
+
+// ---- Exact-numbers table (all-split) ----
+const tbody = document.getElementById('table-body');
+tbody.innerHTML = allRows.map(r => {
+  const label = SHOT_LABELS[r.shot_type] || r.shot_type;
+  return `<tr>
+    <td class="name">${label}</td>
+    <td class="num">${r.n_eligible.toLocaleString()}</td>
+    <td class="num">${(r.p_oreb*100).toFixed(2)}%</td>
+    <td class="num">[${(r.lo_oreb*100).toFixed(2)}-${(r.hi_oreb*100).toFixed(2)}]</td>
+    <td class="num">${(r.p_dreb*100).toFixed(2)}%</td>
+    <td class="num">[${(r.lo_dreb*100).toFixed(2)}-${(r.hi_dreb*100).toFixed(2)}]</td>
+    <td class="num">${(r.oreb_share_of_rebounded*100).toFixed(1)}%</td>
+  </tr>`;
+}).join('');
+
+// ---- Comparisons table ----
+const compBody = document.getElementById('comp-body');
+compBody.innerHTML = comparisons.map(c => {
+  const la = SHOT_LABELS[c.a] || c.a;
+  const lb = SHOT_LABELS[c.b] || c.b;
+  const diffChip = c.diff_pp > 0
+    ? `<span class="chip up">${c.diff_pp.toFixed(2)}pp</span>`
+    : `<span class="chip down">${c.diff_pp.toFixed(2)}pp</span>`;
+  const pFmt = c.p < 0.0001 ? '<0.0001' : c.p.toFixed(4);
+  return `<tr>
+    <td class="name">${la} vs ${lb}</td>
+    <td class="num">${(c.oreb_rate_a*100).toFixed(2)}%</td>
+    <td class="num">${(c.oreb_rate_b*100).toFixed(2)}%</td>
+    <td class="num">${diffChip}</td>
+    <td class="num">${c.z.toFixed(2)}</td>
+    <td class="num">${pFmt}</td>
+  </tr>`;
+}).join('');
+</script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">5cb34d4</code> &middot; rebuilt 2026-04-21 14:21 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

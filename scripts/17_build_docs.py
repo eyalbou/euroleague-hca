@@ -88,7 +88,7 @@ def main() -> None:
 
     # Copy dashboards
     for name in ["index.html", "dashboard.html", "transitions.html",
-                 "final_report.html", "referees.html"]:
+                 "final_report.html", "referees.html", "rebound_rates.html"]:
         src = DASHBOARDS / name
         if src.exists():
             shutil.copy2(src, DOCS / name)
@@ -123,6 +123,8 @@ def main() -> None:
         "hca_transitions.json",
         "referee_output.json",
         "referee_qa.json",
+        "rebound_rates.json",
+        "rebound_rates_qa.json",
         "final_report.md",
     ]
     for name in publishable:
@@ -150,6 +152,7 @@ def main() -> None:
             {"href": "dashboard.html", "title": "Analyst dashboard (7 tabs)"},
             {"href": "transitions.html", "title": "Play-by-play transitions"},
             {"href": "referees.html", "title": "Referee-bias audit (Phase F)"},
+            {"href": "rebound_rates.html", "title": "Rebound rates by miss type (Phase H)"},
             {"href": "walkthrough.mp4", "title": "3-minute walkthrough video (Phase G)"},
             {"href": "final_report.html", "title": "Written report"},
             {"href": "concepts-learned.html", "title": "Concepts learned (Phase E)"},
