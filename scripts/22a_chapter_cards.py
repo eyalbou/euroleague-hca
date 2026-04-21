@@ -51,13 +51,15 @@ def _draw_card(track: str, label: str, headline: str, sub: str, accent: tuple[in
 
     if LOGO.exists():
         logo = Image.open(LOGO).convert("RGBA")
-        scale = 160 / logo.height
-        logo = logo.resize((int(logo.width * scale), 160), Image.LANCZOS)
-        chip_pad = 28
-        chip_w = logo.width + chip_pad * 2
-        chip_h = logo.height + chip_pad * 2
+        target_h = 96
+        scale = target_h / logo.height
+        logo = logo.resize((int(logo.width * scale), target_h), Image.LANCZOS)
+        chip_pad_y = 22
+        chip_pad_x = 30
+        chip_w = logo.width + chip_pad_x * 2
+        chip_h = logo.height + chip_pad_y * 2
         chip = Image.new("RGBA", (chip_w, chip_h), (255, 255, 255, 255))
-        chip.paste(logo, (chip_pad, chip_pad), logo)
+        chip.paste(logo, (chip_pad_x, chip_pad_y), logo)
         img.paste(chip.convert("RGB"), (200, 180))
 
     cx = W // 2 + 40
