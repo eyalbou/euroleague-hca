@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Concepts learned -- EuroLeague HCA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0d10;--panel:#13171d;--ink:#e7ecf1;--muted:#b6bfcc;--dim:#7a8595;
+    --accent:#6eb0ff;--pos:#3ccf8e;--hair:rgba(255,255,255,.07)}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.6;letter-spacing:-0.01em}
+  .wrap{max-width:780px;margin:0 auto;padding:40px 24px 96px}
+  .back{color:var(--accent);font-size:13px;text-decoration:none}
+  h1{font-size:32px;letter-spacing:-0.02em;margin:24px 0 8px;font-weight:700}
+  h2{font-size:22px;letter-spacing:-0.02em;margin:40px 0 12px;
+    border-bottom:1px solid var(--hair);padding-bottom:8px;font-weight:600}
+  h3{font-size:17px;margin:28px 0 10px;font-weight:600}
+  p,li{color:var(--muted)}
+  li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600}
+  em{color:var(--ink)}
+  code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:13px;
+    font-family:'JetBrains Mono',ui-monospace,monospace;color:#e4b85c}
+  pre{background:var(--panel);padding:16px;border-radius:8px;overflow:auto;font-size:13px;
+    border:1px solid var(--hair)}
+  pre code{background:transparent;padding:0;color:var(--ink)}
+  blockquote{border-left:3px solid var(--accent);margin:16px 0;padding:4px 16px;
+    color:var(--muted);background:rgba(110,176,255,.04)}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+  th,td{padding:8px 12px;border-bottom:1px solid var(--hair);text-align:left;color:var(--muted)}
+  th{color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  hr{border:0;border-top:1px solid var(--hair);margin:32px 0}
+  a{color:var(--accent)}
+  .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:24px}
+</style>
+</head>
+<body><div class="wrap">
+<a class="back" href="index.html">&larr; back to dashboard index</a>
+<div class="eyebrow">Phase E -- learning artifact</div>
+<h1>Concepts learned -- statistics, ML, and data methods</h1>
+<p>Scope: one place to review every non-trivial method this project used, in the order I
+encountered it, with a concrete example from our data and the intuition I want to
+carry forward. Not a textbook -- a cheat sheet of things I would have gotten wrong on
+day 1.</p>
+<hr />
+<h2>1. Paired-game analysis beats aggregate comparison</h2>
+<p><strong>Where it showed up:</strong> mechanism decomposition (<code>scripts/11_mechanisms.py</code>).</p>
+<p><strong>Wrong version:</strong> compute league-wide mean eFG% at home vs away across all
+team-games -- you get the right direction but inflated variance because team quality
+confounds everything (good teams play more home games against weak opponents in any
+given week).</p>
+<p><strong>Right version:</strong> for each game, take (home team's eFG% minus away team's eFG%), then
+average those paired deltas across all 2,897 games. Team-quality drops out by
+construction because both numbers are from the same game. The CI tightens by ~2-3x.</p>
+<p><strong>Takeaway:</strong> whenever two conditions are observed <em>within the same unit</em> (game,
+player, patient), pair them. Independent-sample tests are wasteful and mildly
+dishonest.</p>
+<hr />
+<h2>2. Cluster bootstrap for dependent observations</h2>
+<p><strong>Where it showed up:</strong> every transition bar, every PPP delta, every storyline in the
+PBP analysis.</p>
+<p><strong>Problem:</strong> events inside one game are not independent. Two shots by the same team in
+the same 10 minutes share possession context, lineup, fatigue, refs. Treating them as
+iid triples the apparent precision of any per-event average.</p>
+<p><strong>Fix:</strong> sample <em>games</em> with replacement (not events), then recompute the statistic on
+the resampled corpus, repeat 500x. This is what every 95% CI in the transitions
+dashboard does (<code>_bootstrap_cis</code> in <code>12_transitions.py</code> and <code>12b_bigrams.py</code>).</p>
+<p><strong>Intuition:</strong> ask "what happens if I replay the season 500 times?" not "what happens
+if I reshuffle 1.13M events?". Events are not the unit of independence; games are.</p>
+<p><strong>Cost:</strong> ~30x slowdown vs naive bootstrap. Worth it.</p>
+<hr />
+<h2>3. Wilson interval vs percentile bootstrap</h2>
+<p><strong>Where it showed up:</strong> QA file in <code>transitions_qa.json</code>.</p>
+<p>For a single binomial proportion (e.g. "how often does action X follow action Y?"),
+<strong>Wilson</strong> gives a closed-form CI that is well-behaved near 0 and 1 and requires no
+resampling. Percentile bootstrap on the same proportion is noisier and can collapse
+to [0, 0] for rare events (we saw this for low-frequency "Other" categories -- it
+broke one of our tests until we added tolerance).</p>
+<p><strong>Rule of thumb:</strong> use Wilson for simple binomials; use bootstrap when the statistic
+is complex (a difference, a ratio, a KL-divergence) or when clustering matters.</p>
+<hr />
+<h2>4. Mixed-effects linear models -- why not OLS with dummies?</h2>
+<p><strong>Where it showed up:</strong> <code>scripts/07c_mixedlm.py</code>, team-level HCA variation.</p>
+<p>With 18 teams x 10 seasons, team-season fixed effects cost 180 parameters. Random
+effects shrink team-specific intercepts toward the league mean, so small-sample teams
+don't get wild estimates. This is partial pooling, and it buys two things:</p>
+<ol>
+<li>Honest uncertainty: CIs on per-team HCA widen when a team has few games.</li>
+<li>Better out-of-sample: the league-mean is a better prior than "this team's 14 games".</li>
+</ol>
+<p><strong>Our finding:</strong> fixed intercept +3.88 pts/game with team random slopes on
+<code>attendance_ratio</code>. The attendance slope varies substantially across teams (dashboard
+tab 3), which a global OLS would hide entirely.</p>
+<hr />
+<h2>5. Difference-in-differences with three regimes</h2>
+<p><strong>Where it showed up:</strong> COVID natural experiment (<code>scripts/08_covid_experiment.py</code>).</p>
+<p>Standard DiD is two groups x two times. We had three regimes (pre / during / post
+closed-doors) and needed to know: is post = pre (full recovery), or is there a
+permanent crowd effect?</p>
+<p><strong>Setup:</strong> regress <code>point_diff ~ is_home * regime</code> with <code>regime in {pre, covid,
+post}</code>. The <code>is_home:post - is_home:pre</code> contrast answers "did HCA permanently
+change?". The <code>is_home:covid - is_home:pre</code> contrast answers "what happens with no
+crowd?".</p>
+<p><strong>Result:</strong> post - pre CI crosses zero -&gt; HCA recovered. covid - pre is negative but
+CI also crosses zero -&gt; crowd effect is directionally right but not detectable at
+this sample size. We report this honestly instead of forcing a conclusion.</p>
+<p><strong>Takeaway:</strong> the two-by-two DiD is a special case; write out the contrast you care
+about before running the regression.</p>
+<hr />
+<h2>6. Difference in proportions as a test statistic</h2>
+<p><strong>Where it showed up:</strong> COVID DiD on home win-rate.</p>
+<p>For two binomial rates with known n (e.g. home win-rate pre-COVID vs during), the
+standard error is sqrt(p1<em>(1-p1)/n1 + p2</em>(1-p2)/n2). Don't trust the bootstrap for
+rate differences when you can compute this in closed form and sanity-check against
+it.</p>
+<hr />
+<h2>7. Possession as the unit of analysis</h2>
+<p><strong>Where it showed up:</strong> HCA x transitions attribution (<code>scripts/14_hca_x_transitions.py</code>).</p>
+<p><strong>Wrong:</strong> sum up "points gained on post-2FGM possessions at home minus away" +
+"points gained on post-TO possessions" + ... across all 19 source actions and claim
+that sum as the HCA contribution. You double-count events that flow into the same
+possession.</p>
+<p><strong>Right:</strong> compute a single volume-weighted mean <code>delta_ppp</code> (points per offensive
+possession, home minus away) across all sources, then scale by possessions per team
+per game. That gives one number -- how much better home teams are per possession --
+that scales up to a pts/game attribution linearly.</p>
+<p><strong>Our number:</strong> weighted delta PPP = +0.049, possessions per team per game ~74,
+attribution = +3.63 pts/game out of a +3.88 observed HCA = <strong>94% explained by
+possession-level efficiency</strong>.</p>
+<p>This was one of the most important lessons of the project: the right unit of
+analysis turns a messy per-source explainer into a clean, defensible single-number
+attribution.</p>
+<hr />
+<h2>8. Markov chains -- first-order and second-order</h2>
+<p><strong>Where it showed up:</strong> <code>12_transitions.py</code> (Q0/Q1/Q2) and <code>12b_bigrams.py</code> (bigrams).</p>
+<p>A first-order chain answers "what's the distribution of action-at-time-t+1 given
+action-at-time-t?". Three separate chains because "next" has three meanings:</p>
+<ul>
+<li><strong>Q0:</strong> literal next event in the event stream (may be a paired twin -- see below).</li>
+<li><strong>Q1:</strong> next action by the <em>opponent</em>.</li>
+<li><strong>Q2:</strong> next action by the <em>same team's next offensive possession</em> (skip the
+  opponent's possession entirely).</li>
+</ul>
+<p>A second-order chain asks "given two steps of history, what's next?". We only
+computed these for the top-6 source actions because the state space explodes
+(31^3 = ~30k triples, most with &lt;5 observations). Subsetting to top-6 * top-5
+storylines keeps it readable and every cell has meaningful n.</p>
+<p><strong>Example:</strong> after a committed foul (<code>CM</code>), the top storyline is <code>CM -&gt; RV -&gt; FTM</code>
+at 24.8%. That's "foul, foul drawn, made free throw" -- a single causal chain across
+two teams.</p>
+<hr />
+<h2>9. KL divergence for "how different is this team?"</h2>
+<p><strong>Where it showed up:</strong> per-team distinctiveness panel in <code>13_transitions_dashboard.py</code>.</p>
+<p>KL(team || league) measures how surprising a team's Q1 distribution is relative to
+the league baseline. High KL = quirky team. Low KL = plays like the median team.</p>
+<p><strong>Caveat:</strong> KL blows up on zero cells (log(0) = -inf). We smooth with a small epsilon
+and also report Jensen-Shannon divergence (symmetric, bounded in [0, log 2]) for
+team pairs because JSD is more interpretable -- 0 = identical, log 2 = no overlap.</p>
+<hr />
+<h2>10. Shannon entropy and Gini for concentration</h2>
+<p><strong>Where it showed up:</strong> <code>transitions_concentration.json</code>.</p>
+<p>Two complementary ways to summarize "how spiky is this action's distribution?":</p>
+<ul>
+<li><strong>Entropy:</strong> expected surprise in bits. Lower = more predictable.</li>
+<li><strong>Gini:</strong> area between the Lorenz curve and the diagonal. Higher = more unequal.</li>
+</ul>
+<p>Why both? Entropy is information-theoretic (nice for the ML crowd), Gini is
+economics-flavored (nice for talks). They correlate ~0.95 on our data, so in
+practice reporting one is enough. We show both for pedagogy.</p>
+<hr />
+<h2>11. Calibration curve + ROC, not just accuracy</h2>
+<p><strong>Where it showed up:</strong> model comparison in <code>06_ml_logistic.py</code> and <code>07_ml_trees.py</code>.</p>
+<p>Accuracy is the least informative metric for a probabilistic classifier. Two models
+at 65.7% accuracy can have very different Brier scores and calibration.</p>
+<p><strong>What we report:</strong></p>
+<ul>
+<li><strong>Brier score:</strong> the mean squared error of predicted probability vs outcome.</li>
+<li><strong>Calibration curve:</strong> decile-bin the predictions, plot observed frequency vs
+  predicted. A perfectly calibrated model is on the diagonal.</li>
+<li><strong>ROC:</strong> discrimination quality, independent of threshold.</li>
+</ul>
+<p><strong>Why it matters:</strong> LightGBM and RF both beat logistic on Brier by ~0.002, which is
+real but tiny. The story isn't "ML wins" -- it's "Elo + attendance + rest covers
+almost everything a tree can find". Reporting accuracy alone would have hidden that.</p>
+<hr />
+<h2>12. OLS residual intercept as "what I can't explain"</h2>
+<p><strong>Where it showed up:</strong> mechanism decomposition.</p>
+<p>Regressing home margin on (eFG%, TOV, OREB, FTR, PF) all as paired differentials,
+the intercept captures the residual home advantage that <em>isn't</em> explained by any
+measurable box-score gap. On our data the intercept is +2.37 pts, meaning ~63% of
+HCA is "something else" -- travel, sleep, schedule, clutch execution, referee
+uncertainty quantification.</p>
+<p>This is a feature, not a bug: it tells me where to look next. In this project it
+pointed toward play-by-play -- which later (via the PPP attribution) explained 94%
+of HCA at the possession level. Two different models, two different lenses, and
+they agree on direction.</p>
+<hr />
+<h2>13. Paired-event artifacts (data, not method)</h2>
+<p><strong>Where it showed up:</strong> <code>AG -&gt; FV</code> at 82% in the Q0 chain.</p>
+<p>Some APIs log the <em>same incident</em> twice. A block is logged once as <code>AG</code> (shot
+blocked, shooter's view) and once as <code>FV</code> (block, defender's view). They always
+appear adjacent in the event stream, so a first-order Markov chain on the raw
+stream shows <code>P(FV | AG) ~ 82%</code> -- that's data ordering, not basketball.</p>
+<p><strong>Fix:</strong> surface this as a warning banner in the dashboard, and document it in the
+readme. Don't silently drop paired events, because some analyses want them.</p>
+<p><strong>Lesson:</strong> always inspect the top-1 transitions manually before trusting any chain.
+If a cell is &gt;80% it's usually either trivial (paired event) or wrong (bug).</p>
+<hr />
+<h2>14. Sample-first execution</h2>
+<p><strong>Where it showed up:</strong> every script in <code>scripts/</code>.</p>
+<p>Every analysis ran on a 1-2 season sample first (100-300 games) before the full
+10-season run. The sample catches schema bugs, performance cliffs, and wrong-unit
+errors in minutes instead of hours.</p>
+<p><strong>What this saved us from:</strong> the <code>game_id</code>-not-season-unique bug that collapsed 2,564
+of 2,897 games in the mechanism pivot would have wasted a 40-minute full run.
+Caught on the 2-season sample in 90 seconds.</p>
+<p><strong>The discipline:</strong> always ship the script with a <code>--sample N</code> flag and use it.
+Don't disable it "just this once".</p>
+<hr />
+<h2>15. Data layer separation</h2>
+<p><strong>Where it showed up:</strong> <code>raw/ -&gt; bronze/ -&gt; silver/ -&gt; gold/ -&gt; warehouse.sqlite</code>.</p>
+<ul>
+<li><strong>raw:</strong> exactly what the API returned, gzipped. Never rewritten.</li>
+<li><strong>bronze:</strong> flattened to typed columns but no dedup, no joins.</li>
+<li><strong>silver:</strong> dedup + joins + derived columns. This is what analyses read.</li>
+<li><strong>gold:</strong> aggregates per analysis (HCA per team per season, etc).</li>
+<li><strong>warehouse:</strong> SQLite, ad-hoc queries for sanity checks.</li>
+</ul>
+<p><strong>Why the split matters:</strong> every bug we caught was at a specific layer. Raw was
+always right (API is source of truth). Bronze caught type and null issues. Silver
+caught join and dedup issues. Keeping them separate made it trivial to trace where a
+number first went wrong.</p>
+<hr />
+<h2>16. Provenance for free</h2>
+<p><strong>Where it showed up:</strong> <code>ingest_manifest.parquet</code>, stamped dashboard footers, commit
+SHA in every report.</p>
+<p>Every artifact carries the commit SHA and UTC timestamp of when it was built. That
+means anyone (including future-me) can check out that SHA and reproduce the exact
+number they saw.</p>
+<p><strong>Cost:</strong> one small script (<code>stamp_dashboards.py</code>) and a <code>git rev-parse --short</code>
+call in each report generator. Saves hours of "which version was this from?".</p>
+<hr />
+<h2>17. Tests as invariants, not regression bait</h2>
+<p><strong>Where it showed up:</strong> <code>tests/test_ingest.py</code>, <code>tests/test_transitions.py</code>.</p>
+<p>These aren't unit tests in the Java sense. They're claims about the data that must
+hold for the analysis to be valid:</p>
+<ul>
+<li>Every game has exactly one home team and one away team.</li>
+<li>No duplicate <code>(season, game_id)</code> rows.</li>
+<li>Transition probabilities sum to 1 within (question, source, split).</li>
+<li>CIs contain the point estimate for the top-1 action.</li>
+</ul>
+<p>When the data or code drifts, one of these fires and tells me <em>where</em>. Much more
+useful than "does <code>parse_game</code> return the right dict?".</p>
+<hr />
+<h2>18. Reporting effects with uncertainty, always</h2>
+<p><strong>Where it showed up:</strong> everywhere.</p>
+<p>Every number in the final report has either a 95% CI, a p-value, or an explicit
+"directional only -- CI crosses zero" hedge. This is non-negotiable for a learning
+artifact; without it the report is marketing.</p>
+<p><strong>The specific discipline:</strong> if I catch myself writing "X is Y", I ask "what's the
+uncertainty on Y?" and if I can't answer, I don't publish the claim.</p>
+</div></body></html>

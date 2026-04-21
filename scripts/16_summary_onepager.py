@@ -147,13 +147,27 @@ HTML = """<!doctype html>
   </a>
   <a class="card" href="transitions.html">
     <div class="title">2. Play-by-play transitions</div>
-    <div class="desc">For any source action (3-pt make, turnover, block, foul...), see what happens next -- on the other team's next play, or on your own next possession. Includes an HCA lens.</div>
+    <div class="desc">For any source action (3-pt make, turnover, block, foul...), see what happens next -- on the other team's next play, or on your own next possession. Includes an HCA lens and Storylines (second-order chains).</div>
     <span class="arrow">Open →</span>
   </a>
   <a class="card" href="final_report.html">
     <div class="title">3. Written report</div>
     <div class="desc">The full narrative + all numbers traced back to JSON outputs. ~6 KB of text, ~10 min read.</div>
     <span class="arrow">Open →</span>
+  </a>
+</div>
+
+<h2>Learning notes (Phase E)</h2>
+<div class="cards">
+  <a class="card" href="concepts-learned.html">
+    <div class="title">Concepts learned</div>
+    <div class="desc">18 statistical, ML, and data methods used in the project -- paired analysis, cluster bootstrap, mixed-effects LM, DiD, Markov chains, KL divergence, calibration -- each with a concrete worked example from our data.</div>
+    <span class="arrow">Read →</span>
+  </a>
+  <a class="card" href="llm-engineering-lessons.html">
+    <div class="title">LLM engineering lessons</div>
+    <div class="desc">16 workflow lessons about using an LLM as a coding and analysis partner. Plan-before-prompt, sample-first, code review &gt; code generation, the silent-collapse bug, and a revised scorecard.</div>
+    <span class="arrow">Read →</span>
   </a>
 </div>
 

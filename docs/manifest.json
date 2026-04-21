@@ -1,5 +1,5 @@
 {
-  "built_at_utc": "2026-04-21T05:56:24.924966Z",
+  "built_at_utc": "2026-04-21T06:04:09.747509Z",
   "dashboards": [
     {
       "href": "index.html",
@@ -16,6 +16,14 @@
     {
       "href": "final_report.html",
       "title": "Written report"
+    },
+    {
+      "href": "concepts-learned.html",
+      "title": "Concepts learned (Phase E)"
+    },
+    {
+      "href": "llm-engineering-lessons.html",
+      "title": "LLM engineering lessons (Phase E)"
     }
   ],
   "reports_count": 13
