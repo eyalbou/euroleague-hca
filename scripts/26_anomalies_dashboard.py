@@ -276,6 +276,8 @@ HTML = r"""<!doctype html>
 </div>
 
 <script>
+Chart.defaults.font.family = "'DM Sans','Axiforma',system-ui,sans-serif";
+Chart.defaults.color = '#b8c1cb';
 const DATA = __JSON__;
 const anomalies = Object.fromEntries(DATA.anomalies.map(a => [a.id, a]));
 
@@ -342,7 +344,7 @@ function fmtPct(p) { return (p*100).toFixed(1) + '%'; }
 {
   const a = anomalies.overtime_hca;
   kpi(document.getElementById('kpi-1'), [
-    {value: fmtPct(a.regulation.home_win_p), label: 'Regulation home-win %', sub: `n=${a.regulation.n.toLocaleString()} [${fmtPct(a.regulation.lo)}-${fmtPct(a.regulation.hi)}]`, color:'pos'},
+    {value: fmtPct(a.regulation.home_win_p), label: 'Regulation home-win %', sub: `n=${a.regulation.n.toLocaleString('en-US')} [${fmtPct(a.regulation.lo)}-${fmtPct(a.regulation.hi)}]`, color:'pos'},
     {value: fmtPct(a.overtime.home_win_p), label: 'Overtime home-win %', sub: `n=${a.overtime.n} [${fmtPct(a.overtime.lo)}-${fmtPct(a.overtime.hi)}]`, color:'neg'},
     {value: a.diff_pp.toFixed(1)+' pp', label: 'Drop in OT', sub:`z=${a.z} &middot; p=${a.p_value}`, color:'warn'},
   ]);
@@ -422,7 +424,7 @@ function fmtPct(p) { return (p*100).toFixed(1) + '%'; }
 {
   const a = anomalies.clutch_hca;
   kpi(document.getElementById('kpi-4'), a.buckets.map(b => ({
-    value: fmtPct(b.home_win_p), label: b.bucket, sub:`n=${b.n.toLocaleString()} [${fmtPct(b.lo)}-${fmtPct(b.hi)}]`,
+    value: fmtPct(b.home_win_p), label: b.bucket, sub:`n=${b.n.toLocaleString('en-US')} [${fmtPct(b.lo)}-${fmtPct(b.hi)}]`,
     color: b.bucket.startsWith('close') ? 'warn' : (b.bucket.startsWith('medium') ? 'neu' : 'pos'),
   })));
   new Chart(document.getElementById('c4').getContext('2d'), {
@@ -563,8 +565,8 @@ function fmtPct(p) { return (p*100).toFixed(1) + '%'; }
 {
   const a = anomalies.ft_myth;
   kpi(document.getElementById('kpi-9'), [
-    {value: a.home.ft_pct.toFixed(2)+'%', label:'Home FT%', sub:`${a.home.ftm.toLocaleString()} / ${a.home.fta.toLocaleString()}`, color:'pos'},
-    {value: a.away.ft_pct.toFixed(2)+'%', label:'Away FT%', sub:`${a.away.ftm.toLocaleString()} / ${a.away.fta.toLocaleString()}`, color:'neg'},
+    {value: a.home.ft_pct.toFixed(2)+'%', label:'Home FT%', sub:`${a.home.ftm.toLocaleString('en-US')} / ${a.home.fta.toLocaleString('en-US')}`, color:'pos'},
+    {value: a.away.ft_pct.toFixed(2)+'%', label:'Away FT%', sub:`${a.away.ftm.toLocaleString('en-US')} / ${a.away.fta.toLocaleString('en-US')}`, color:'neg'},
     {value: '+'+a.diff_pp.toFixed(2)+' pp', label:'Difference', sub:`z=${a.z} &middot; p=${a.p_value} (not significant)`, color:'dim'},
   ]);
   new Chart(document.getElementById('c9').getContext('2d'), {

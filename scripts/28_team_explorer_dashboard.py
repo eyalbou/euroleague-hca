@@ -378,7 +378,7 @@ function update() {
 
   // Scope readout
   const agg = aggregate(rows);
-  document.getElementById('scope-games').textContent = agg.n_total.toLocaleString();
+  document.getElementById('scope-games').textContent = agg.n_total.toLocaleString('en-US');
   document.getElementById('scope-teams').textContent =
     STATE.teams.size || 36;
   document.getElementById('scope-seasons').textContent =
@@ -405,7 +405,7 @@ function update() {
 
   // KPIs
   kpiEl.innerHTML = `
-    <div class="kpi"><span class="v neu">${agg.n_total.toLocaleString()}</span><span class="k">games in selection</span><span class="n">${agg.n_home} home / ${agg.n_away} away</span></div>
+    <div class="kpi"><span class="v neu">${agg.n_total.toLocaleString('en-US')}</span><span class="k">games in selection</span><span class="n">${agg.n_home} home / ${agg.n_away} away</span></div>
     <div class="kpi"><span class="v pos">${fmtSigned(agg.margin_home - agg.margin_away)}</span><span class="k">HCA (pts, home margin − away margin)</span><span class="n">from raw sums</span></div>
     <div class="kpi"><span class="v pos">${fmtPct(agg.home_win_p)}</span><span class="k">Home win rate</span><span class="n">${Math.round(agg.home_win_p*agg.n_home)}-${agg.n_home - Math.round(agg.home_win_p*agg.n_home)}</span></div>
     <div class="kpi"><span class="v neg">${fmtPct(agg.away_win_p)}</span><span class="k">Road win rate</span><span class="n">${Math.round(agg.away_win_p*agg.n_away)}-${agg.n_away - Math.round(agg.away_win_p*agg.n_away)}</span></div>

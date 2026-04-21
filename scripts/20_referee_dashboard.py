@@ -168,6 +168,8 @@ HTML = r"""<!doctype html>
 </div>
 
 <script>
+Chart.defaults.font.family = "'DM Sans','Axiforma',system-ui,sans-serif";
+Chart.defaults.color = '#b8c1cb';
 const DATA = __JSON__;
 
 const perRef = DATA.per_ref;

@@ -228,6 +228,8 @@ HTML = r"""<!doctype html>
 </div>
 
 <script>
+Chart.defaults.font.family = "'DM Sans','Axiforma',system-ui,sans-serif";
+Chart.defaults.color = '#b8c1cb';
 const DATA = __JSON__;
 const SLICES = __SLICES__;
 
@@ -427,7 +429,7 @@ function renderChart(rows) {
             const eb = ds._errorBars[i];
             extra = `  CI [${(eb.lo*100).toFixed(2)}-${(eb.hi*100).toFixed(2)}]`;
           }
-          return `${ds.label}: ${v.toFixed(2)}%${extra}  (n=${row.n_eligible.toLocaleString()})`;
+          return `${ds.label}: ${v.toFixed(2)}%${extra}  (n=${row.n_eligible.toLocaleString('en-US')})`;
         }}},
       },
       scales: {
@@ -445,7 +447,7 @@ function renderKpis(rows) {
     return `<div class="kpi">
       <span class="v neu">${(r.p_oreb*100).toFixed(1)}%</span>
       <span class="k">OREB rate after ${label.toLowerCase()}</span>
-      <span class="n">n = ${r.n_eligible.toLocaleString()} &middot; CI [${(r.lo_oreb*100).toFixed(1)}-${(r.hi_oreb*100).toFixed(1)}]</span>
+      <span class="n">n = ${r.n_eligible.toLocaleString('en-US')} &middot; CI [${(r.lo_oreb*100).toFixed(1)}-${(r.hi_oreb*100).toFixed(1)}]</span>
     </div>`;
   }).join('');
   document.getElementById('kpi-strip').innerHTML = html;
@@ -457,7 +459,7 @@ function renderTable(rows) {
     const label = SHOT_LABELS[r.shot_type] || r.shot_type;
     return `<tr>
       <td class="name">${label}</td>
-      <td class="num">${r.n_eligible.toLocaleString()}</td>
+      <td class="num">${r.n_eligible.toLocaleString('en-US')}</td>
       <td class="num">${(r.p_oreb*100).toFixed(2)}%</td>
       <td class="num">[${(r.lo_oreb*100).toFixed(2)}-${(r.hi_oreb*100).toFixed(2)}]</td>
       <td class="num">${(r.p_dreb*100).toFixed(2)}%</td>
@@ -500,7 +502,7 @@ function update() {
   const rows = withStats(rollup);
   const totalMisses = rows.reduce((a,r) => a + r.n_eligible, 0);
   // scope readout
-  document.getElementById('scope-misses').textContent = totalMisses.toLocaleString();
+  document.getElementById('scope-misses').textContent = totalMisses.toLocaleString('en-US');
   document.getElementById('scope-teams').textContent = STATE.teams.size || 36;
   document.getElementById('scope-seasons').textContent = STATE.seasons.size || 10;
   // low-n warning

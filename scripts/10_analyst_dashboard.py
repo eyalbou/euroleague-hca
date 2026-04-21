@@ -1157,7 +1157,7 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('trend-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games across ${P.trend.seasons.length} seasons`);
+  setText('trend-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString('en-US')} games across ${P.trend.seasons.length} seasons`);
 
   // === Density (replaces histogram) ===
   const densityCtx = document.getElementById('chart-density');
@@ -1213,13 +1213,13 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('density-n', `n = ${ds.n.toLocaleString()} games \u00B7 mean ${fmtSigned(ds.mean,2)} \u00B7 ${fmtPct(ds.share_within_5,0)} within +/-5`);
+  setText('density-n', `n = ${ds.n.toLocaleString('en-US')} games \u00B7 mean ${fmtSigned(ds.mean,2)} \u00B7 ${fmtPct(ds.share_within_5,0)} within +/-5`);
 
   // === RS vs PO ===
   new Chart(document.getElementById('chart-phase'), {
     type: 'bar',
     data: {
-      labels: P.phase_hca.map(p => `${p.phase} (n=${p.n.toLocaleString()})`),
+      labels: P.phase_hca.map(p => `${p.phase} (n=${p.n.toLocaleString('en-US')})`),
       datasets: [{
         data: P.phase_hca.map(p => p.hca),
         backgroundColor: P.phase_hca.map(p => p.code === 'RS' ? COLORS.accent : 'rgba(167, 139, 250, 0.7)'),
@@ -1256,7 +1256,7 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('phase-n', `n = ${P.phase_hca.reduce((s,p)=>s+p.n,0).toLocaleString()} games`);
+  setText('phase-n', `n = ${P.phase_hca.reduce((s,p)=>s+p.n,0).toLocaleString('en-US')} games`);
 
   // === Win rate with Wilson CI ===
   new Chart(document.getElementById('chart-wr'), {
@@ -1286,7 +1286,7 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('wr-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games`);
+  setText('wr-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString('en-US')} games`);
 
   // === FOREST: team HCA with league ref ===
   const teamForestEl = document.getElementById('team-forest');
@@ -1323,7 +1323,7 @@ TEMPLATE = r"""<!doctype html>
   axisRow.className = 'forest-axis-row';
   axisRow.innerHTML = `<div></div><div class="axis-content"><span>${fmtSigned(xMin,0)}</span><span style="color:${COLORS.fgMute};">0 (no edge)</span><span style="color:${COLORS.accent};">league avg ${fmtSigned(P.kpis.league_hca,1)}</span><span>${fmtSigned(xMax,0)}</span></div><div></div>`;
   teamForestEl.appendChild(axisRow);
-  setText('teamf-n', `n teams = ${P.team_hca.length} \u00B7 total games = ${P.team_hca.reduce((s,t)=>s+t.n,0).toLocaleString()}`);
+  setText('teamf-n', `n teams = ${P.team_hca.length} \u00B7 total games = ${P.team_hca.reduce((s,t)=>s+t.n,0).toLocaleString('en-US')}`);
 
   // === HEATMAP ===
   const heatEl = document.getElementById('heatmap');
@@ -1419,7 +1419,7 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('dose-n', `n = ${P.attendance.n_games.toLocaleString()} home games`);
+  setText('dose-n', `n = ${P.attendance.n_games.toLocaleString('en-US')} home games`);
   setText('dose-slope', `OLS slope: ${fmtSigned(P.attendance.slope_pp10, 2)} pts per +10pp arena fill`);
 
   // === DECILES with CI error bars ===
@@ -1460,7 +1460,7 @@ TEMPLATE = r"""<!doctype html>
       }
     }
   });
-  setText('deciles-n', `n = ${P.attendance.deciles.reduce((s,d)=>s+d.n,0).toLocaleString()} home games`);
+  setText('deciles-n', `n = ${P.attendance.deciles.reduce((s,d)=>s+d.n,0).toLocaleString('en-US')} home games`);
 
   // === Team attendance slopes ===
   const slopesEl = document.getElementById('team-slopes');
@@ -1524,7 +1524,7 @@ TEMPLATE = r"""<!doctype html>
              title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } } }
     }
   });
-  setText('reg-n', `n = ${P.covid.regimes.reduce((s,r)=>s+r.n,0).toLocaleString()} games`);
+  setText('reg-n', `n = ${P.covid.regimes.reduce((s,r)=>s+r.n,0).toLocaleString('en-US')} games`);
 
   // === DiD forest ===
   const didEl = document.getElementById('did-forest');
@@ -1589,7 +1589,7 @@ TEMPLATE = r"""<!doctype html>
              title: { display: true, text: 'HCA (pts)', color: COLORS.fgMute, font: { size: 11 } } } }
     }
   });
-  setText('covid-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString()} games`);
+  setText('covid-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString('en-US')} games`);
 
   // === MODELS: OR card ===
   setText('or-value', fmtNum(P.models.is_home_OR, 3));

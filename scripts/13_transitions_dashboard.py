@@ -644,9 +644,9 @@ function updateBarsView(){
   document.getElementById('q1-title').textContent = `After ${label(src)}, opponent does...`;
   document.getElementById('q2-title').textContent = `When ${label(src)} team next has ball...`;
 
-  document.getElementById('q1-n').textContent = cQ1 ? `n=${cQ1.n.toLocaleString()} opponent responses` : 'n=0';
-  document.getElementById('q2-n').textContent = cQ2 ? `n=${cQ2.n.toLocaleString()} next-possession actions` : 'n=0';
-  document.getElementById('q0-n').textContent = rowsQ0.length ? `n=${rowsQ0[0].n.toLocaleString()} next events` : 'n=0';
+  document.getElementById('q1-n').textContent = cQ1 ? `n=${cQ1.n.toLocaleString('en-US')} opponent responses` : 'n=0';
+  document.getElementById('q2-n').textContent = cQ2 ? `n=${cQ2.n.toLocaleString('en-US')} next-possession actions` : 'n=0';
+  document.getElementById('q0-n').textContent = rowsQ0.length ? `n=${rowsQ0[0].n.toLocaleString('en-US')} next events` : 'n=0';
 
   document.getElementById('q1-entropy').textContent = cQ1 ? cQ1.entropy_bits.toFixed(2) : '--';
   document.getElementById('q1-gini').textContent = cQ1 ? cQ1.gini.toFixed(2) : '--';
@@ -783,7 +783,7 @@ function updateSmallMultiples(){
       const h = document.createElement('h4'); h.textContent = label(s); cell.appendChild(h);
       const top = CIDX[`${s}|${q}|${split}`];
       const sub = document.createElement('div'); sub.className = 'sub';
-      let sub_txt = top ? `n=${top.n.toLocaleString()} -- H=${top.entropy_bits.toFixed(2)}b` : '';
+      let sub_txt = top ? `n=${top.n.toLocaleString('en-US')} -- H=${top.entropy_bits.toFixed(2)}b` : '';
       if (q === 'q2' && top && top.ppp_mean != null) sub_txt += ` -- PPP=${top.ppp_mean.toFixed(2)}`;
       sub.textContent = sub_txt;
       cell.appendChild(sub);
@@ -847,7 +847,7 @@ function updateTeamView(){
     const rowCells = [
       String(i+1),
       t.team,
-      t.n.toLocaleString(),
+      t.n.toLocaleString('en-US'),
       t.kl_div.toFixed(3),
       `${label(topAction)} ${chip}`,
       pctStr(t.top1_p),
@@ -923,7 +923,7 @@ function updateHcaView(){
               return [
                 `\u0394 PPP = +${r.delta_ppp.toFixed(3)}  [95% CI ${r.delta_lo.toFixed(3)}, ${r.delta_hi.toFixed(3)}]`,
                 `freq = ${r.freq_per_game.toFixed(2)}/game`,
-                `n = ${(r.n_home + r.n_away).toLocaleString()}`,
+                `n = ${(r.n_home + r.n_away).toLocaleString('en-US')}`,
               ];
             }
           }
@@ -998,7 +998,7 @@ function updateHcaView(){
     const cells = [
       String(i+1),
       `${r.source} -- ${r.source_label}`,
-      `${r.n_home.toLocaleString()} / ${r.n_away.toLocaleString()}`,
+      `${r.n_home.toLocaleString('en-US')} / ${r.n_away.toLocaleString('en-US')}`,
       r.home_ppp != null ? r.home_ppp.toFixed(3) : '--',
       r.away_ppp != null ? r.away_ppp.toFixed(3) : '--',
       `+${r.delta_ppp.toFixed(3)}`,
@@ -1037,7 +1037,7 @@ function updateBigramsView(){
           <div style="font-size:18px;font-weight:600">${b.source} -- ${b.source_label}</div>
         </div>
         <div style="font-size:12px;color:var(--fg-mute);font-variant-numeric:tabular-nums">
-          n = ${b.n_source.toLocaleString()} &middot; top-5 covers ${(b.top_k_coverage*100).toFixed(0)}% of paths
+          n = ${b.n_source.toLocaleString('en-US')} &middot; top-5 covers ${(b.top_k_coverage*100).toFixed(0)}% of paths
         </div>
       </div>`;
 
@@ -1140,7 +1140,7 @@ function buildSourceSelect(){
 
 function init(){
   document.getElementById('meta-line').textContent =
-    `${BARS.n_events.toLocaleString()} in-play events across ${BARS.n_games} games, seasons ${BARS.seasons.join(', ')}`;
+    `${BARS.n_events.toLocaleString('en-US')} in-play events across ${BARS.n_games} games, seasons ${BARS.seasons.join(', ')}`;
   const dataBanner = document.getElementById('data-banner');
   if (BARS.seasons.length === 1){
     dataBanner.textContent = `SMOKE DATA: only season ${BARS.seasons[0]} loaded. Full backfill runs separately.`;
