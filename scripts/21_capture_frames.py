@@ -111,6 +111,18 @@ async def main() -> None:
         rp = "file://" + str(DASHBOARDS / "final_report.html")
         await _viewport_shot(page, rp, OUT / "report.png", wait=800)
 
+        # rebound_rates.html -- hero + chart grid
+        rb = "file://" + str(DASHBOARDS / "rebound_rates.html")
+        await _viewport_shot(page, rb, OUT / "rebound_rates.png", wait=1800)
+
+        # anomalies.html -- hero + first cards
+        an = "file://" + str(DASHBOARDS / "anomalies.html")
+        await _viewport_shot(page, an, OUT / "anomalies.png", wait=1800)
+
+        # explorer.html -- hero + filters + KPIs
+        ex = "file://" + str(DASHBOARDS / "explorer.html")
+        await _viewport_shot(page, ex, OUT / "explorer.png", wait=2000)
+
         await browser.close()
 
     log.info("done -- %d frames in %s", len(list(OUT.glob("*.png"))), OUT)

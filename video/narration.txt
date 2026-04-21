@@ -1,29 +1,39 @@
-Do home teams in EuroLeague really win more? And if they do, why?
+Do EuroLeague home teams win more? And if they do, why?
 
-I analyzed ten seasons of EuroLeague basketball. Twenty eight hundred games. One point one million play by play events. All of it running locally in Cursor, on my laptop.
+I analyzed ten seasons of EuroLeague basketball. Twenty-eight hundred games. One point one million play-by-play events. All of it running locally, in Cursor, on my laptop.
 
-Here's the headline. EuroLeague home teams win one point seven five times more often than road teams. They score three point eight eight more points per game on average. That's real. It's big. It's stable across ten seasons.
+One dataset. Two investigations. Track A -- why home wins. Track B -- how possessions chain. Let's start with Track A.
+
+The headline. EuroLeague home teams win one point seven five times more often than road teams. Plus three point eight eight points per game, on average. A ten-season mean, stable across seasons.
 
 So the question becomes: why?
 
-The old answer, from Moskowitz and Wertheim's book Scorecasting, is referee bias. They showed it for the NBA. It was the single biggest driver of home advantage.
+The old answer, from N B A research, is referee bias. Home refs whistle fewer fouls on home players. I tested it for Europe. Sixty one referees, each with at least thirty games.
 
-I tested it for Europe. Across sixty one referees with at least thirty games each, I compared home versus away foul calls for every single one. After Holm correction for sixty one simultaneous tests, the number of statistically biased referees came out to zero. The raw outlier count matched pure chance almost exactly. European basketball officiating, within our statistical power, is neutral.
+After Holm correction for sixty one simultaneous tests, the number of statistically biased referees came out to zero. European officiating, within our statistical power, is neutral. That hypothesis is dead.
 
-Okay. So what is driving the home edge?
+So what is driving the home edge? I decomposed every box-score mechanism. Shooting efficiency. Turnovers. Free-throw rate. Pace.
 
-I pulled every play by play event and computed points per possession for every offensive action. Home teams score zero point zero four nine more points per possession than road teams. That tiny per-possession edge, multiplied by about eighty possessions a game, explains ninety four percent of the observed home advantage.
+Then, COVID became a natural experiment nobody could run on purpose. Games played in empty arenas dropped home advantage by almost two points per game. When fans came back, so did the edge. Crowd presence matters -- but it is one layer, not the whole story.
 
-The story isn't one big thing. It's a thousand small things. Home teams are slightly better at every single source action. Not one. Every single one. Nineteen out of nineteen trackable possession starters. That's the attribution.
+The full model explains ninety four percent of home advantage from measurable, in-game mechanism.
 
-For the second order chains -- what I call Storylines -- I found that after a home team gets a defensive rebound, the next three events favor the home team in a way that cascades. Momentum isn't a myth. It's just micro.
+Okay. Mechanism. But where does that plus three point eight eight actually live, play by play? For that: Track B.
 
-And then COVID. During the twenty-twenty to twenty twenty one season, games played in empty arenas. A natural experiment you could not run deliberately. Home advantage dropped by almost two points per game. When the fans came back, so did the edge. So crowd presence matters. But it's layered on top of everything else, not the whole thing.
+After every action on the floor, what comes next? First-order Markov chains, computed over one point one million events.
 
-The dashboard is live. You can filter by team, by season, by regular season or playoff, by quarter. You can toggle between possession lift and raw probability. You can dig into any of the nineteen source actions and see the full transition matrix.
+Then I added a home-versus-road lens on top. Home teams score zero point zero four nine more points per possession than road teams. That tiny per-possession edge, times eighty possessions a game, reproduces the entire three point eight eight.
 
-The link is in the description. All source code, data pipeline, and methodology is open on GitHub.
+Every action. Nineteen of nineteen possession starters. The home edge is not one big thing. It is a thousand small things.
 
-If you want to see how I built this -- or how I use L L Ms as an engineering partner -- there are two writeups on the site covering every decision I made and every lesson learned.
+Two-step chains -- what I call Storylines. After a home-team defensive rebound, the next three events cascade, slightly, in the home team's favor. Momentum exists. It is just micro.
 
-Thanks for watching.
+Two more things fell out of this analysis.
+
+After a three-point miss, offensive-rebound odds are measurably higher than after a two-point miss. After a terminal free-throw miss, different again. Three shooting regimes, three rebound dynamics -- with confidence intervals on every number.
+
+And a catalog of ten basketball anomalies: the first-score effect, tied-at-half home-win rates, quarter-by-quarter asymmetry -- each with a basketball-analyst interpretation.
+
+Everything is filterable. Pick any teams. Any seasons. The numbers recompute in your browser.
+
+The dashboards are live, the code is open, the link is in the description. Thanks for watching.
