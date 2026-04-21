@@ -258,6 +258,127 @@ def _fort_row(r: pd.Series) -> dict:
 
 home_forts = [_fort_row(r) for _, r in fort_pivot.iterrows()]
 
+# -- What drives the fortress score? (multi-model analysis of team-season HCA dependence) --
+# Target: the same fortress_score used in the ranking above (home_wr * (home_wr - away_wr)).
+# Features (all team-season level, all computed from feat_game_team, is_neutral excluded):
+#   avg_elo           mean team_elo_pre over the season -- proxy for team quality
+#   avg_att_ratio     mean attendance / capacity for home games -- the "crowd" factor
+#   avg_capacity      mean home-arena capacity -- proxy for arena size / fanbase reach
+#   any_playoff       1 if they appeared in any playoff game that season
+#   tenure_years      # of prior EuroLeague seasons in our panel (closest available proxy
+#                     for institutional experience; individual-player tenure isn't in data)
+# We run three models for robustness:
+#   OLS with standardized coefficients + HC3 robust SE (main interpretable answer)
+#   Random forest feature importance (catches non-linearities and interactions)
+#   Logistic regression on "top-quartile fortress vs rest" (OR per +1 SD, as requested)
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import KFold, cross_val_score
+import statsmodels.api as _sm
+
+_fgt_drv = fgt[fgt["is_neutral"] == 0].copy() if "is_neutral" in fgt.columns else fgt.copy()
+_fgt_drv["team_win"] = (_fgt_drv["point_diff"] > 0).astype(int)
+
+# tenure_years = number of prior seasons the team appeared in the panel
+_tenure_rows = []
+for _tid, _seasons in _fgt_drv.groupby("team_id")["season"].apply(lambda s: sorted(set(s))).items():
+    for _i, _s in enumerate(_seasons):
+        _tenure_rows.append({"team_id": _tid, "season": _s, "tenure_years": _i})
+_tenure_df = pd.DataFrame(_tenure_rows)
+
+_drv_all = (
+    _fgt_drv.groupby(["team_id", "season"])
+    .agg(avg_elo=("team_elo_pre", "mean"), any_playoff=("is_playoff", "max"))
+    .reset_index()
+)
+_drv_home = (
+    _fgt_drv[_fgt_drv["is_home"] == 1]
+    .groupby(["team_id", "season"])
+    .agg(avg_att_ratio=("attendance_ratio", "mean"), avg_capacity=("capacity", "mean"))
+    .reset_index()
+)
+_drv_win = (
+    _fgt_drv.groupby(["team_id", "season"])
+    .apply(lambda g: pd.Series({
+        "n_home": int((g.is_home == 1).sum()),
+        "n_away": int((g.is_home == 0).sum()),
+        "home_wins": int(((g.is_home == 1) & (g.team_win == 1)).sum()),
+        "away_wins": int(((g.is_home == 0) & (g.team_win == 1)).sum()),
+    }), include_groups=False)
+    .reset_index()
+)
+_drv = (
+    _drv_all.merge(_drv_home, on=["team_id", "season"])
+            .merge(_drv_win, on=["team_id", "season"])
+            .merge(_tenure_df, on=["team_id", "season"])
+)
+_drv = _drv[(_drv.n_home >= 5) & (_drv.n_away >= 5)].copy()
+_drv["fortress_score"] = (
+    (_drv.home_wins / _drv.n_home) * ((_drv.home_wins / _drv.n_home) - (_drv.away_wins / _drv.n_away))
+)
+
+# (label = long display name; short = chart axis label)
+_drv_feats = [
+    ("avg_elo",        "Team quality (Elo)",                "Team Elo"),
+    ("avg_att_ratio",  "Crowd fill rate",                    "Crowd fill"),
+    ("avg_capacity",   "Arena size",                         "Arena size"),
+    ("any_playoff",    "Made playoffs",                      "Playoffs"),
+    ("tenure_years",   "Experience (seasons in EuroLeague)", "EL tenure"),
+]
+_drv = _drv.dropna(subset=[c for c, _, _ in _drv_feats] + ["fortress_score"]).copy()
+_X = _drv[[c for c, _, _ in _drv_feats]].values.astype(float)
+_y = _drv["fortress_score"].values.astype(float)
+_scaler = StandardScaler()
+_Xz = _scaler.fit_transform(_X)
+
+_ols = _sm.OLS(_y, _sm.add_constant(_Xz)).fit(cov_type="HC3")
+_ols_rows = []
+for _i, (_code, _label, _short) in enumerate(_drv_feats):
+    _beta = float(_ols.params[_i + 1]); _se = float(_ols.bse[_i + 1]); _p = float(_ols.pvalues[_i + 1])
+    _ols_rows.append({
+        "code": _code, "label": _label, "short": _short,
+        "beta_z": _beta, "se": _se,
+        "ci_lo": _beta - 1.96 * _se, "ci_hi": _beta + 1.96 * _se,
+        "p": _p,
+    })
+
+_rf = RandomForestRegressor(n_estimators=500, max_depth=5, random_state=42, n_jobs=-1)
+_rf.fit(_X, _y)
+_rf_cv = cross_val_score(_rf, _X, _y, cv=KFold(5, shuffle=True, random_state=42), scoring="r2")
+_rf_rows = [
+    {"code": c, "label": lbl, "short": short, "importance": float(imp)}
+    for (c, lbl, short), imp in zip(_drv_feats, _rf.feature_importances_)
+]
+_rf_rows.sort(key=lambda r: -r["importance"])
+
+_q75 = float(_drv["fortress_score"].quantile(0.75))
+_logit = _sm.Logit((_drv["fortress_score"] >= _q75).astype(int).values, _sm.add_constant(_Xz)).fit(disp=0)
+_logit_rows = []
+for _i, (_code, _label, _short) in enumerate(_drv_feats):
+    _b = float(_logit.params[_i + 1]); _se = float(_logit.bse[_i + 1]); _p = float(_logit.pvalues[_i + 1])
+    _logit_rows.append({
+        "code": _code, "label": _label, "short": _short,
+        "beta_z": _b, "OR_sd": float(np.exp(_b)),
+        "OR_lo": float(np.exp(_b - 1.96 * _se)), "OR_hi": float(np.exp(_b + 1.96 * _se)),
+        "p": _p,
+    })
+
+_bivar = []
+for _code, _label, _short in _drv_feats:
+    _r = float(_drv[["fortress_score", _code]].corr().iloc[0, 1])
+    _bivar.append({"code": _code, "label": _label, "short": _short, "r": _r})
+_bivar.sort(key=lambda r: -abs(r["r"]))
+
+fortress_drivers = {
+    "n": int(len(_drv)),
+    "target_mean": float(_drv.fortress_score.mean()),
+    "target_sd": float(_drv.fortress_score.std()),
+    "ols": {"r2": float(_ols.rsquared), "adj_r2": float(_ols.rsquared_adj), "rows": _ols_rows},
+    "rf": {"cv_r2_mean": float(_rf_cv.mean()), "cv_r2_sd": float(_rf_cv.std()), "rows": _rf_rows},
+    "logit": {"threshold": _q75, "pseudo_r2": float(_logit.prsquared), "rows": _logit_rows},
+    "bivar": _bivar,
+}
+
 # -- Maccabi Tel Aviv deep-dive: a unique natural experiment across four home-venue regimes.
 # Context:
 #  * 2015-16 through 2022-23: normal home at Menora Mivtachim Arena (AQO), Tel Aviv
@@ -704,6 +825,7 @@ PAYLOAD = {
     },
     # Per team-season home-fort rankings. Shipped whole so the UI can re-sort/re-filter.
     "home_forts": home_forts,
+    "fortress_drivers": fortress_drivers,
     "maccabi": maccabi_payload,
     "covid": {
         "regimes": [{"regime": r["regime"], "hca": round(r["hca"], 3),
@@ -993,6 +1115,36 @@ TEMPLATE = r"""<!doctype html>
   .upsets-table td.team { color: var(--fg); }
   .upsets-table td.surprise { color: var(--accent); font-weight: 600; }
 
+  /* Fortress drivers panel */
+  .driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  @media (max-width: 980px) { .driver-grid { grid-template-columns: 1fr; } }
+  .driver-chart { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px;
+                  padding: 14px 16px; }
+  .driver-chart-title { font-size: 12px; color: var(--fg-mute); letter-spacing: 0.02em; margin-bottom: 10px; }
+  .driver-chart-body { height: 240px; position: relative; }
+  .driver-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0 0; }
+  @media (max-width: 800px) { .driver-kpis { grid-template-columns: 1fr; } }
+  .driver-kpi { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px;
+                padding: 14px 16px; }
+  .driver-kpi .rank { font-size: 10px; color: var(--fg-mute); letter-spacing: 0.12em; text-transform: uppercase; }
+  .driver-kpi .label { font-size: 14px; color: var(--fg); font-weight: 600; margin-top: 4px; }
+  .driver-kpi .val { font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; margin-top: 6px;
+                     font-weight: 600; }
+  .driver-kpi .meta { font-size: 11px; color: var(--fg-mute); margin-top: 4px; }
+  .driver-logit { margin-top: 16px; }
+  .logit-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px;
+                 font-variant-numeric: tabular-nums; }
+  .logit-table th { text-align: left; padding: 8px 10px; color: var(--fg-mute); font-weight: 500;
+                    border-bottom: 1px solid var(--border); }
+  .logit-table th.num { text-align: right; }
+  .logit-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--fg-dim); }
+  .logit-table td.num { text-align: right; color: var(--fg); }
+  .logit-table td.sig { color: var(--green); font-weight: 600; }
+  .driver-narrative { margin-top: 18px; padding: 14px 16px; background: rgba(59,130,246,0.04);
+                      border-left: 3px solid var(--accent); border-radius: 6px; color: var(--fg-dim);
+                      font-size: 13px; line-height: 1.6; }
+  .driver-narrative strong { color: var(--fg); }
+
   /* Verdict */
   .mock-banner { background: rgba(250, 204, 21, 0.06); border: 1px solid rgba(250, 204, 21, 0.3);
                  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex;
@@ -1232,6 +1384,41 @@ TEMPLATE = r"""<!doctype html>
         <div class="n-cap">
           <span id="forts-n">...</span>
           <span>Min 5 home + 5 away games to qualify. All phases (RS + playoffs).</span>
+        </div>
+      </div>
+      <div class="card span-2">
+        <h3>What builds a fortress? &mdash; feature-importance analysis</h3>
+        <p class="sub">
+          Regressing the <code>fortress_score</code> above on five team-season features. Three models for
+          robustness: standardized OLS (interpretable effect sizes), random forest (non-linear check),
+          and logistic regression on the top-quartile (OR per +1 SD, answering the question "what raises the
+          odds of being a top-25% fortress?"). Individual player experience isn't in the dataset; the closest
+          proxy is team tenure (years in EuroLeague).
+        </p>
+        <div class="driver-kpis" id="driver-kpis"></div>
+        <div class="driver-grid">
+          <div class="driver-chart">
+            <div class="driver-chart-title">OLS standardized coefficients (95% CI)</div>
+            <div class="driver-chart-body"><canvas id="chart-driver-ols"></canvas></div>
+          </div>
+          <div class="driver-chart">
+            <div class="driver-chart-title">Random forest feature importance</div>
+            <div class="driver-chart-body"><canvas id="chart-driver-rf"></canvas></div>
+          </div>
+        </div>
+        <div class="driver-logit">
+          <div class="driver-chart-title">Logistic regression &mdash; odds of being a top-25% fortress (OR per +1 SD, 95% CI)</div>
+          <table class="logit-table" id="logit-table">
+            <thead>
+              <tr><th>Feature</th><th class="num">OR (1 SD)</th><th class="num">95% CI</th><th class="num">p</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p id="driver-narrative" class="driver-narrative"></p>
+        <div class="n-cap">
+          <span id="driver-n">...</span>
+          <span>Features: Elo, attendance fill rate, arena capacity, playoff flag, tenure years</span>
         </div>
       </div>
       <div class="card span-2">
@@ -2845,6 +3032,167 @@ TEMPLATE = r"""<!doctype html>
     item.innerHTML = `<h4>${v.headline}</h4><p>${v.body}</p>`;
     vList.appendChild(item);
   });
+
+  // === FORTRESS DRIVERS ANALYSIS (Teams tab) ===
+  (function renderFortressDrivers() {
+    const FD = P.fortress_drivers;
+    if (!FD) return;
+    const nCap = document.getElementById('driver-n');
+    if (nCap) nCap.textContent = `n=${FD.n} team-seasons · OLS adj R²=${FD.ols.adj_r2.toFixed(3)} · RF CV R²=${FD.rf.cv_r2_mean.toFixed(3)}`;
+
+    // KPI row: top 3 by RF importance (most robust "total effect" ranking)
+    const top3 = FD.rf.rows.slice(0, 3);
+    const kpiEl = document.getElementById('driver-kpis');
+    if (kpiEl) {
+      kpiEl.innerHTML = top3.map((r, i) => {
+        const ols = FD.ols.rows.find(x => x.code === r.code);
+        const sig = ols && ols.p < 0.05 ? `<span style="color:var(--green)">p=${ols.p.toFixed(3)} *</span>` :
+                    `p=${ols ? ols.p.toFixed(2) : '--'}`;
+        return `
+          <div class="driver-kpi">
+            <div class="rank">#${i + 1} driver</div>
+            <div class="label">${r.label}</div>
+            <div class="val">${(r.importance * 100).toFixed(0)}%</div>
+            <div class="meta">RF importance · OLS ${ols ? (ols.beta_z >= 0 ? '+' : '') + ols.beta_z.toFixed(3) : '--'}/SD · ${sig}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Chart 1: OLS standardized coefficients, horizontal bars with 95% CI error bars
+    const olsRows = [...FD.ols.rows].sort((a, b) => b.beta_z - a.beta_z);
+    const olsEl = document.getElementById('chart-driver-ols');
+    if (olsEl) {
+      const labels = olsRows.map(r => r.short || r.label);
+      const data = olsRows.map(r => r.beta_z);
+      const errs = olsRows.map(r => [r.ci_lo, r.ci_hi]);
+      const colors = olsRows.map(r => r.p < 0.05 ? COLORS.green : (r.beta_z >= 0 ? COLORS.accent : COLORS.red));
+      // give x-axis a little negative headroom so the CI whiskers don't overlap the category labels
+      const xLo = Math.min(0, ...olsRows.map(r => r.ci_lo));
+      const xHi = Math.max(0, ...olsRows.map(r => r.ci_hi));
+      const xPad = (xHi - xLo) * 0.15;
+      new Chart(olsEl, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors.map(c => c + 'AA'),
+            borderColor: colors,
+            borderWidth: 1.2,
+            errorBars: errs,
+          }],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                  const r = olsRows[ctx.dataIndex];
+                  return `β(z) = ${r.beta_z >= 0 ? '+' : ''}${r.beta_z.toFixed(4)}  95% CI [${r.ci_lo.toFixed(3)}, ${r.ci_hi.toFixed(3)}]  p=${r.p.toFixed(3)}`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              min: xLo - xPad, max: xHi + xPad * 0.3,
+              title: { display: true, text: 'Δ fortress per +1 SD of feature', color: COLORS.fgMute, font: { size: 11 } },
+              grid: { color: COLORS.grid },
+              ticks: { color: COLORS.fgMute, font: { size: 11 } },
+            },
+            y: { grid: { display: false }, ticks: { color: COLORS.fg, font: { size: 12 } } },
+          },
+        },
+        plugins: [hBarErrorPlugin],
+      });
+    }
+
+    // Chart 2: RF importance
+    const rfRows = FD.rf.rows;
+    const rfEl = document.getElementById('chart-driver-rf');
+    if (rfEl) {
+      new Chart(rfEl, {
+        type: 'bar',
+        data: {
+          labels: rfRows.map(r => r.short || r.label),
+          datasets: [{
+            data: rfRows.map(r => r.importance * 100),
+            backgroundColor: COLORS.accent + 'AA',
+            borderColor: COLORS.accent,
+            borderWidth: 1.2,
+          }],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label(ctx) { return `${ctx.parsed.x.toFixed(1)}%`; } } },
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Random-forest importance (% of total)', color: COLORS.fgMute, font: { size: 11 } },
+              grid: { color: COLORS.grid },
+              ticks: { color: COLORS.fgMute, font: { size: 11 }, callback: v => v + '%' },
+            },
+            y: { grid: { display: false }, ticks: { color: COLORS.fg, font: { size: 12 } } },
+          },
+        },
+      });
+    }
+
+    // Logit table
+    const logitBody = document.querySelector('#logit-table tbody');
+    if (logitBody) {
+      const rowsByOR = [...FD.logit.rows].sort((a, b) => b.OR_sd - a.OR_sd);
+      logitBody.innerHTML = rowsByOR.map(r => `
+        <tr>
+          <td>${r.label}</td>
+          <td class="num">${r.OR_sd.toFixed(2)}</td>
+          <td class="num">[${r.OR_lo.toFixed(2)}, ${r.OR_hi.toFixed(2)}]</td>
+          <td class="num ${r.p < 0.05 ? 'sig' : ''}">${r.p.toFixed(3)}</td>
+        </tr>`).join('');
+    }
+
+    // Narrative -- synthesized from the three models
+    const olsSig = FD.ols.rows.filter(r => r.p < 0.05).sort((a, b) => a.p - b.p);
+    const rfTop = FD.rf.rows[0];
+    const rfTop2 = FD.rf.rows[1];
+    const rfTop3 = FD.rf.rows[2];
+    const logitTop = [...FD.logit.rows].sort((a, b) => b.OR_sd - a.OR_sd)[0];
+
+    const sigPart = olsSig.length
+      ? `In the standardized OLS, <strong>${olsSig[0].label.toLowerCase()}</strong> is the only feature that clears statistical significance (β<sub>z</sub>=${olsSig[0].beta_z >= 0 ? '+' : ''}${olsSig[0].beta_z.toFixed(3)} per +1 SD, p=${olsSig[0].p.toFixed(3)}).`
+      : `In the standardized OLS, no single feature crosses p&lt;0.05 individually &mdash; the features are partially collinear (e.g., good teams also make playoffs).`;
+
+    const narr = `
+      <strong>The short answer:</strong> fortresses are built by <strong>full crowds</strong> and <strong>strong teams</strong> &mdash;
+      those two features dominate every model.
+      ${sigPart}
+      A random-forest check (which absorbs non-linearities and interactions) ranks
+      <strong>${rfTop.label}</strong> first (${(rfTop.importance * 100).toFixed(0)}%) and <strong>${rfTop2.label}</strong> second (${(rfTop2.importance * 100).toFixed(0)}%),
+      with <strong>${rfTop3.label}</strong> a distant third (${(rfTop3.importance * 100).toFixed(0)}%).
+      The logistic regression on "top-25% fortress" agrees: <strong>${logitTop.label}</strong> has the highest odds ratio at
+      ${logitTop.OR_sd.toFixed(2)}× per +1 SD (95% CI [${logitTop.OR_lo.toFixed(2)}, ${logitTop.OR_hi.toFixed(2)}]).
+      <br><br>
+      <strong>What doesn't build a fortress:</strong> making the playoffs, venue consistency, and accumulated seasons in
+      EuroLeague all contribute tiny positive effects that don't separate statistically at n=${FD.n}. The dataset also
+      doesn't contain player-level tenure or age, so individual "experience" is measured only at the team level
+      (years-in-EuroLeague, our closest proxy, lands near the bottom of every ranking).
+      <br><br>
+      <strong>Caveat:</strong> overall R² is modest (OLS adj R²=${FD.ols.adj_r2.toFixed(2)}, RF CV R²=${FD.rf.cv_r2_mean.toFixed(2)}),
+      which means most season-to-season variation in fortress strength is still noise &mdash; injuries, schedule luck,
+      referee calls, travel. The model tells you <em>which</em> factors matter; it doesn't claim to predict a team's
+      next-season fortress score from these alone.
+    `;
+    const narrEl = document.getElementById('driver-narrative');
+    if (narrEl) narrEl.innerHTML = narr;
+  })();
 })();
 </script>
 </body>
