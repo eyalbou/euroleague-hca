@@ -71,7 +71,7 @@
   <a class="back" href="index.html">&larr; back to dashboard index</a>
 
   <div class="hero">
-    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a></div>
+    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a> &middot; <a href="explorer.html" style="color:#3ccf8e;text-decoration:none">team+season explorer</a></div>
     <h1>Ten surprising patterns buried in <span class="lead">1.5M PBP events</span>.</h1>
     <p class="sub">A basketball analyst's tour through the EuroLeague data. Most of these findings re-frame where HCA is (and isn't) present -- OT collapse, clutch dilution, halftime holes. Two are standalone dynamics findings (#8 team 3PT travel, #10 named players). Each card is self-contained -- jump around freely.</p>
     <div class="meta">2,895 games &middot; 10 seasons &middot; all claims carry CIs or p-values</div>
@@ -250,7 +250,7 @@
     Data: silver-layer PBP + team box scores (10 seasons, 2,896 games, 1.51M events, 5,790 team-games).
     Methodology: Wilson 95% CIs for proportions, bootstrap 500-1000x for means, pooled two-proportion z-tests for rate comparisons.
     All raw numbers: <a href="reports/anomalies.json" style="color:var(--accent)">anomalies.json</a>.
-    <br/>Build <code>ba8722f</code>
+    <br/>Build <code>33aec70</code>
   </footer>
 </div>
 
@@ -584,4 +584,4 @@ function fmtPct(p) { return (p*100).toFixed(1) + '%'; }
   document.getElementById('tbl-road-warriors').innerHTML = a.top_road_warriors.map(row).join('');
 }
 </script>
-<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ba8722f</code> &middot; rebuilt 2026-04-21 17:12 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">019f48b</code> &middot; rebuilt 2026-04-21 18:34 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

@@ -33,6 +33,7 @@ log = logging.getLogger("23_rebound_rates")
 SILVER = config.SILVER_DIR / "fact_game_event.parquet"
 OUT = config.REPORTS_DIR / "rebound_rates.json"
 QA_OUT = config.REPORTS_DIR / "rebound_rates_qa.json"
+SLICE_OUT = config.REPORTS_DIR / "rebound_slices.json"  # per (team, season, miss_type, is_home) counts for client-side filtering
 
 SHOT_MISS_CODES = ["3FGA", "2FGA", "FTA"]
 
@@ -268,6 +269,41 @@ def main() -> None:
     OUT.write_text(json.dumps(payload, indent=2))
     log.info("wrote %s (%d rate rows, %d comparisons)",
              OUT, len(out_rows), len(comparisons))
+
+    # Per-team x per-season slice dump for the dashboard's client-side filter.
+    # Each row: (team_id, season, miss_type, is_home, n_eligible, n_dreb, n_oreb)
+    # Client will filter + reaggregate + Wilson-CI on the fly.
+    slice_df = (misses_all
+                .assign(is_home_i=misses_all["is_home"].astype(int))
+                .groupby(["code_team", "season", "miss_type", "is_home_i",
+                          "rebound_outcome"])
+                .size().unstack(fill_value=0).reset_index())
+    for c in ("D", "O", "other"):
+        if c not in slice_df.columns:
+            slice_df[c] = 0
+    slice_df["n_eligible"] = slice_df[["D", "O", "other"]].sum(axis=1)
+    slice_rows = []
+    for _, r in slice_df.iterrows():
+        slice_rows.append({
+            "team_id": r["code_team"],
+            "season": int(r["season"]),
+            "miss_type": r["miss_type"],
+            "is_home": int(r["is_home_i"]),
+            "n_eligible": int(r["n_eligible"]),
+            "n_dreb": int(r["D"]),
+            "n_oreb": int(r["O"]),
+            "n_other": int(r["other"]),
+        })
+    SLICE_OUT.write_text(json.dumps({
+        "meta": {
+            "seasons": sorted(df["season"].unique().tolist()),
+            "miss_types": ["3FGA", "2FGA", "FTA_terminal"],
+            "built_by": "scripts/23_rebound_rates.py",
+            "n_rows": len(slice_rows),
+        },
+        "rows": slice_rows,
+    }, indent=2))
+    log.info("wrote %s (%d slice rows)", SLICE_OUT, len(slice_rows))
 
     # QA / invariants for tests
     qa = {

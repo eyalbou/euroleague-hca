@@ -16,6 +16,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("24_rebound_dashboard")
 
 SRC = config.REPORTS_DIR / "rebound_rates.json"
+SLICE_SRC = config.REPORTS_DIR / "rebound_slices.json"
 OUT = config.DASHBOARDS_DIR / "rebound_rates.html"
 
 
@@ -73,6 +74,27 @@ HTML = r"""<!doctype html>
     font-family:inherit;font-size:12px;cursor:pointer;font-weight:500}
   .splitbtns button.active{background:var(--panel);color:var(--ink)}
 
+  /* Filter bar */
+  .filterbar{margin:22px 0 8px;padding:16px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+    display:grid;grid-template-columns:1.7fr 1fr auto;gap:16px;align-items:start}
+  @media (max-width:900px){.filterbar{grid-template-columns:1fr}}
+  .filter h4{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px;font-weight:500}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;max-height:116px;overflow-y:auto;padding:2px}
+  .fchip{padding:5px 10px;font-size:12px;font-weight:500;border-radius:14px;background:var(--panel2);
+    color:var(--muted);border:1px solid var(--hair);cursor:pointer;transition:all .12s;user-select:none;
+    white-space:nowrap}
+  .fchip:hover{border-color:var(--accent);color:var(--ink)}
+  .fchip.active{background:var(--accent);color:#0b0d10;border-color:var(--accent);font-weight:600}
+  .actions{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+  .btn{padding:7px 12px;font-size:12px;font-weight:600;border-radius:6px;background:var(--panel2);
+    color:var(--muted);border:1px solid var(--hair);cursor:pointer}
+  .btn:hover{border-color:var(--accent);color:var(--ink)}
+  .scope{color:var(--dim);font-size:11px;margin-top:6px;text-align:right}
+  .scope strong{color:var(--ink);font-variant-numeric:tabular-nums}
+  .warning{background:rgba(245,183,58,.06);border-left:3px solid var(--warn);padding:10px 14px;
+    border-radius:4px;margin-top:8px;color:var(--muted);font-size:12.5px;line-height:1.5;display:none}
+  .warning.show{display:block} .warning strong{color:var(--warn)}
+
   .reading{background:rgba(110,176,255,.04);border-left:3px solid var(--accent);
     padding:14px 18px;border-radius:4px;margin-top:16px;color:var(--muted);font-size:13.5px;line-height:1.65}
   .reading strong{color:var(--ink)}
@@ -101,6 +123,27 @@ HTML = r"""<!doctype html>
     <p class="sub">Terminal free-throw misses are the hardest to offensive-rebound -- only 16.6% of them end on an OREB, vs 28-32% for field goals. Every rate is reported with a Wilson 95% CI; pairwise differences use a pooled two-proportion z-test.</p>
     <div class="meta">__N_GAMES__ games &middot; __N_SEASONS__ seasons &middot; 201k rebound-eligible misses</div>
   </div>
+
+  <!-- FILTER BAR -->
+  <div class="filterbar">
+    <div class="filter" id="filter-team">
+      <h4>Teams (click to toggle; empty = all 36) &middot; <span id="team-count" style="color:var(--accent)">all 36</span></h4>
+      <div class="chips" id="team-chips"></div>
+    </div>
+    <div class="filter" id="filter-season">
+      <h4>Seasons (click to toggle; empty = all 10) &middot; <span id="season-count" style="color:var(--accent)">all 10</span></h4>
+      <div class="chips" id="season-chips"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btn-clear">Clear all</button>
+      <button class="btn" id="btn-last3">Last 3 seasons</button>
+      <button class="btn" id="btn-covid">COVID slice</button>
+      <div class="scope"><strong id="scope-misses">0</strong> misses in scope &middot;
+        <strong id="scope-teams">36</strong> teams &middot;
+        <strong id="scope-seasons">10</strong> seasons</div>
+    </div>
+  </div>
+  <div class="warning" id="low-n-warning"><strong>Small sample.</strong> Your selection has fewer than 200 rebound-eligible misses in at least one miss-type cell. Confidence intervals will be wide; don't over-interpret small differences.</div>
 
   <div class="kpis" id="kpi-strip"></div>
 
@@ -186,66 +229,173 @@ HTML = r"""<!doctype html>
 
 <script>
 const DATA = __JSON__;
-const rates = DATA.rates;
-const comparisons = DATA.comparisons;
+const SLICES = __SLICES__;
 
 const SHOT_LABELS = {
   "3FGA": "Missed 3-pointer",
   "2FGA": "Missed 2-pointer",
   "FTA_terminal": "Missed terminal FT",
 };
-
 const COLORS = {
   pos: 'rgba(60,207,142,0.85)',
   neg: 'rgba(239,90,90,0.85)',
   other: 'rgba(122,133,149,0.5)',
 };
 
-// ---- KPI strip (all-split) ----
-const allRows = rates.filter(r => r.split === 'all');
-const kpiHtml = allRows.map(r => {
-  const label = SHOT_LABELS[r.shot_type] || r.shot_type;
-  return `<div class="kpi">
-    <span class="v neu">${(r.p_oreb*100).toFixed(1)}%</span>
-    <span class="k">OREB rate after ${label.toLowerCase()}</span>
-    <span class="n">n = ${r.n_eligible.toLocaleString()} &middot; CI [${(r.lo_oreb*100).toFixed(1)}-${(r.hi_oreb*100).toFixed(1)}]</span>
-  </div>`;
-}).join('');
-document.getElementById('kpi-strip').innerHTML = kpiHtml;
+const STATE = {teams: new Set(), seasons: new Set(), split: 'all'};
+const TEAMS = [...new Set(SLICES.rows.map(r => r.team_id))].sort((a,b) => {
+  // sort by total misses desc
+  const score = (t) => SLICES.rows.filter(r => r.team_id === t).reduce((a,r)=>a+r.n_eligible,0);
+  return score(b) - score(a);
+});
+const SEASONS = SLICES.meta.seasons;
 
-// ---- Bar chart with CI error bars ----
-// Custom error-bar plugin
+// ---- Filter UI ----
+function renderTeamChips() {
+  const el = document.getElementById('team-chips');
+  el.innerHTML = TEAMS.map(t => {
+    const active = STATE.teams.has(t) ? 'active' : '';
+    return `<span class="fchip ${active}" data-team="${t}">${t}</span>`;
+  }).join('');
+  document.getElementById('team-count').textContent = STATE.teams.size ? `${STATE.teams.size} selected` : 'all 36';
+}
+function renderSeasonChips() {
+  const el = document.getElementById('season-chips');
+  el.innerHTML = SEASONS.map(s => {
+    const active = STATE.seasons.has(s) ? 'active' : '';
+    return `<span class="fchip ${active}" data-season="${s}">${s}-${String(s+1).slice(2)}</span>`;
+  }).join('');
+  document.getElementById('season-count').textContent = STATE.seasons.size ? `${STATE.seasons.size} selected` : 'all 10';
+}
+document.getElementById('team-chips').addEventListener('click', (e) => {
+  const c = e.target.closest('.fchip'); if (!c) return;
+  const t = c.dataset.team;
+  STATE.teams.has(t) ? STATE.teams.delete(t) : STATE.teams.add(t);
+  renderTeamChips(); update();
+});
+document.getElementById('season-chips').addEventListener('click', (e) => {
+  const c = e.target.closest('.fchip'); if (!c) return;
+  const s = parseInt(c.dataset.season);
+  STATE.seasons.has(s) ? STATE.seasons.delete(s) : STATE.seasons.add(s);
+  renderSeasonChips(); update();
+});
+document.getElementById('btn-clear').addEventListener('click', () => {
+  STATE.teams.clear(); STATE.seasons.clear();
+  renderTeamChips(); renderSeasonChips(); update();
+});
+document.getElementById('btn-last3').addEventListener('click', () => {
+  STATE.seasons = new Set(SEASONS.slice(-3)); renderSeasonChips(); update();
+});
+document.getElementById('btn-covid').addEventListener('click', () => {
+  STATE.seasons = new Set([2019, 2020]); renderSeasonChips(); update();
+});
+document.querySelectorAll('.split-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.split-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    STATE.split = b.dataset.split;
+    update();
+  });
+});
+
+// ---- Wilson score interval (ported from Python) ----
+function wilson(k, n, z=1.96) {
+  if (n === 0) return [0, 0];
+  const p = k / n;
+  const denom = 1 + z*z/n;
+  const center = (p + z*z/(2*n)) / denom;
+  const halfw = z * Math.sqrt(p*(1-p)/n + z*z/(4*n*n)) / denom;
+  return [Math.max(0, center-halfw), Math.min(1, center+halfw)];
+}
+// ---- pooled two-proportion z ----
+function twoProp(p1, n1, p2, n2) {
+  if (!n1 || !n2) return {z: 0, p: 1};
+  const pp = (p1*n1 + p2*n2) / (n1 + n2);
+  const se = Math.sqrt(pp*(1-pp)*(1/n1 + 1/n2));
+  if (se === 0) return {z: 0, p: 1};
+  const z = (p1 - p2) / se;
+  // standard normal cdf via erf approx
+  const erf = (x) => {
+    const sign = x < 0 ? -1 : 1; x = Math.abs(x);
+    const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+    const t = 1/(1+p*x);
+    const y = 1 - (((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t * Math.exp(-x*x);
+    return sign*y;
+  };
+  const cdf = (x) => 0.5*(1+erf(x/Math.SQRT2));
+  return {z, p: 2*(1-cdf(Math.abs(z)))};
+}
+
+// ---- Aggregate slices under current filter ----
+function filteredSlices() {
+  const teamsSet = STATE.teams.size ? STATE.teams : null;
+  const seasonsSet = STATE.seasons.size ? STATE.seasons : null;
+  let rows = SLICES.rows.filter(r =>
+    (!teamsSet || teamsSet.has(r.team_id)) &&
+    (!seasonsSet || seasonsSet.has(r.season))
+  );
+  if (STATE.split === 'home') rows = rows.filter(r => r.is_home === 1);
+  if (STATE.split === 'away') rows = rows.filter(r => r.is_home === 0);
+  return rows;
+}
+function rollupByMissType(rows) {
+  const out = {};
+  for (const mt of ["3FGA", "2FGA", "FTA_terminal"]) {
+    out[mt] = {n_eligible:0, n_dreb:0, n_oreb:0};
+  }
+  for (const r of rows) {
+    if (!out[r.miss_type]) continue;
+    out[r.miss_type].n_eligible += r.n_eligible;
+    out[r.miss_type].n_dreb += r.n_dreb;
+    out[r.miss_type].n_oreb += r.n_oreb;
+  }
+  return out;
+}
+function withStats(rollup) {
+  const out = [];
+  for (const mt of ["3FGA", "2FGA", "FTA_terminal"]) {
+    const r = rollup[mt];
+    const n = r.n_eligible;
+    const p_o = n ? r.n_oreb/n : 0;
+    const p_d = n ? r.n_dreb/n : 0;
+    const [lo_o, hi_o] = wilson(r.n_oreb, n);
+    const [lo_d, hi_d] = wilson(r.n_dreb, n);
+    const reb = r.n_dreb + r.n_oreb;
+    const oreb_share = reb ? r.n_oreb/reb : 0;
+    out.push({shot_type: mt, n_eligible: n, n_dreb: r.n_dreb, n_oreb: r.n_oreb,
+              p_oreb: p_o, p_dreb: p_d, lo_oreb: lo_o, hi_oreb: hi_o,
+              lo_dreb: lo_d, hi_dreb: hi_d, oreb_share_of_rebounded: oreb_share});
+  }
+  return out;
+}
+
+// ---- Chart error bar plugin ----
 const errorBarPlugin = {
   id: 'errorBars',
   afterDatasetsDraw(chart) {
-    const {ctx, data, chartArea, scales} = chart;
+    const {ctx, data, scales} = chart;
     const yScale = scales.y;
     data.datasets.forEach((ds, dsi) => {
       if (!ds._errorBars) return;
       const meta = chart.getDatasetMeta(dsi);
       meta.data.forEach((bar, i) => {
-        const eb = ds._errorBars[i];
-        if (!eb) return;
+        const eb = ds._errorBars[i]; if (!eb) return;
         const yLo = yScale.getPixelForValue(eb.lo * 100);
         const yHi = yScale.getPixelForValue(eb.hi * 100);
         const x = bar.x;
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-        ctx.lineWidth = 1.5;
+        ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(x, yLo); ctx.lineTo(x, yHi);
         ctx.moveTo(x-5, yLo); ctx.lineTo(x+5, yLo);
         ctx.moveTo(x-5, yHi); ctx.lineTo(x+5, yHi);
-        ctx.stroke();
-        ctx.restore();
+        ctx.stroke(); ctx.restore();
       });
     });
-  }
+  },
 };
 
 let chart = null;
-function renderChart(split) {
-  const rows = rates.filter(r => r.split === split);
+function renderChart(rows) {
   const labels = rows.map(r => SHOT_LABELS[r.shot_type] || r.shot_type);
   const orebPct = rows.map(r => +(r.p_oreb*100).toFixed(2));
   const drebPct = rows.map(r => +(r.p_dreb*100).toFixed(2));
@@ -270,22 +420,15 @@ function renderChart(split) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: {position:'bottom', labels: {color:'#b6bfcc', font:{family:'DM Sans', size:12}}},
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              const ds = ctx.dataset;
-              const i = ctx.dataIndex;
-              const v = ctx.parsed.y;
-              const row = rows[i];
-              let extra = '';
-              if (ds._errorBars) {
-                const eb = ds._errorBars[i];
-                extra = `  CI [${(eb.lo*100).toFixed(2)}-${(eb.hi*100).toFixed(2)}]`;
-              }
-              return `${ds.label}: ${v.toFixed(2)}%${extra}  (n=${row.n_eligible.toLocaleString()})`;
-            },
-          },
-        },
+        tooltip: {callbacks: {label: (c) => {
+          const ds = c.dataset, i = c.dataIndex, v = c.parsed.y, row = rows[i];
+          let extra = '';
+          if (ds._errorBars) {
+            const eb = ds._errorBars[i];
+            extra = `  CI [${(eb.lo*100).toFixed(2)}-${(eb.hi*100).toFixed(2)}]`;
+          }
+          return `${ds.label}: ${v.toFixed(2)}%${extra}  (n=${row.n_eligible.toLocaleString()})`;
+        }}},
       },
       scales: {
         y: {beginAtZero: true, max: 100, title:{display:true, text:'Probability (%)', color:'#b6bfcc'},
@@ -295,48 +438,81 @@ function renderChart(split) {
     },
   });
 }
-renderChart('all');
-document.querySelectorAll('.split-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.split-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    renderChart(b.dataset.split);
+
+function renderKpis(rows) {
+  const html = rows.map(r => {
+    const label = SHOT_LABELS[r.shot_type] || r.shot_type;
+    return `<div class="kpi">
+      <span class="v neu">${(r.p_oreb*100).toFixed(1)}%</span>
+      <span class="k">OREB rate after ${label.toLowerCase()}</span>
+      <span class="n">n = ${r.n_eligible.toLocaleString()} &middot; CI [${(r.lo_oreb*100).toFixed(1)}-${(r.hi_oreb*100).toFixed(1)}]</span>
+    </div>`;
+  }).join('');
+  document.getElementById('kpi-strip').innerHTML = html;
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = rows.map(r => {
+    const label = SHOT_LABELS[r.shot_type] || r.shot_type;
+    return `<tr>
+      <td class="name">${label}</td>
+      <td class="num">${r.n_eligible.toLocaleString()}</td>
+      <td class="num">${(r.p_oreb*100).toFixed(2)}%</td>
+      <td class="num">[${(r.lo_oreb*100).toFixed(2)}-${(r.hi_oreb*100).toFixed(2)}]</td>
+      <td class="num">${(r.p_dreb*100).toFixed(2)}%</td>
+      <td class="num">[${(r.lo_dreb*100).toFixed(2)}-${(r.hi_dreb*100).toFixed(2)}]</td>
+      <td class="num">${(r.oreb_share_of_rebounded*100).toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+function renderComparisons(rows) {
+  const rateBy = Object.fromEntries(rows.map(r => [r.shot_type, r]));
+  const pairs = [["3FGA","2FGA"], ["3FGA","FTA_terminal"], ["2FGA","FTA_terminal"]];
+  const comps = pairs.map(([a,b]) => {
+    const ra = rateBy[a], rb = rateBy[b];
+    const {z, p} = twoProp(ra.p_oreb, ra.n_eligible, rb.p_oreb, rb.n_eligible);
+    return {a, b, p_a: ra.p_oreb, p_b: rb.p_oreb,
+            diff_pp: (ra.p_oreb - rb.p_oreb)*100, z, p};
   });
-});
+  const tbody = document.getElementById('comp-body');
+  tbody.innerHTML = comps.map(c => {
+    const la = SHOT_LABELS[c.a] || c.a;
+    const lb = SHOT_LABELS[c.b] || c.b;
+    const chip = c.diff_pp > 0
+      ? `<span class="chip up">${c.diff_pp.toFixed(2)}pp</span>`
+      : `<span class="chip down">${c.diff_pp.toFixed(2)}pp</span>`;
+    const pFmt = c.p < 0.0001 ? '<0.0001' : c.p.toFixed(4);
+    return `<tr>
+      <td class="name">${la} vs ${lb}</td>
+      <td class="num">${(c.p_a*100).toFixed(2)}%</td>
+      <td class="num">${(c.p_b*100).toFixed(2)}%</td>
+      <td class="num">${chip}</td>
+      <td class="num">${c.z.toFixed(2)}</td>
+      <td class="num">${pFmt}</td>
+    </tr>`;
+  }).join('');
+}
 
-// ---- Exact-numbers table (all-split) ----
-const tbody = document.getElementById('table-body');
-tbody.innerHTML = allRows.map(r => {
-  const label = SHOT_LABELS[r.shot_type] || r.shot_type;
-  return `<tr>
-    <td class="name">${label}</td>
-    <td class="num">${r.n_eligible.toLocaleString()}</td>
-    <td class="num">${(r.p_oreb*100).toFixed(2)}%</td>
-    <td class="num">[${(r.lo_oreb*100).toFixed(2)}-${(r.hi_oreb*100).toFixed(2)}]</td>
-    <td class="num">${(r.p_dreb*100).toFixed(2)}%</td>
-    <td class="num">[${(r.lo_dreb*100).toFixed(2)}-${(r.hi_dreb*100).toFixed(2)}]</td>
-    <td class="num">${(r.oreb_share_of_rebounded*100).toFixed(1)}%</td>
-  </tr>`;
-}).join('');
+function update() {
+  const slice = filteredSlices();
+  const rollup = rollupByMissType(slice);
+  const rows = withStats(rollup);
+  const totalMisses = rows.reduce((a,r) => a + r.n_eligible, 0);
+  // scope readout
+  document.getElementById('scope-misses').textContent = totalMisses.toLocaleString();
+  document.getElementById('scope-teams').textContent = STATE.teams.size || 36;
+  document.getElementById('scope-seasons').textContent = STATE.seasons.size || 10;
+  // low-n warning
+  const lowN = rows.some(r => r.n_eligible < 200);
+  document.getElementById('low-n-warning').classList.toggle('show', lowN);
+  renderKpis(rows);
+  renderChart(rows);
+  renderTable(rows);
+  renderComparisons(rows);
+}
 
-// ---- Comparisons table ----
-const compBody = document.getElementById('comp-body');
-compBody.innerHTML = comparisons.map(c => {
-  const la = SHOT_LABELS[c.a] || c.a;
-  const lb = SHOT_LABELS[c.b] || c.b;
-  const diffChip = c.diff_pp > 0
-    ? `<span class="chip up">${c.diff_pp.toFixed(2)}pp</span>`
-    : `<span class="chip down">${c.diff_pp.toFixed(2)}pp</span>`;
-  const pFmt = c.p < 0.0001 ? '<0.0001' : c.p.toFixed(4);
-  return `<tr>
-    <td class="name">${la} vs ${lb}</td>
-    <td class="num">${(c.oreb_rate_a*100).toFixed(2)}%</td>
-    <td class="num">${(c.oreb_rate_b*100).toFixed(2)}%</td>
-    <td class="num">${diffChip}</td>
-    <td class="num">${c.z.toFixed(2)}</td>
-    <td class="num">${pFmt}</td>
-  </tr>`;
-}).join('');
+renderTeamChips(); renderSeasonChips(); update();
 </script>
 </body></html>
 """
@@ -354,10 +530,12 @@ def _git_sha() -> str:
 
 def main() -> None:
     data = json.loads(SRC.read_text())
+    slices = json.loads(SLICE_SRC.read_text())
     n_games = data["meta"]["n_games"]
     n_seasons = len(data["meta"]["seasons"])
     html = (HTML
             .replace("__JSON__", json.dumps(data))
+            .replace("__SLICES__", json.dumps(slices))
             .replace("__N_GAMES__", f"{n_games:,}")
             .replace("__N_SEASONS__", str(n_seasons))
             .replace("__SHA__", _git_sha()))

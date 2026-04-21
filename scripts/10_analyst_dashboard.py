@@ -763,6 +763,7 @@ TEMPLATE = r"""<!doctype html>
     More of Track A &mdash; sibling dashboards
   </div>
   <nav class="tabs">
+    <a class="tab" href="explorer.html" style="text-decoration:none;display:inline-flex;align-items:center;background:rgba(110,176,255,0.08);border-color:rgba(110,176,255,0.3)">Team &amp; Season Explorer (multi-select filters) &rarr;</a>
     <a class="tab" href="anomalies.html" style="text-decoration:none;display:inline-flex;align-items:center">Anomalies &rarr;</a>
     <a class="tab" href="referees.html" style="text-decoration:none;display:inline-flex;align-items:center">Referee-bias audit (null) &rarr;</a>
     <a class="tab" href="final_report.html" style="text-decoration:none;display:inline-flex;align-items:center">Written report &rarr;</a>

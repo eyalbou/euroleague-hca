@@ -83,7 +83,7 @@ HTML = r"""<!doctype html>
   <a class="back" href="index.html">&larr; back to dashboard index</a>
 
   <div class="hero">
-    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a></div>
+    <div class="eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a> &middot; <a href="explorer.html" style="color:#3ccf8e;text-decoration:none">team+season explorer</a></div>
     <h1>EuroLeague referees are <span class="lead">unbiased.</span><br/>
       <span style="color:var(--muted);font-weight:500">The outlier count matches pure chance almost exactly.</span></h1>
     <p class="sub">We tested all __N_ELIGIBLE__ referees with at least __MIN__ games for home-vs-away asymmetry in fouls called and free-throw attempts. Every claim uses cluster-resampled 95% CIs and Holm-corrected p-values.</p>

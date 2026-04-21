@@ -161,7 +161,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 <header>
   <div style="color:#6eb0ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px">
     <span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
-    Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a>
+    Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a> &middot; <a href="explorer.html" style="color:#6eb0ff;text-decoration:none">team+season explorer</a>
   </div>
   <h1>After action X, what actually happens next?</h1>
   <p class="sub">A separate investigation from the HCA story: this is about how possessions <em>chain</em>,

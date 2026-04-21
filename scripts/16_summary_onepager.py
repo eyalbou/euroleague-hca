@@ -118,6 +118,14 @@ HTML = """<!doctype html>
   <a href="walkthrough.mp4" style="background:var(--accent);color:#0b0d10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap">Watch video →</a>
 </div>
 
+<div style="margin:14px 0 0;padding:20px;background:linear-gradient(135deg,rgba(60,207,142,0.08),rgba(110,176,255,0.06));border:1px solid rgba(110,176,255,0.22);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1;min-width:240px">
+    <div style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px">⟐ Interactive slicer</div>
+    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">Pick any teams and any seasons -- every HCA number, record, and shooting split below the hero recomputes live in the browser from 10 seasons of team-game data.</div>
+  </div>
+  <a href="explorer.html" style="background:var(--accent);color:#0b0d10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap">Open explorer →</a>
+</div>
+
 <div class="kpis">
   <div class="kpi">
     <span class="v pos">+__HCA_PTS__</span>
@@ -152,6 +160,11 @@ HTML = """<!doctype html>
 </h2>
 <p style="color:var(--muted);margin:0 0 16px;max-width:780px">Four dashboards, each answering one outcome-level question about home-court advantage.</p>
 <div class="cards">
+  <a class="card" href="explorer.html" style="border-color:rgba(110,176,255,0.28);background:linear-gradient(180deg,rgba(110,176,255,0.05),transparent)">
+    <div class="title" style="color:var(--accent)">Team &amp; Season Explorer <span style="font-size:11px;background:var(--accent);color:#0b0d10;padding:2px 8px;border-radius:10px;margin-left:8px;letter-spacing:.02em">FILTERS</span></div>
+    <div class="desc">Multi-select any combination of 36 teams and 10 seasons (2015-16 → 2024-25). HCA, home/away record, shooting profile, and per-season trend all recompute instantly from the raw team-game sums. Start here if you want to ask "what does HCA look like for <em>my</em> team in <em>this</em> year?"</div>
+    <span class="arrow">Open the interactive explorer →</span>
+  </a>
   <a class="card" href="dashboard.html">
     <div class="title">How big is HCA, and what's it made of?</div>
     <div class="desc">Seven tabs: league-wide magnitude, per-team variation, attendance dose-response, COVID natural experiment, ML models, final verdict, and the mechanism decomposition (eFG%, TOV, FT rate, OREB, pace). The main dashboard.</div>
@@ -186,8 +199,8 @@ HTML = """<!doctype html>
     <span class="arrow">Play-by-play transitions →</span>
   </a>
   <a class="card" href="rebound_rates.html">
-    <div class="title">After a miss, who gets the rebound?</div>
-    <div class="desc">OREB vs DREB by miss type: 3-point miss, 2-point miss, terminal missed free throw. 2PT misses are offensive-rebounded 3.8 pp more often than 3PT misses; terminal FT misses only 16.6%. Wilson 95% CIs + pairwise z-tests.</div>
+    <div class="title">After a miss, who gets the rebound? <span style="font-size:10px;background:var(--accent);color:#0b0d10;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:600">+FILTERS</span></div>
+    <div class="desc">OREB vs DREB by miss type: 3-point miss, 2-point miss, terminal missed free throw. 2PT misses are offensive-rebounded 3.8 pp more often than 3PT misses; terminal FT misses only 16.6%. Wilson 95% CIs + pairwise z-tests. <strong style="color:var(--ink)">New:</strong> filter by any team subset and season subset -- all rates and comparisons recompute live.</div>
     <span class="arrow">Rebound rates →</span>
   </a>
 </div>

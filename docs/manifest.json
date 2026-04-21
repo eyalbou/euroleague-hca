@@ -1,5 +1,5 @@
 {
-  "built_at_utc": "2026-04-21T17:12:21.542429Z",
+  "built_at_utc": "2026-04-21T18:34:04.799352Z",
   "dashboards": [
     {
       "href": "index.html",
@@ -26,6 +26,10 @@
       "title": "Ten basketball anomalies (Phase I)"
     },
     {
+      "href": "explorer.html",
+      "title": "Team & Season Explorer (multi-select filters, Phase J)"
+    },
+    {
       "href": "walkthrough.mp4",
       "title": "3-minute walkthrough video (Phase G)"
     },
@@ -42,5 +46,5 @@
       "title": "LLM engineering lessons (Phase E)"
     }
   ],
-  "reports_count": 18
+  "reports_count": 20
 }
