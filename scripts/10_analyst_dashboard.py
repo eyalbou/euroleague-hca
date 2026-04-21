@@ -761,6 +761,9 @@ TEMPLATE = r"""<!doctype html>
     <a class="tab" href="rebound_rates.html" style="text-decoration:none;display:inline-flex;align-items:center">
       10. Rebound rates &rarr;
     </a>
+    <a class="tab" href="anomalies.html" style="text-decoration:none;display:inline-flex;align-items:center">
+      11. Anomalies &rarr;
+    </a>
   </nav>
 
   <!-- OVERVIEW -->

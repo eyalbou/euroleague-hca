@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "n_games": 2895,
+    "seasons": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "built_by": "scripts/25_anomalies.py"
+  },
+  "anomalies": [
+    {
+      "id": "overtime_hca",
+      "title": "The OT coin flip",
+      "regulation": {
+        "n": 2759,
+        "home_win_p": 0.6307,
+        "lo": 0.6125,
+        "hi": 0.6485
+      },
+      "overtime": {
+        "n": 136,
+        "home_win_p": 0.5,
+        "lo": 0.4171,
+        "hi": 0.5829
+      },
+      "diff_pp": 13.07,
+      "z": 3.072,
+      "p_value": 0.0021
+    },
+    {
+      "id": "first_score",
+      "title": "Does scoring first predict winning?",
+      "n_games": 2894,
+      "home_scored_first": {
+        "n": 1467,
+        "home_win_p": 0.6626,
+        "lo": 0.638,
+        "hi": 0.6863
+      },
+      "away_scored_first": {
+        "n": 1427,
+        "home_win_p": 0.5858,
+        "lo": 0.5601,
+        "hi": 0.6111
+      },
+      "scored_first_team_wins": {
+        "p": 0.5401,
+        "lo": 0.5219,
+        "hi": 0.5582
+      }
+    },
+    {
+      "id": "quarter_hca",
+      "title": "Which quarter produces the league-wide HCA?",
+      "by_quarter": [
+        {
+          "quarter": 1,
+          "n": 2896,
+          "mean_home_margin": 1.0794,
+          "lo": 0.8394,
+          "hi": 1.3452,
+          "mean_home_pts": 20.51,
+          "mean_away_pts": 19.43
+        },
+        {
+          "quarter": 2,
+          "n": 2896,
+          "mean_home_margin": 0.8764,
+          "lo": 0.5958,
+          "hi": 1.1117,
+          "mean_home_pts": 20.49,
+          "mean_away_pts": 19.61
+        },
+        {
+          "quarter": 3,
+          "n": 2896,
+          "mean_home_margin": 0.9399,
+          "lo": 0.7133,
+          "hi": 1.1857,
+          "mean_home_pts": 19.97,
+          "mean_away_pts": 19.03
+        },
+        {
+          "quarter": 4,
+          "n": 2896,
+          "mean_home_margin": 0.8764,
+          "lo": 0.6344,
+          "hi": 1.1374,
+          "mean_home_pts": 20.53,
+          "mean_away_pts": 19.65
+        }
+      ],
+      "sum_margin": 3.772
+    },
+    {
+      "id": "clutch_hca",
+      "title": "Does HCA survive close games?",
+      "buckets": [
+        {
+          "bucket": "close (<=5)",
+          "n": 915,
+          "home_win_p": 0.5421,
+          "lo": 0.5097,
+          "hi": 0.5741
+        },
+        {
+          "bucket": "medium (6-10)",
+          "n": 790,
+          "home_win_p": 0.6013,
+          "lo": 0.5667,
+          "hi": 0.6348
+        },
+        {
+          "bucket": "blowout (>10)",
+          "n": 1190,
+          "home_win_p": 0.7034,
+          "lo": 0.6768,
+          "hi": 0.7286
+        }
+      ]
+    },
+    {
+      "id": "blowout_asymmetry",
+      "title": "Home blowouts vs road blowouts",
+      "n_games": 2895,
+      "thresholds": [
+        {
+          "margin": 10,
+          "home": 908,
+          "away": 397,
+          "home_p": 0.3136,
+          "away_p": 0.1371,
+          "ratio": 2.29
+        },
+        {
+          "margin": 20,
+          "home": 299,
+          "away": 105,
+          "home_p": 0.1033,
+          "away_p": 0.0363,
+          "ratio": 2.85,
+          "home_lo": 0.0927,
+          "home_hi": 0.1149,
+          "away_lo": 0.0301,
+          "away_hi": 0.0437
+        },
+        {
+          "margin": 30,
+          "home": 73,
+          "away": 17,
+          "home_p": 0.0252,
+          "away_p": 0.0059,
+          "ratio": 4.29
+        }
+      ]
+    },
+    {
+      "id": "halftime_comeback",
+      "title": "The 10-point halftime hole",
+      "home_trailing": {
+        "n": 334,
+        "comeback_p": 0.1976,
+        "lo": 0.1584,
+        "hi": 0.2436
+      },
+      "away_trailing": {
+        "n": 613,
+        "comeback_p": 0.0653,
+        "lo": 0.0483,
+        "hi": 0.0876
+      }
+    },
+    {
+      "id": "tied_at_half",
+      "title": "Tied at halftime -- pure HCA",
+      "buckets": {
+        "tied_exact": {
+          "n": 104,
+          "home_win_p": 0.5962,
+          "lo": 0.5001,
+          "hi": 0.6854
+        },
+        "within_2": {
+          "n": 569,
+          "home_win_p": 0.6221,
+          "lo": 0.5816,
+          "hi": 0.661
+        }
+      }
+    },
+    {
+      "id": "team_3pt_gap",
+      "title": "Which teams travel worst with their 3-point shot?",
+      "top_home_shooters": [
+        {
+          "team_id": "CSK",
+          "fg3_pct_home": 42.15,
+          "fg3_pct_away": 39.57,
+          "gap_pp": 2.58,
+          "n_home_games": 116,
+          "n_away_games": 111
+        },
+        {
+          "team_id": "KHI",
+          "fg3_pct_home": 36.92,
+          "fg3_pct_away": 34.49,
+          "gap_pp": 2.44,
+          "n_home_games": 75,
+          "n_away_games": 75
+        },
+        {
+          "team_id": "BAS",
+          "fg3_pct_home": 37.23,
+          "fg3_pct_away": 35.43,
+          "gap_pp": 1.8,
+          "n_home_games": 165,
+          "n_away_games": 166
+        },
+        {
+          "team_id": "IST",
+          "fg3_pct_home": 39.41,
+          "fg3_pct_away": 37.82,
+          "gap_pp": 1.6,
+          "n_home_games": 169,
+          "n_away_games": 174
+        },
+        {
+          "team_id": "MAD",
+          "fg3_pct_home": 37.82,
+          "fg3_pct_away": 36.34,
+          "gap_pp": 1.48,
+          "n_home_games": 181,
+          "n_away_games": 178
+        }
+      ],
+      "top_road_warriors": [
+        {
+          "team_id": "OLY",
+          "fg3_pct_home": 34.36,
+          "fg3_pct_away": 35.95,
+          "gap_pp": -1.59,
+          "n_home_games": 173,
+          "n_away_games": 173
+        },
+        {
+          "team_id": "PAR",
+          "fg3_pct_home": 36.8,
+          "fg3_pct_away": 38.29,
+          "gap_pp": -1.49,
+          "n_home_games": 53,
+          "n_away_games": 54
+        },
+        {
+          "team_id": "ZAL",
+          "fg3_pct_home": 36.55,
+          "fg3_pct_away": 37.8,
+          "gap_pp": -1.24,
+          "n_home_games": 161,
+          "n_away_games": 162
+        },
+        {
+          "team_id": "PAM",
+          "fg3_pct_home": 36.28,
+          "fg3_pct_away": 36.69,
+          "gap_pp": -0.4,
+          "n_home_games": 80,
+          "n_away_games": 80
+        },
+        {
+          "team_id": "BER",
+          "fg3_pct_home": 36.25,
+          "fg3_pct_away": 36.59,
+          "gap_pp": -0.34,
+          "n_home_games": 98,
+          "n_away_games": 100
+        }
+      ],
+      "n_teams": 20,
+      "league_mean_gap_pp": 0.666
+    },
+    {
+      "id": "ft_myth",
+      "title": "Does the crowd actually rattle FT shooters?",
+      "home": {
+        "ftm": 40919,
+        "fta": 53215,
+        "ft_pct": 76.894
+      },
+      "away": {
+        "ftm": 38163,
+        "fta": 49944,
+        "ft_pct": 76.412
+      },
+      "diff_pp": 0.482,
+      "z": 1.83,
+      "p_value": 0.0673
+    },
+    {
+      "id": "player_splits",
+      "title": "The biggest home warriors and road warriors",
+      "n_players_eligible": 172,
+      "min_games_each_side": 50,
+      "top_home_warriors": [
+        {
+          "player_id": "P003526",
+          "player_name": "LIGHTY, DAVID",
+          "ppg_home": 9.97,
+          "ppg_away": 6.68,
+          "diff_ppg": 3.29,
+          "games_home": 73,
+          "games_away": 73
+        },
+        {
+          "player_id": "P006540",
+          "player_name": "MUSA, DZANAN",
+          "ppg_home": 14.65,
+          "ppg_away": 11.84,
+          "diff_ppg": 2.81,
+          "games_home": 62,
+          "games_away": 56
+        },
+        {
+          "player_id": "PKVZ",
+          "player_name": "SHVED, ALEXEY",
+          "ppg_home": 19.78,
+          "ppg_away": 17.54,
+          "diff_ppg": 2.24,
+          "games_home": 77,
+          "games_away": 67
+        },
+        {
+          "player_id": "P006477",
+          "player_name": "RUBIT, AUGUSTINE",
+          "ppg_home": 10.55,
+          "ppg_away": 8.36,
+          "diff_ppg": 2.19,
+          "games_home": 67,
+          "games_away": 72
+        },
+        {
+          "player_id": "P005775",
+          "player_name": "BARON, BILLY",
+          "ppg_home": 11.9,
+          "ppg_away": 9.74,
+          "diff_ppg": 2.16,
+          "games_home": 60,
+          "games_away": 57
+        }
+      ],
+      "top_road_warriors": [
+        {
+          "player_id": "P004974",
+          "player_name": "ROLL, MICHAEL",
+          "ppg_home": 7.17,
+          "ppg_away": 9.0,
+          "diff_ppg": -1.83,
+          "games_home": 54,
+          "games_away": 56
+        },
+        {
+          "player_id": "P007982",
+          "player_name": "WILLIAMS-GOSS, NIGEL",
+          "ppg_home": 8.1,
+          "ppg_away": 9.88,
+          "diff_ppg": -1.78,
+          "games_home": 69,
+          "games_away": 68
+        },
+        {
+          "player_id": "P005985",
+          "player_name": "JAMES, MIKE",
+          "ppg_home": 16.07,
+          "ppg_away": 17.57,
+          "diff_ppg": -1.5,
+          "games_home": 151,
+          "games_away": 152
+        },
+        {
+          "player_id": "P006919",
+          "player_name": "OLINDE, LOUIS",
+          "ppg_home": 6.16,
+          "ppg_away": 7.46,
+          "diff_ppg": -1.3,
+          "games_home": 56,
+          "games_away": 57
+        },
+        {
+          "player_id": "P006435",
+          "player_name": "LAPROVITTOLA, NICOLAS",
+          "ppg_home": 9.38,
+          "ppg_away": 10.6,
+          "diff_ppg": -1.22,
+          "games_home": 80,
+          "games_away": 80
+        }
+      ]
+    }
+  ]
+}

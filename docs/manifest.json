@@ -1,5 +1,5 @@
 {
-  "built_at_utc": "2026-04-21T14:21:29.152705Z",
+  "built_at_utc": "2026-04-21T14:30:54.390912Z",
   "dashboards": [
     {
       "href": "index.html",
@@ -22,6 +22,10 @@
       "title": "Rebound rates by miss type (Phase H)"
     },
     {
+      "href": "anomalies.html",
+      "title": "Ten basketball anomalies (Phase I)"
+    },
+    {
       "href": "walkthrough.mp4",
       "title": "3-minute walkthrough video (Phase G)"
     },
@@ -38,5 +42,5 @@
       "title": "LLM engineering lessons (Phase E)"
     }
   ],
-  "reports_count": 17
+  "reports_count": 18
 }

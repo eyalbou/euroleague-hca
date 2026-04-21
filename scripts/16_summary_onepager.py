@@ -168,8 +168,13 @@ HTML = """<!doctype html>
     <div class="desc">OREB vs DREB after missed 3s, missed 2s, and terminal missed FTs. 2PT misses get offensive-rebounded 3.8pp more often than 3PT misses. Wilson 95% CIs + pairwise z-tests.</div>
     <span class="arrow">Open →</span>
   </a>
+  <a class="card" href="anomalies.html">
+    <div class="title">5. Ten anomalies</div>
+    <div class="desc">OT coin flip. First-score effect. Quarter-by-quarter HCA. Clutch collapse. Home blowouts 2.85x. Halftime comeback. Tied-at-half. Team 3PT travel. FT-myth falsified. Named home/road warriors.</div>
+    <span class="arrow">Open →</span>
+  </a>
   <a class="card" href="final_report.html">
-    <div class="title">5. Written report</div>
+    <div class="title">6. Written report</div>
     <div class="desc">The full narrative + all numbers traced back to JSON outputs. ~6 KB of text, ~10 min read.</div>
     <span class="arrow">Open →</span>
   </a>
