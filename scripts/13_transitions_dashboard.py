@@ -159,12 +159,23 @@ HTML_TEMPLATE = r"""<!doctype html>
 </head>
 <body>
 <header>
-  <h1>Play-by-play transitions -- what happens after action X?</h1>
-  <p class="sub">For each source action, three Markov distributions: <strong>Q0</strong> the
-    immediate next event (any team); <strong>Q1</strong> the opponent's immediate response;
-    <strong>Q2</strong> the same team's first <em>offensive</em> action on their next possession.
-    Sources with fewer than 30 observations per split are hidden. Cluster-bootstrapped 95%
-    confidence intervals at the <em>game</em> level.</p>
+  <div style="color:#6eb0ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px">
+    <span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
+    Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a>
+  </div>
+  <h1>After action X, what actually happens next?</h1>
+  <p class="sub">A separate investigation from the HCA story: this is about how possessions <em>chain</em>,
+    independent of who's at home. For each source action, three Markov distributions:
+    <strong>Q0</strong> the immediate next event (any team); <strong>Q1</strong> the opponent's
+    immediate response; <strong>Q2</strong> the same team's first <em>offensive</em> action on their
+    next possession. Sources with fewer than 30 observations per split are hidden.
+    Cluster-bootstrapped 95% confidence intervals at the <em>game</em> level.</p>
+  <p class="sub" style="background:rgba(110,176,255,0.05);border-left:3px solid #6eb0ff;padding:10px 14px;border-radius:4px;margin-top:12px;font-size:13px">
+    <strong style="color:#e7ecf1">Bridge to Track A:</strong> the <em>HCA lens</em> view (pill above) re-reads these
+    distributions as home vs away possessions, and reveals that the tiny per-possession efficiency edge
+    (+0.049 PPP) multiplied across ~72 possessions produces the league's +3.88 HCA. That's where these
+    two investigations meet; everywhere else, this dashboard is about tactics and flow, not who wins.
+  </p>
   <div class="meta" id="meta-line">Loading...</div>
 </header>
 

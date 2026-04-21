@@ -68,13 +68,13 @@
 <div class="hero">
   <div class="eyebrow">EuroLeague Basketball · 10 seasons · 2015-16 → 2024-25</div>
   <h1>Home teams win <span class="lead">1.75x</span> more often.<br/>
-     <span style="color:var(--muted);font-weight:500">Here's why -- and what it means possession by possession.</span></h1>
+     <span style="color:var(--muted);font-weight:500">Two investigations on the same data.</span></h1>
   <p class="sub">
-    A self-built analysis pipeline -- direct Swagger API pulls, bronze/silver/gold parquet lake,
-    SQLite warehouse, 1.13M play-by-play events, mixed-effects models, and a COVID natural experiment --
-    all running locally in Cursor. Built as a learning exercise in ML engineering and LLM-assisted analysis.
+    <strong style="color:var(--ink)">Track A &mdash; why home wins:</strong> quantify HCA, decompose its mechanisms, rule out referee bias, catalog surprising outcome patterns.
+    <strong style="color:var(--ink)">Track B &mdash; how possessions chain:</strong> what actually happens on the next play, and on the opponent's reply.
+    Built locally in Cursor on a self-built parquet lake + SQLite warehouse, 1.13M play-by-play events.
   </p>
-  <div class="meta">Build <code>98210ee</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
+  <div class="meta">Build <code>ba8722f</code> · rebuilt 2026-04-21 UTC · <a href="https://github.com/eyalbou/euroleague-hca" style="color:var(--accent)">source on GitHub</a></div>
 </div>
 
 <div style="margin:24px 0 0;padding:20px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
@@ -113,41 +113,57 @@
   </div>
 </div>
 
-<h2>Explore the dashboards</h2>
+<h2 style="display:flex;align-items:baseline;gap:14px;margin-top:44px">
+  <span style="background:var(--pos);color:#0b0d10;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;letter-spacing:.04em">TRACK A</span>
+  Why do home teams win more?
+</h2>
+<p style="color:var(--muted);margin:0 0 16px;max-width:780px">Four dashboards, each answering one outcome-level question about home-court advantage.</p>
 <div class="cards">
   <a class="card" href="dashboard.html">
-    <div class="title">1. Analyst dashboard</div>
-    <div class="desc">League-wide HCA, per-team variation, attendance dose-response, COVID natural experiment, ML models, mechanism decomposition. Seven tabs.</div>
-    <span class="arrow">Open →</span>
-  </a>
-  <a class="card" href="transitions.html">
-    <div class="title">2. Play-by-play transitions</div>
-    <div class="desc">For any source action (3-pt make, turnover, block, foul...), see what happens next -- on the other team's next play, or on your own next possession. Includes an HCA lens and Storylines (second-order chains).</div>
-    <span class="arrow">Open →</span>
-  </a>
-  <a class="card" href="referees.html">
-    <div class="title">3. Referee-bias audit</div>
-    <div class="desc">Per-referee home-vs-away call asymmetry on 61 EuroLeague officials. Funnel plot + Holm correction. Null result, honestly reported: zero biased refs after correction.</div>
-    <span class="arrow">Open →</span>
-  </a>
-  <a class="card" href="rebound_rates.html">
-    <div class="title">4. Rebound rates by miss type</div>
-    <div class="desc">OREB vs DREB after missed 3s, missed 2s, and terminal missed FTs. 2PT misses get offensive-rebounded 3.8pp more often than 3PT misses. Wilson 95% CIs + pairwise z-tests.</div>
-    <span class="arrow">Open →</span>
+    <div class="title">How big is HCA, and what's it made of?</div>
+    <div class="desc">Seven tabs: league-wide magnitude, per-team variation, attendance dose-response, COVID natural experiment, ML models, final verdict, and the mechanism decomposition (eFG%, TOV, FT rate, OREB, pace). The main dashboard.</div>
+    <span class="arrow">Open the analyst dashboard →</span>
   </a>
   <a class="card" href="anomalies.html">
-    <div class="title">5. Ten anomalies</div>
-    <div class="desc">OT coin flip. First-score effect. Quarter-by-quarter HCA. Clutch collapse. Home blowouts 2.85x. Halftime comeback. Tied-at-half. Team 3PT travel. FT-myth falsified. Named home/road warriors.</div>
-    <span class="arrow">Open →</span>
+    <div class="title">Where does HCA break, and where is it biggest?</div>
+    <div class="desc">Ten outcome patterns: OT coin flip (HCA vanishes), halftime holes (3x easier at home), home blowouts (2.85x more common), tied-at-half, clutch, first-score, FT-myth falsified, named home/road warrior players.</div>
+    <span class="arrow">Ten anomalies →</span>
+  </a>
+  <a class="card" href="referees.html">
+    <div class="title">Is it the referees?</div>
+    <div class="desc">Per-referee home-vs-away call asymmetry on 61 officials with 30+ games. Funnel plot, Holm correction, permutation test. <strong style="color:var(--pos)">Null result:</strong> zero biased refs after correction -- rules out referee bias as a meaningful mechanism.</div>
+    <span class="arrow">Referee-bias audit →</span>
   </a>
   <a class="card" href="final_report.html">
-    <div class="title">6. Written report</div>
-    <div class="desc">The full narrative + all numbers traced back to JSON outputs. ~6 KB of text, ~10 min read.</div>
-    <span class="arrow">Open →</span>
+    <div class="title">The full written argument, with every number traceable</div>
+    <div class="desc">Narrative report stitching together all findings from both tracks, each claim linked to the JSON output that produced it. ~10 min read.</div>
+    <span class="arrow">Final report →</span>
   </a>
 </div>
 
-<h2>Learning notes (Phase E)</h2>
+<h2 style="display:flex;align-items:baseline;gap:14px;margin-top:44px">
+  <span style="background:var(--accent);color:#0b0d10;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;letter-spacing:.04em">TRACK B</span>
+  What happens next on the floor?
+</h2>
+<p style="color:var(--muted);margin:0 0 16px;max-width:780px">Two dashboards, each answering one dynamics-level question -- about the flow of possessions, not who wins.</p>
+<div class="cards">
+  <a class="card" href="transitions.html">
+    <div class="title">After action X, what comes next?</div>
+    <div class="desc">Pick any action (3-pt make, turnover, block, personal foul...) and see three answers: the literal next event, the opponent's immediate reply, and your team's first action next possession. Heatmap, per-team splits, and Storylines (second-order chains) included.</div>
+    <span class="arrow">Play-by-play transitions →</span>
+  </a>
+  <a class="card" href="rebound_rates.html">
+    <div class="title">After a miss, who gets the rebound?</div>
+    <div class="desc">OREB vs DREB by miss type: 3-point miss, 2-point miss, terminal missed free throw. 2PT misses are offensive-rebounded 3.8 pp more often than 3PT misses; terminal FT misses only 16.6%. Wilson 95% CIs + pairwise z-tests.</div>
+    <span class="arrow">Rebound rates →</span>
+  </a>
+</div>
+
+<div style="margin:28px 0 0;padding:16px 20px;background:rgba(110,176,255,0.05);border-left:3px solid var(--accent);border-radius:6px;color:var(--muted);font-size:13px;line-height:1.6">
+  <strong style="color:var(--ink)">Bridge between the tracks:</strong> the transitions dashboard has a dedicated <em>HCA lens</em> view showing per-action Δ PPP between home and away possessions -- that's where Track B partially re-connects to Track A. The headline: <strong style="color:var(--ink)">94% of the +3.88 HCA is explained by a tiny (+0.049) per-possession efficiency edge repeated across ~72 possessions</strong>. Otherwise, Track B is its own investigation about how basketball flows, independent of who's at home.
+</div>
+
+<h2>Learning notes</h2>
 <div class="cards">
   <a class="card" href="concepts-learned.html">
     <div class="title">Concepts learned</div>
@@ -220,4 +236,4 @@
 </footer>
 
 </div>
-<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">98210ee</code> &middot; rebuilt 2026-04-21 14:30 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ba8722f</code> &middot; rebuilt 2026-04-21 17:12 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>

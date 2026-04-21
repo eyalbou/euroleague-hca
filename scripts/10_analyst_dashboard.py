@@ -694,6 +694,7 @@ TEMPLATE = r"""<!doctype html>
 <div class="app">
   <header class="hero">
     <div>
+      <div class="hero-eyebrow" style="color:#3ccf8e"><span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track A &middot; why home wins &middot; <a href="index.html" style="color:#3ccf8e;text-decoration:none">back to index</a></div>
       <div class="hero-eyebrow">EuroLeague Basketball &middot; 10 seasons &middot; {n_games} games</div>
       <h1>The crowd, the court, and the count.<br><span class="accent">What actually moves home-court advantage?</span></h1>
       <p class="hero-sub">A quantitative deep-dive into home-court advantage across 10 EuroLeague seasons (2015-16 to 2024-25).
@@ -744,6 +745,10 @@ TEMPLATE = r"""<!doctype html>
     </table>
   </section>
 
+  <div style="margin:8px 0 4px;color:#9aa3af;font-size:11px;text-transform:uppercase;letter-spacing:.08em">
+    <span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
+    Track A &mdash; Why home wins &middot; tabs below are this investigation
+  </div>
   <nav class="tabs" id="tabs">
     <button class="tab active" data-target="tab-overview">1. The league</button>
     <button class="tab" data-target="tab-teams">2. Per team</button>
@@ -752,18 +757,23 @@ TEMPLATE = r"""<!doctype html>
     <button class="tab" data-target="tab-models">5. Models</button>
     <button class="tab" data-target="tab-verdict">6. Verdict</button>
     <button class="tab" data-target="tab-mechanisms">7. Mechanisms</button>
-    <a class="tab" href="transitions.html" style="text-decoration:none;display:inline-flex;align-items:center">
-      8. Transitions &rarr;
-    </a>
-    <a class="tab" href="referees.html" style="text-decoration:none;display:inline-flex;align-items:center">
-      9. Referees &rarr;
-    </a>
-    <a class="tab" href="rebound_rates.html" style="text-decoration:none;display:inline-flex;align-items:center">
-      10. Rebound rates &rarr;
-    </a>
-    <a class="tab" href="anomalies.html" style="text-decoration:none;display:inline-flex;align-items:center">
-      11. Anomalies &rarr;
-    </a>
+  </nav>
+  <div style="margin:14px 0 4px;color:#9aa3af;font-size:11px;text-transform:uppercase;letter-spacing:.08em">
+    <span style="display:inline-block;width:8px;height:8px;background:#3ccf8e;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
+    More of Track A &mdash; sibling dashboards
+  </div>
+  <nav class="tabs">
+    <a class="tab" href="anomalies.html" style="text-decoration:none;display:inline-flex;align-items:center">Anomalies &rarr;</a>
+    <a class="tab" href="referees.html" style="text-decoration:none;display:inline-flex;align-items:center">Referee-bias audit (null) &rarr;</a>
+    <a class="tab" href="final_report.html" style="text-decoration:none;display:inline-flex;align-items:center">Written report &rarr;</a>
+  </nav>
+  <div style="margin:14px 0 4px;color:#9aa3af;font-size:11px;text-transform:uppercase;letter-spacing:.08em">
+    <span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>
+    Track B &mdash; what happens next on the floor (different question)
+  </div>
+  <nav class="tabs">
+    <a class="tab" href="transitions.html" style="text-decoration:none;display:inline-flex;align-items:center">Play-by-play transitions &rarr;</a>
+    <a class="tab" href="rebound_rates.html" style="text-decoration:none;display:inline-flex;align-items:center">Rebound rates by miss type &rarr;</a>
   </nav>
 
   <!-- OVERVIEW -->

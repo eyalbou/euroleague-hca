@@ -96,7 +96,7 @@ HTML = r"""<!doctype html>
   <a class="back" href="index.html">&larr; back to dashboard index</a>
 
   <div class="hero">
-    <div class="eyebrow">Phase H &middot; Rebound rates by miss type</div>
+    <div class="eyebrow" style="color:#6eb0ff"><span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a></div>
     <h1>2-point misses are rebounded by the offense <span class="lead">3.8pp more often</span> than 3-point misses.</h1>
     <p class="sub">Terminal free-throw misses are the hardest to offensive-rebound -- only 16.6% of them end on an OREB, vs 28-32% for field goals. Every rate is reported with a Wilson 95% CI; pairwise differences use a pooled two-proportion z-test.</p>
     <div class="meta">__N_GAMES__ games &middot; __N_SEASONS__ seasons &middot; 201k rebound-eligible misses</div>

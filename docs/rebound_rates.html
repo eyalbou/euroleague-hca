@@ -75,7 +75,7 @@
   <a class="back" href="index.html">&larr; back to dashboard index</a>
 
   <div class="hero">
-    <div class="eyebrow">Phase H &middot; Rebound rates by miss type</div>
+    <div class="eyebrow" style="color:#6eb0ff"><span style="display:inline-block;width:8px;height:8px;background:#6eb0ff;border-radius:50%;margin-right:6px;vertical-align:middle"></span>Track B &middot; game dynamics &middot; <a href="index.html" style="color:#6eb0ff;text-decoration:none">back to index</a></div>
     <h1>2-point misses are rebounded by the offense <span class="lead">3.8pp more often</span> than 3-point misses.</h1>
     <p class="sub">Terminal free-throw misses are the hardest to offensive-rebound -- only 16.6% of them end on an OREB, vs 28-32% for field goals. Every rate is reported with a Wilson 95% CI; pairwise differences use a pooled two-proportion z-test.</p>
     <div class="meta">2,896 games &middot; 10 seasons &middot; 201k rebound-eligible misses</div>
@@ -159,7 +159,7 @@
   <footer>
     Data: silver-layer PBP (<code>fact_game_event.parquet</code>), 1.51M events across 2,896 games and 10 EuroLeague seasons.
     Methodology: terminal-FT detection via forward lookup, rebound outcome classified via 3-event forward window, Wilson 95% CIs, pooled two-proportion z-test for pairwise comparisons.
-    <br/>Build <code>5cb34d4</code> &middot; see <a href="reports/rebound_rates.json" style="color:var(--accent)">rebound_rates.json</a> for all 9 rows.
+    <br/>Build <code>ba8722f</code> &middot; see <a href="reports/rebound_rates.json" style="color:var(--accent)">rebound_rates.json</a> for all 9 rows.
   </footer>
 </div>
 
@@ -317,4 +317,4 @@ compBody.innerHTML = comparisons.map(c => {
   </tr>`;
 }).join('');
 </script>
-<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">98210ee</code> &middot; rebuilt 2026-04-21 14:30 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">ba8722f</code> &middot; rebuilt 2026-04-21 17:12 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
