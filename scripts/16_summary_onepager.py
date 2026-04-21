@@ -110,6 +110,14 @@ HTML = """<!doctype html>
   <div class="meta">Build <code>__SHA__</code> · rebuilt __DATE__ UTC · <a href="https://github.com/__REPO__" style="color:var(--accent)">source on GitHub</a></div>
 </div>
 
+<div style="margin:24px 0 0;padding:20px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1;min-width:240px">
+    <div style="color:var(--pos);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px">▶ 3-minute walkthrough</div>
+    <div style="color:var(--ink);font-size:15px;font-weight:500;line-height:1.4">The whole story in under three minutes: headline, referee null result, possession mechanism, COVID experiment, and what it all means.</div>
+  </div>
+  <a href="walkthrough.mp4" style="background:var(--accent);color:#0b0d10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap">Watch video →</a>
+</div>
+
 <div class="kpis">
   <div class="kpi">
     <span class="v pos">+__HCA_PTS__</span>
@@ -138,7 +146,7 @@ HTML = """<!doctype html>
   </div>
 </div>
 
-<h2>Explore the three dashboards</h2>
+<h2>Explore the dashboards</h2>
 <div class="cards">
   <a class="card" href="dashboard.html">
     <div class="title">1. Analyst dashboard</div>
@@ -150,8 +158,13 @@ HTML = """<!doctype html>
     <div class="desc">For any source action (3-pt make, turnover, block, foul...), see what happens next -- on the other team's next play, or on your own next possession. Includes an HCA lens and Storylines (second-order chains).</div>
     <span class="arrow">Open →</span>
   </a>
+  <a class="card" href="referees.html">
+    <div class="title">3. Referee-bias audit</div>
+    <div class="desc">Per-referee home-vs-away call asymmetry on __N_ELIGIBLE__ EuroLeague officials. Funnel plot + Holm correction. Null result, honestly reported: zero biased refs after correction.</div>
+    <span class="arrow">Open →</span>
+  </a>
   <a class="card" href="final_report.html">
-    <div class="title">3. Written report</div>
+    <div class="title">4. Written report</div>
     <div class="desc">The full narrative + all numbers traced back to JSON outputs. ~6 KB of text, ~10 min read.</div>
     <span class="arrow">Open →</span>
   </a>
@@ -244,6 +257,7 @@ def main() -> None:
     sha = _sha()
     date = datetime.utcnow().strftime("%Y-%m-%d")
     repo = "eyalbou/euroleague-hca"
+    referees = _read("referee_output.json")
 
     odds = logistic.get("is_home_odds", 0)
     mixed_int = (mixedlm.get("fixed_effects") or {}).get("Intercept", 0)
@@ -253,6 +267,7 @@ def main() -> None:
     pos_share = kpi.get("pct_sources_positive_delta", 0)
     weighted_delta = kpi.get("weighted_delta_ppp", 0)
     did = ((covid.get("did") or {}).get("post - pre") or {}).get("mean", 0)
+    ref_eligible = (referees.get("kpi") or {}).get("n_refs_eligible", 61)
 
     html = (
         HTML
@@ -263,6 +278,7 @@ def main() -> None:
         .replace("__DELTA__", f"{weighted_delta:.3f}")
         .replace("__POS__", f"{pos_share*100:.0f}")
         .replace("__DID__", f"{did:+.2f}")
+        .replace("__N_ELIGIBLE__", str(ref_eligible))
         .replace("__SHA__", sha)
         .replace("__DATE__", date)
         .replace("__REPO__", repo)

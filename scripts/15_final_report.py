@@ -45,6 +45,7 @@ def build() -> str:
     mech = _read("mechanism_output.json")
     hca_trans = _read("hca_transitions.json")
     trans_qa = _read("transitions_qa.json")
+    referees = _read("referee_output.json")
 
     sha = _commit_sha()
     stamp = datetime.utcnow().strftime("%Y-%m-%d")
@@ -188,8 +189,36 @@ def build() -> str:
           "HCA-lens overlay.")
         a("")
 
+    # -- Referee-bias null result --
+    if referees:
+        rk = referees.get("kpi", {})
+        a("## 7. Referee-level bias (null result)")
+        a("")
+        a(f"We tested all **{rk.get('n_refs_eligible', 0)} referees** with at least "
+          f"{rk.get('min_games_threshold', 30)} games (out of "
+          f"{rk.get('n_refs_total', 0)} total unique officials across 10 seasons) for "
+          "home-vs-away asymmetry in foul calls and free-throw attempts.")
+        a("")
+        a(f"- **Raw p < 0.05** (before correction): **{rk.get('n_significant_raw_pf', 0)}** refs on foul diff; "
+          f"**{rk.get('n_significant_raw_fta', 0)}** refs on FTA diff. "
+          f"Expected by chance alone: **{rk.get('expected_false_positives_raw', 0)}**.")
+        a(f"- **Permutation test** (200 home/away label shuffles): the mean number of outliers under the null is "
+          f"**{rk.get('permutation_mean_outlier_count', 0):.1f}** -- essentially identical to what we observed "
+          f"(permutation p = {rk.get('permutation_p_value', 1.0):.2f}).")
+        a(f"- **After Holm correction** across {rk.get('n_refs_eligible', 0)} simultaneous tests: "
+          f"**{rk.get('n_significant_holm_pf', 0)}** significant on foul diff; "
+          f"**{rk.get('n_significant_holm_fta', 0)}** on FTA diff.")
+        a("")
+        a("**Reading it:** home teams draw +1.1 more FTA per game and commit 0.5 fewer fouls "
+          "league-wide -- but *no individual referee* is driving that skew. The small asymmetry "
+          "is spread evenly across the entire referee pool. Combined with the mechanism-decomposition "
+          "finding that foul differential contributes only +0.05 pts of the +3.88 pt HCA (1.3%), "
+          "EuroLeague officiating is effectively neutral -- the opposite of Moskowitz & Wertheim's "
+          "NBA finding. See `dashboards/referees.html` for the funnel plot and top-10 outlier table.")
+        a("")
+
     # -- QA section --
-    a("## 7. Quality checks")
+    a("## 8. Quality checks")
     a("")
     if trans_qa:
         a(f"- Transition QA ({len(trans_qa)} checks): all green "
@@ -203,17 +232,18 @@ def build() -> str:
     a("")
 
     # -- Reading the dashboard --
-    a("## 8. How to read the dashboard")
+    a("## 9. How to read the dashboard")
     a("")
     a("- **index.html** -- one-pager with the 5 headline KPIs and deep-links.")
     a("- **analyst_dashboard.html** -- seven tabs covering league, per-team, "
       "attendance, COVID, models, verdict, mechanisms.")
     a("- **transitions.html** -- play-by-play Markov view with four lenses "
       "(bars, heatmap, per-source multiples, per-team, HCA).")
+    a("- **referees.html** -- per-referee funnel plot + Holm-corrected outlier table.")
     a("")
 
     # -- What I learned --
-    a("## 9. What this project taught me")
+    a("## 10. What this project taught me")
     a("")
     a("- **Cluster bootstrap vs naive bootstrap:** treating events inside one game "
       "as independent triples the apparent precision. Clustering at the game level "

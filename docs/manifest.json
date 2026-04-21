@@ -1,5 +1,5 @@
 {
-  "built_at_utc": "2026-04-21T06:04:09.747509Z",
+  "built_at_utc": "2026-04-21T14:01:43.839828Z",
   "dashboards": [
     {
       "href": "index.html",
@@ -14,6 +14,14 @@
       "title": "Play-by-play transitions"
     },
     {
+      "href": "referees.html",
+      "title": "Referee-bias audit (Phase F)"
+    },
+    {
+      "href": "walkthrough.mp4",
+      "title": "3-minute walkthrough video (Phase G)"
+    },
+    {
       "href": "final_report.html",
       "title": "Written report"
     },
@@ -26,5 +34,5 @@
       "title": "LLM engineering lessons (Phase E)"
     }
   ],
-  "reports_count": 13
+  "reports_count": 15
 }

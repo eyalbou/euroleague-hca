@@ -87,11 +87,18 @@ def main() -> None:
     DOCS.mkdir(parents=True)
 
     # Copy dashboards
-    for name in ["index.html", "dashboard.html", "transitions.html", "final_report.html"]:
+    for name in ["index.html", "dashboard.html", "transitions.html",
+                 "final_report.html", "referees.html"]:
         src = DASHBOARDS / name
         if src.exists():
             shutil.copy2(src, DOCS / name)
             log.info("copied dashboards/%s", name)
+
+    # Copy walkthrough video if rendered
+    video_src = config.PROJECT_ROOT / "video" / "out" / "walkthrough.mp4"
+    if video_src.exists():
+        shutil.copy2(video_src, DOCS / "walkthrough.mp4")
+        log.info("copied walkthrough.mp4 (%.1f MB)", video_src.stat().st_size / 1024 / 1024)
 
     # Copy shared assets (if any)
     assets_src = DASHBOARDS / "assets"
@@ -114,6 +121,8 @@ def main() -> None:
         "transitions_team_rank.json",
         "transitions_bigrams.json",
         "hca_transitions.json",
+        "referee_output.json",
+        "referee_qa.json",
         "final_report.md",
     ]
     for name in publishable:
@@ -140,6 +149,8 @@ def main() -> None:
             {"href": "index.html", "title": "Summary (start here)"},
             {"href": "dashboard.html", "title": "Analyst dashboard (7 tabs)"},
             {"href": "transitions.html", "title": "Play-by-play transitions"},
+            {"href": "referees.html", "title": "Referee-bias audit (Phase F)"},
+            {"href": "walkthrough.mp4", "title": "3-minute walkthrough video (Phase G)"},
             {"href": "final_report.html", "title": "Written report"},
             {"href": "concepts-learned.html", "title": "Concepts learned (Phase E)"},
             {"href": "llm-engineering-lessons.html", "title": "LLM engineering lessons (Phase E)"},

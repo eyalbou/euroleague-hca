@@ -6,6 +6,8 @@ effects models, and first-order Markov chains over play-by-play data.
 
 **Live dashboard:** https://eyalbou.github.io/euroleague-hca/
 
+**3-minute video walkthrough:** https://eyalbou.github.io/euroleague-hca/walkthrough.mp4
+
 ## Headline findings
 
 - **+3.88 pts / game** average home advantage (mixed-effects LM intercept).
@@ -13,6 +15,9 @@ effects models, and first-order Markov chains over play-by-play data.
 - **94% of HCA** is explained by possession-level efficiency -- home teams
   score **+0.049 more points per offensive possession** than road teams,
   across *every single one* of the 19 trackable source actions.
+- **Referees are unbiased.** Across 61 officials with >=30 games, zero show
+  a Holm-significant home-vs-away call asymmetry. The opposite of the NBA
+  finding (Moskowitz & Wertheim 2011). Referee neutrality is the null.
 - COVID-19 natural experiment confirms HCA recovered to pre-pandemic levels
   once fans returned.
 

@@ -1,0 +1,8 @@
+{
+  "n_refs_total": 112,
+  "n_refs_eligible": 61,
+  "all_refs_have_country": true,
+  "p_values_in_range": true,
+  "holm_monotone": true,
+  "verdict_matches_holm": true
+}

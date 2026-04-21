@@ -755,6 +755,9 @@ TEMPLATE = r"""<!doctype html>
     <a class="tab" href="transitions.html" style="text-decoration:none;display:inline-flex;align-items:center">
       8. Transitions &rarr;
     </a>
+    <a class="tab" href="referees.html" style="text-decoration:none;display:inline-flex;align-items:center">
+      9. Referees &rarr;
+    </a>
   </nav>
 
   <!-- OVERVIEW -->

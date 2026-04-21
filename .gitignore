@@ -33,3 +33,11 @@ email-cleanup/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Video build artifacts. Only keep sources (narration.txt + package.json);
+# the final walkthrough.mp4 lives in docs/ for GitHub Pages to serve.
+video/out/
+video/public/
+video/node_modules/
+video/src/
+

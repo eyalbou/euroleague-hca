@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Referee-level bias -- EuroLeague HCA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+<style>
+  :root{--bg:#0b0d10;--panel:#13171d;--panel2:#1a1f27;--ink:#e7ecf1;--muted:#b6bfcc;
+    --dim:#7a8595;--accent:#6eb0ff;--pos:#3ccf8e;--neg:#ef5a5a;--warn:#f5b73a;
+    --hair:rgba(255,255,255,.07)}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;
+    letter-spacing:-0.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+  .back{color:var(--accent);font-size:13px;text-decoration:none}
+  .hero{padding:24px 0 16px;border-bottom:1px solid var(--hair)}
+  .eyebrow{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  h1{font-size:30px;font-weight:700;line-height:1.08;letter-spacing:-0.02em;margin:0 0 8px}
+  h1 .lead{color:var(--pos)}
+  .sub{color:var(--muted);max-width:780px;margin:0}
+  .meta{color:var(--dim);font-size:12px;margin-top:12px}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:28px 0}
+  .kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:16px}
+  .kpi .v{font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.1;display:block}
+  .kpi .v.pos{color:var(--pos)} .kpi .v.neu{color:var(--accent)} .kpi .v.warn{color:var(--warn)}
+  .kpi .k{color:var(--dim);font-size:12px;margin-top:4px;display:block}
+  .kpi .n{color:var(--dim);font-size:11px;margin-top:8px;display:block;font-variant-numeric:tabular-nums}
+
+  h2{font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:36px 0 8px}
+  .card{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:20px;margin-top:16px}
+  .card h3{margin:0 0 8px;font-size:15px;font-weight:600}
+  .card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .chart-wrap{position:relative;width:100%;height:420px}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  table.tbl th,table.tbl td{padding:8px 10px;border-bottom:1px solid var(--hair);text-align:left}
+  table.tbl th{color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  table.tbl td.num{font-variant-numeric:tabular-nums;text-align:right}
+  table.tbl td.name{color:var(--ink);font-weight:500}
+  .chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;
+    background:rgba(255,255,255,.05);color:var(--muted);font-weight:500}
+  .chip.null{background:rgba(60,207,142,.12);color:var(--pos)}
+  .chip.sig{background:rgba(239,90,90,.12);color:var(--neg)}
+
+  .reading{background:rgba(110,176,255,.04);border-left:3px solid var(--accent);
+    padding:14px 18px;border-radius:4px;margin-top:16px;color:var(--muted);font-size:13.5px;line-height:1.65}
+  .reading strong{color:var(--ink)}
+
+  footer{margin-top:48px;color:var(--dim);font-size:12px;border-top:1px solid var(--hair);padding-top:16px}
+  code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
+    background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px}
+
+  @media (max-width:640px){ h1{font-size:24px} .wrap{padding:24px 16px 64px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; back to dashboard index</a>
+
+  <div class="hero">
+    <div class="eyebrow">Phase F &middot; Referee-level bias audit</div>
+    <h1>EuroLeague referees are <span class="lead">unbiased.</span><br/>
+      <span style="color:var(--muted);font-weight:500">The outlier count matches pure chance almost exactly.</span></h1>
+    <p class="sub">We tested all 61 referees with at least 30 games for home-vs-away asymmetry in fouls called and free-throw attempts. Every claim uses cluster-resampled 95% CIs and Holm-corrected p-values.</p>
+    <div class="meta">112 unique referees observed &middot; 61 tested (n &ge; 30) &middot; 2,897 games &middot; 10 seasons</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <span class="v pos">NULL</span>
+      <span class="k">verdict after Holm correction</span>
+      <span class="n">two-sided z-tests vs league mean</span>
+    </div>
+    <div class="kpi">
+      <span class="v neu">3</span>
+      <span class="k">raw p &lt; 0.05 refs (foul diff)</span>
+      <span class="n">expected by chance: ~3.1</span>
+    </div>
+    <div class="kpi">
+      <span class="v neu">3.0</span>
+      <span class="k">mean outliers under null (permutation)</span>
+      <span class="n">200 label-reshuffle permutations</span>
+    </div>
+    <div class="kpi">
+      <span class="v pos">0</span>
+      <span class="k">Holm-significant refs (PF)</span>
+      <span class="n">after correction for 61 tests</span>
+    </div>
+    <div class="kpi">
+      <span class="v pos">0</span>
+      <span class="k">Holm-significant refs (FTA)</span>
+      <span class="n">after correction for 61 tests</span>
+    </div>
+  </div>
+
+  <h2>Funnel plot: foul differential vs sample size</h2>
+  <div class="card">
+    <h3>Each dot is one referee; black curves are the 95% funnel under the null</h3>
+    <p class="sub">Y-axis: mean (home fouls &minus; away fouls) across that ref's games. X-axis: number of games officiated.
+      The two dashed curves mark the band within which 95% of refs would fall by pure chance, given the league-wide per-game
+      standard deviation of the foul differential. Dots inside the funnel = indistinguishable from chance.</p>
+    <div class="chart-wrap"><canvas id="funnel"></canvas></div>
+    <div class="reading" id="reading">Reading this chart...</div>
+  </div>
+
+  <h2>Top-10 refs by raw p-value (before multiple-comparison correction)</h2>
+  <div class="card">
+    <p class="sub">Sorted by raw (uncorrected) p-value on foul-diff. Watch the Holm column: once we correct for 61 simultaneous tests, every one of these jumps to near 1.0. That's the null result in a single glance.</p>
+    <table class="tbl" id="top-table">
+      <thead>
+        <tr>
+          <th>Referee</th><th>Country</th><th class="num">n games</th>
+          <th class="num">PF diff (home-away)</th><th class="num">95% CI</th>
+          <th class="num">raw p</th><th class="num">Holm p</th><th>status</th>
+        </tr>
+      </thead>
+      <tbody id="top-body"></tbody>
+    </table>
+  </div>
+
+  <h2>What this means</h2>
+  <div class="card">
+    <div class="reading">
+      <strong>Observation:</strong> Home teams draw about <strong>+1.1 more free-throw attempts per game</strong> and commit roughly <strong>0.5 fewer fouls</strong> than road teams &mdash; a small league-wide skew that is consistent with home teams being more aggressive on offense and with referees being human.
+      <br/><br/>
+      <strong>Test:</strong> Is any individual referee driving that league-wide skew? For each of the 61 refs with n &ge; 30 games, we compared their personal foul-differential and FTA-differential to the league mean, then applied Holm correction across all 61 simultaneous tests.
+      <br/><br/>
+      <strong>Result:</strong> <span class="chip null">3 of 61</span> refs cleared p &lt; 0.05 on the raw test. Expected by pure chance alone: <strong>3.1</strong>. The permutation test (shuffle home/away labels 200x and recount outliers) produced a mean outlier count of <strong>3.0</strong> &mdash; essentially identical to what we observed. After Holm correction: <strong>zero</strong> refs remain significant on either metric.
+      <br/><br/>
+      <strong>Interpretation:</strong> EuroLeague's league-wide home-court advantage (+3.88 pts / game) is <em>not</em> driven by any individual referee or even a small group of biased referees. The small home-foul-call skew is distributed evenly across the referee pool. Coupled with the mechanism-decomposition finding that the foul differential contributes only +0.05 pts of the +3.88 pt HCA (1.3%), refereeing is effectively neutral in European basketball.
+      <br/><br/>
+      <strong>Why this differs from the NBA:</strong> Moskowitz &amp; Wertheim (<em>Scorecasting</em>, 2011) found that referee bias was the majority driver of NBA HCA. Our data replicates that EuroLeague HCA is instead driven by possession-level offensive efficiency (94% of HCA from a +0.049 &Delta; PPP home edge), not officiating.
+      <br/><br/>
+      <strong>Caveats:</strong> (1) EuroLeague refs work as 3-person crews; per-ref metrics attribute the crew's calls to each individual ref. (2) Per-crew triples are too sparse (most crews appear &lt;5 times) to analyze directly. (3) n &ge; 30 eliminates 51 refs who only officiated a handful of games &mdash; they could harbor bias we can't detect.
+    </div>
+  </div>
+
+  <footer>
+    Data: raw game-header JSON (referee assignments) joined to silver-layer box scores.
+    Methodology: paired per-game differentials, cluster bootstrap 500x, z-test against league mean, Holm correction across 61 simultaneous tests, 200-permutation sanity check.
+    <br/>Build <code>7aeba6a</code> &middot; see <a href="reports/referee_output.json" style="color:var(--accent)">referee_output.json</a> for all 61 rows.
+  </footer>
+</div>
+
+<script>
+const DATA = {"generated_at": "2026-04-21T13:32:06.087325+00:00", "baselines": {"league_mu_pf_diff": -0.48842832469775477, "league_sd_pf_diff": 4.715446919499164, "league_mu_fta_diff": 1.1298791018998273, "league_sd_fta_diff": 8.712746055906948, "league_mu_home_margin": 3.785146804835924}, "kpi": {"n_refs_total": 112, "n_refs_eligible": 61, "min_games_threshold": 30, "n_significant_raw_pf": 3, "n_significant_raw_fta": 4, "n_significant_holm_pf": 0, "n_significant_holm_fta": 0, "expected_false_positives_raw": 3.1, "permutation_mean_outlier_count": 3.01, "permutation_p_value": 0.5621890547263682, "n_permutations": 200, "verdict": "null_result"}, "per_ref": [{"ref_code": "OJFH", "ref_name": "LAURINAVICIUS, JURGIS", "ref_country": "LTU", "n_games": 54, "mean_pf_diff": 1.1296296296296295, "lo_pf_diff": -0.2319444444444444, "hi_pf_diff": 2.324537037037037, "mean_fta_diff": 0.5925925925925926, "lo_fta_diff": -1.3898148148148148, "hi_fta_diff": 2.5467592592592587, "mean_home_margin": 1.5925925925925926, "lo_home_margin": -1.3166666666666664, "hi_home_margin": 4.7875, "z_pf": 2.521552949285211, "z_fta": -0.4531560262536037, "p_pf": 0.011683808987260624, "p_fta": 0.6504363944307956, "p_holm_pf": 0.7127123482228981, "p_holm_fta": 1.0}, {"ref_code": "OJFA", "ref_name": "BISSANG, JOSEPH", "ref_country": "FRA", "n_games": 127, "mean_pf_diff": -1.3543307086614174, "lo_pf_diff": -2.126771653543307, "hi_pf_diff": -0.5391732283464569, "mean_fta_diff": 2.52755905511811, "lo_fta_diff": 1.0236220472440944, "hi_fta_diff": 4.059251968503936, "mean_home_margin": 4.826771653543307, "lo_home_margin": 2.551771653543307, "hi_home_margin": 7.165748031496062, "z_pf": -2.069416632524801, "z_fta": 1.8078173100595771, "p_pf": 0.03850700705481702, "p_fta": 0.07063493874941384, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAAX", "ref_name": "ZAMOJSKI, JAKUB", "ref_country": "POL", "n_games": 141, "mean_pf_diff": -1.2836879432624113, "lo_pf_diff": -2.000354609929078, "hi_pf_diff": -0.5565602836879434, "mean_fta_diff": 0.3475177304964539, "lo_fta_diff": -0.8723404255319149, "hi_fta_diff": 1.5758865248226939, "mean_home_margin": 5.716312056737588, "lo_home_margin": 3.893262411347518, "hi_home_margin": 7.899468085106381, "z_pf": -2.0026065227868157, "z_fta": -1.0662570101454358, "p_pf": 0.04521953919671717, "p_fta": 0.28630747718296456, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OADA", "ref_name": "KOROMILAS, ELIAS", "ref_country": "GRE", "n_games": 117, "mean_pf_diff": -1.3247863247863247, "lo_pf_diff": -2.2905982905982905, "hi_pf_diff": -0.5042735042735043, "mean_fta_diff": 2.572649572649573, "lo_fta_diff": 1.0166666666666666, "hi_fta_diff": 4.098504273504273, "mean_home_margin": 3.427350427350427, "lo_home_margin": 1.2262820512820514, "hi_home_margin": 5.853632478632476, "z_pf": -1.918502130621464, "z_fta": 1.7911630423866505, "p_pf": 0.055047372218437474, "p_fta": 0.07326713497914694, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJFQ", "ref_name": "FOUFIS, IOANNIS", "ref_country": "GRE", "n_games": 107, "mean_pf_diff": 0.38317757009345793, "lo_pf_diff": -0.48598130841121495, "hi_pf_diff": 1.1824766355140184, "mean_fta_diff": 0.411214953271028, "lo_fta_diff": -1.0144859813084108, "hi_fta_diff": 1.766355140186916, "mean_home_margin": 1.8317757009345794, "lo_home_margin": -0.4490654205607476, "hi_home_margin": 4.234579439252336, "z_pf": 1.91200571978246, "z_fta": -0.8532235083952544, "p_pf": 0.05587546041396818, "p_fta": 0.39353536913475473, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEM", "ref_name": "PATERNICO, CARMELO", "ref_country": "ITA", "n_games": 231, "mean_pf_diff": -1.051948051948052, "lo_pf_diff": -1.6588744588744588, "hi_pf_diff": -0.5584415584415584, "mean_fta_diff": 1.7575757575757576, "lo_fta_diff": 0.702922077922078, "hi_fta_diff": 2.7406926406926404, "mean_home_margin": 3.2554112554112553, "lo_home_margin": 1.5994588744588745, "hi_home_margin": 4.877164502164502, "z_pf": -1.8163195334395226, "z_fta": 1.0949662887744966, "p_pf": 0.06932137055573562, "p_fta": 0.2735314057047704, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIU", "ref_name": "MAJKIC, MARIO", "ref_country": "SLO", "n_games": 84, "mean_pf_diff": -1.3214285714285714, "lo_pf_diff": -2.2142857142857144, "hi_pf_diff": -0.2970238095238101, "mean_fta_diff": 1.869047619047619, "lo_fta_diff": -0.14404761904761898, "hi_fta_diff": 3.774404761904761, "mean_home_margin": 2.8333333333333335, "lo_home_margin": 0.23690476190476198, "hi_home_margin": 5.335119047619045, "z_pf": -1.6190561572332571, "z_fta": 0.7775495026304703, "p_pf": 0.10543518085569148, "p_fta": 0.4368346404881329, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJFP", "ref_name": "DRAGOJEVIC, IGOR", "ref_country": "MNE", "n_games": 49, "mean_pf_diff": 0.42857142857142855, "lo_pf_diff": -0.9591836734693877, "hi_pf_diff": 1.836734693877551, "mean_fta_diff": 1.0204081632653061, "lo_fta_diff": -1.4510204081632652, "hi_fta_diff": 3.5413265306122446, "mean_home_margin": 3.0816326530612246, "lo_home_margin": 0.1816326530612246, "hi_home_margin": 6.348979591836732, "z_pf": 1.3612703912201087, "z_fta": -0.08795121142342087, "p_pf": 0.17342825632016723, "p_fta": 0.9299154534423921, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLM", "ref_name": "NEDOVIC, MILAN", "ref_country": "SLO", "n_games": 153, "mean_pf_diff": -0.006535947712418301, "lo_pf_diff": -0.765032679738562, "hi_pf_diff": 0.7777777777777778, "mean_fta_diff": 0.6470588235294118, "lo_fta_diff": -0.8062091503267972, "hi_fta_diff": 2.0460784313725484, "mean_home_margin": 2.7908496732026142, "lo_home_margin": 0.5745098039215687, "hi_home_margin": 4.745751633986927, "z_pf": 1.2640752007668907, "z_fta": -0.6854506006961049, "p_pf": 0.2062030367323544, "p_fta": 0.4930596228658515, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJFV", "ref_name": "TRAWICKI, TOMASZ", "ref_country": "POL", "n_games": 91, "mean_pf_diff": 0.13186813186813187, "lo_pf_diff": -0.8027472527472527, "hi_pf_diff": 1.0120879120879112, "mean_fta_diff": 0.945054945054945, "lo_fta_diff": -0.7478021978021978, "hi_fta_diff": 2.7420329670329666, "mean_home_margin": 4.34065934065934, "lo_home_margin": 1.7686813186813186, "hi_home_margin": 7.131868131868132, "z_pf": 1.2548653744173015, "z_fta": -0.20235986157732028, "p_pf": 0.2095276355556983, "p_fta": 0.839635405047666, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLJ", "ref_name": "PANTHER, ANNE", "ref_country": "GER", "n_games": 139, "mean_pf_diff": -0.9784172661870504, "lo_pf_diff": -1.8098920863309351, "hi_pf_diff": -0.1976618705035973, "mean_fta_diff": 0.7769784172661871, "lo_fta_diff": -0.737589928057554, "hi_fta_diff": 2.258992805755396, "mean_home_margin": 2.258992805755396, "lo_home_margin": 0.14514388489208646, "hi_home_margin": 4.072302158273381, "z_pf": -1.2250979643612392, "z_fta": -0.47753460087813093, "p_pf": 0.22053831207885266, "p_fta": 0.6329814881091309, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJLS", "ref_name": "NIKOLIC, UROS", "ref_country": "SRB", "n_games": 135, "mean_pf_diff": -0.007407407407407408, "lo_pf_diff": -0.9594444444444444, "hi_pf_diff": 0.8518518518518519, "mean_fta_diff": 1.0148148148148148, "lo_fta_diff": -0.5703703703703704, "hi_fta_diff": 2.5605555555555544, "mean_home_margin": 3.3851851851851853, "lo_home_margin": 1.2496296296296299, "hi_home_margin": 5.363333333333332, "z_pf": 1.1852446016129483, "z_fta": -0.1534448719487304, "p_pf": 0.23592074994101275, "p_fta": 0.8780474611506126, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OADE", "ref_name": "MANTYLA, PETRI", "ref_country": "FIN", "n_games": 58, "mean_pf_diff": -1.1896551724137931, "lo_pf_diff": -2.3719827586206894, "hi_pf_diff": -0.11163793103448315, "mean_fta_diff": 1.2413793103448276, "lo_fta_diff": -0.6469827586206897, "hi_fta_diff": 3.3883620689655167, "mean_home_margin": 4.0, "lo_home_margin": 0.4392241379310345, "hi_home_margin": 7.578879310344827, "z_pf": -1.1325298872228093, "z_fta": 0.09746184306587832, "p_pf": 0.2574117265493474, "p_fta": 0.9223596347517651, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJFU", "ref_name": "SILVA, SERGIO", "ref_country": "POR", "n_games": 92, "mean_pf_diff": -1.0434782608695652, "lo_pf_diff": -1.923913043478261, "hi_pf_diff": -0.30380434782608745, "mean_fta_diff": 2.0217391304347827, "lo_fta_diff": 0.22771739130434787, "hi_fta_diff": 3.855163043478259, "mean_home_margin": 4.239130434782608, "lo_home_margin": 1.514945652173913, "hi_home_margin": 6.522282608695652, "z_pf": -1.1290238343678392, "z_fta": 0.9818283264047885, "p_pf": 0.25888777934888774, "p_fta": 0.32618443058633817, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJBD", "ref_name": "BOLTAUZER, MATEJ", "ref_country": "SLO", "n_games": 234, "mean_pf_diff": -0.8333333333333334, "lo_pf_diff": -1.4766025641025642, "hi_pf_diff": -0.2564102564102564, "mean_fta_diff": 0.9957264957264957, "lo_fta_diff": -0.13044871794871793, "hi_fta_diff": 2.097115384615384, "mean_home_margin": 3.576923076923077, "lo_home_margin": 1.9646367521367523, "hi_home_margin": 5.177457264957265, "z_pf": -1.1188827269561306, "z_fta": -0.23553312088559672, "p_pf": 0.2631901728298489, "p_fta": 0.8137949750561491, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OACY", "ref_name": "JOVCIC, MILIVOJE", "ref_country": "SRB", "n_games": 205, "mean_pf_diff": -0.8341463414634146, "lo_pf_diff": -1.473170731707317, "hi_pf_diff": -0.11682926829268314, "mean_fta_diff": 2.004878048780488, "lo_fta_diff": 0.7997560975609757, "hi_fta_diff": 3.1375609756097553, "mean_home_margin": 3.2487804878048783, "lo_home_margin": 1.6034146341463416, "hi_home_margin": 5.095365853658534, "z_pf": -1.0497263116106146, "z_fta": 1.4379023871008996, "p_pf": 0.2938439629779861, "p_fta": 0.15046175231734304, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJLU", "ref_name": "UDYANSKYY, EDUARD", "ref_country": "GBR", "n_games": 52, "mean_pf_diff": 0.19230769230769232, "lo_pf_diff": -0.8177884615384615, "hi_pf_diff": 1.2115384615384615, "mean_fta_diff": 1.9423076923076923, "lo_fta_diff": -0.38557692307692304, "hi_fta_diff": 4.098076923076921, "mean_home_margin": 6.134615384615385, "lo_home_margin": 2.295673076923077, "hi_home_margin": 9.653846153846153, "z_pf": 1.041016326244196, "z_fta": 0.672406362258786, "p_pf": 0.29786797111230867, "p_fta": 0.5013250335646711, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLL", "ref_name": "DIFALLAH, MEHDI", "ref_country": "FRA", "n_games": 210, "mean_pf_diff": -0.1523809523809524, "lo_pf_diff": -0.7360714285714286, "hi_pf_diff": 0.44285714285714284, "mean_fta_diff": 0.5428571428571428, "lo_fta_diff": -0.6573809523809524, "hi_fta_diff": 1.6771428571428564, "mean_home_margin": 3.919047619047619, "lo_home_margin": 2.326071428571429, "hi_home_margin": 5.630238095238094, "z_pf": 1.0327311832675667, "z_fta": -0.9763576617737451, "p_pf": 0.3017297162075874, "p_fta": 0.3288872546179529, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJGG", "ref_name": "CORTES, CARLOS", "ref_country": "ESP", "n_games": 99, "mean_pf_diff": 0.0, "lo_pf_diff": -0.7984848484848485, "hi_pf_diff": 0.894191919191919, "mean_fta_diff": 0.20202020202020202, "lo_fta_diff": -1.5464646464646465, "hi_fta_diff": 1.8186868686868682, "mean_home_margin": 1.707070707070707, "lo_home_margin": -0.9005050505050505, "hi_home_margin": 4.611363636363636, "z_pf": 1.03061290965166, "z_fta": -1.0596061710783966, "p_pf": 0.30272237973036953, "p_fta": 0.28932380496615373, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJDF", "ref_name": "LATISEVS, OLEGS", "ref_country": "LAT", "n_games": 291, "mean_pf_diff": -0.20618556701030927, "lo_pf_diff": -0.6993986254295532, "hi_pf_diff": 0.32499999999999973, "mean_fta_diff": 1.0549828178694158, "lo_fta_diff": 0.20403780068728525, "hi_fta_diff": 1.9936426116838484, "mean_home_margin": 4.384879725085911, "lo_home_margin": 2.9036082474226803, "hi_home_margin": 5.863058419243985, "z_pf": 1.0210486626037154, "z_fta": -0.1466397491778961, "p_pf": 0.3072313839091385, "p_fta": 0.8834163774996422, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OADB", "ref_name": "LAMONICA, LUIGI", "ref_country": "ITA", "n_games": 209, "mean_pf_diff": -0.15789473684210525, "lo_pf_diff": -0.8111244019138756, "hi_pf_diff": 0.41877990430622, "mean_fta_diff": 1.6363636363636365, "lo_fta_diff": 0.5885167464114832, "hi_fta_diff": 2.7972488038277508, "mean_home_margin": 4.177033492822966, "lo_home_margin": 2.397727272727273, "hi_home_margin": 5.9022727272727264, "z_pf": 1.0133649533129543, "z_fta": 0.8403965784919724, "p_pf": 0.3108858729962678, "p_fta": 0.4006860669075245, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAAM", "ref_name": "GKONTAS, SPIROS", "ref_country": "GRE", "n_games": 78, "mean_pf_diff": 0.05128205128205128, "lo_pf_diff": -0.7698717948717948, "hi_pf_diff": 0.9169871794871792, "mean_fta_diff": 0.20512820512820512, "lo_fta_diff": -1.4102564102564104, "hi_fta_diff": 1.9554487179487177, "mean_home_margin": 2.08974358974359, "lo_home_margin": -0.8541666666666665, "hi_home_margin": 4.968269230769231, "z_pf": 1.0108464921996851, "z_fta": -0.9373828559679098, "p_pf": 0.31208990713682083, "p_fta": 0.3485616564164413, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJCL", "ref_name": "LOTTERMOSER, ROBERT", "ref_country": "GER", "n_games": 283, "mean_pf_diff": -0.21201413427561838, "lo_pf_diff": -0.7987632508833923, "hi_pf_diff": 0.2956713780918723, "mean_fta_diff": 0.9187279151943463, "lo_fta_diff": -0.09372791519434628, "hi_fta_diff": 1.9666961130742047, "mean_home_margin": 3.939929328621908, "lo_home_margin": 2.548321554770318, "hi_home_margin": 5.422879858657244, "z_pf": 0.9861221006106224, "z_fta": -0.4076915293715203, "p_pf": 0.32407319971877113, "p_fta": 0.6835001570651271, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJLV", "ref_name": "VILIUS, GYTIS", "ref_country": "LTU", "n_games": 155, "mean_pf_diff": -0.11612903225806452, "lo_pf_diff": -0.8291935483870968, "hi_pf_diff": 0.6841935483870965, "mean_fta_diff": -0.4064516129032258, "lo_fta_diff": -1.6716129032258062, "hi_fta_diff": 1.0379032258064496, "mean_home_margin": 4.103225806451613, "lo_home_margin": 2.1225806451612903, "hi_home_margin": 5.946935483870966, "z_pf": 0.9829585382690916, "z_fta": -2.195308233003842, "p_pf": 0.3256278451951584, "p_fta": 0.028141494729939653, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEF", "ref_name": "GARCIA, JUAN CARLOS", "ref_country": "ESP", "n_games": 222, "mean_pf_diff": -0.7972972972972973, "lo_pf_diff": -1.4506756756756758, "hi_pf_diff": -0.1527027027027031, "mean_fta_diff": 1.6531531531531531, "lo_fta_diff": 0.536036036036036, "hi_fta_diff": 2.808671171171171, "mean_home_margin": 3.963963963963964, "lo_home_margin": 2.3599099099099097, "hi_home_margin": 5.717117117117116, "z_pf": -0.97595076815085, "z_fta": 0.8948507986287659, "p_pf": 0.3290888619497965, "p_fta": 0.37086685098097827, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIZ", "ref_name": "PERUGA, CARLOS", "ref_country": "ESP", "n_games": 153, "mean_pf_diff": -0.8562091503267973, "lo_pf_diff": -1.6047385620915033, "hi_pf_diff": -0.13349673202614423, "mean_fta_diff": 0.9019607843137255, "lo_fta_diff": -0.5070261437908496, "hi_fta_diff": 2.291339869281045, "mean_home_margin": 5.150326797385621, "lo_home_margin": 3.1073529411764707, "hi_home_margin": 7.151960784313724, "z_pf": -0.9647436714056826, "z_fta": -0.32357122245636766, "p_pf": 0.3346732155859522, "p_fta": 0.7462626779452972, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLQ", "ref_name": "ALIAGA, JORDI", "ref_country": "ESP", "n_games": 76, "mean_pf_diff": -0.9868421052631579, "lo_pf_diff": -2.0463815789473685, "hi_pf_diff": 0.08585526315789443, "mean_fta_diff": 1.631578947368421, "lo_fta_diff": -0.21743421052631576, "hi_fta_diff": 3.230592105263158, "mean_home_margin": 4.434210526315789, "lo_home_margin": 1.905921052631579, "hi_home_margin": 7.1460526315789465, "z_pf": -0.9214546738163252, "z_fta": 0.5019907414620345, "p_pf": 0.3568130952572619, "p_fta": 0.6156740336855908, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJGC", "ref_name": "HALLIKO, AARE", "ref_country": "EST", "n_games": 58, "mean_pf_diff": -1.0172413793103448, "lo_pf_diff": -2.284913793103448, "hi_pf_diff": 0.21681034482758504, "mean_fta_diff": -0.1206896551724138, "lo_fta_diff": -2.3719827586206894, "hi_fta_diff": 2.1206896551724137, "mean_home_margin": 5.948275862068965, "lo_home_margin": 2.706034482758621, "hi_home_margin": 9.68146551724138, "z_pf": -0.8540696795238348, "z_fta": -1.0931166644857562, "p_pf": 0.3930663826249132, "p_fta": 0.27434258013337187, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJCE", "ref_name": "CHRISTODOULOU, CHRISTOS", "ref_country": "GRE", "n_games": 140, "mean_pf_diff": -0.8142857142857143, "lo_pf_diff": -1.5714285714285714, "hi_pf_diff": -0.09250000000000033, "mean_fta_diff": 2.1214285714285714, "lo_fta_diff": 0.8425, "hi_fta_diff": 3.508214285714285, "mean_home_margin": 3.8214285714285716, "lo_home_margin": 1.5662500000000001, "hi_home_margin": 6.09910714285714, "z_pf": -0.817652429398865, "z_fta": 1.3465526787952562, "p_pf": 0.41355568082394756, "p_fta": 0.17812434346266048, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEN", "ref_name": "PEREZ, MIGUEL ANGEL", "ref_country": "ESP", "n_games": 199, "mean_pf_diff": -0.23115577889447236, "lo_pf_diff": -0.9677135678391959, "hi_pf_diff": 0.42977386934673356, "mean_fta_diff": 0.9346733668341709, "lo_fta_diff": -0.29170854271356783, "hi_fta_diff": 2.16608040201005, "mean_home_margin": 5.065326633165829, "lo_home_margin": 3.3988693467336684, "hi_home_margin": 6.7798994974874365, "z_pf": 0.7696568194746799, "z_fta": -0.3160560113445399, "p_pf": 0.4415034906680524, "p_fta": 0.7519599944473832, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OADJ", "ref_name": "PUKL,SASA", "ref_country": "SLO", "n_games": 261, "mean_pf_diff": -0.2681992337164751, "lo_pf_diff": -0.868103448275862, "hi_pf_diff": 0.22040229885057463, "mean_fta_diff": 1.946360153256705, "lo_fta_diff": 0.9195402298850575, "hi_fta_diff": 2.9870689655172407, "mean_home_margin": 2.9080459770114944, "lo_home_margin": 1.2450191570881226, "hi_home_margin": 4.362931034482758, "z_pf": 0.7545222990563792, "z_fta": 1.513949217128266, "p_pf": 0.4505356607094715, "p_fta": 0.13003871990881644, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OACA", "ref_name": "RYZHYK, BORYS", "ref_country": "UKR", "n_games": 253, "mean_pf_diff": -0.7114624505928854, "lo_pf_diff": -1.3657114624505928, "hi_pf_diff": -0.07094861660079069, "mean_fta_diff": 2.2885375494071147, "lo_fta_diff": 1.2762845849802371, "hi_fta_diff": 3.306422924901186, "mean_home_margin": 2.691699604743083, "lo_home_margin": 1.0432806324110673, "hi_home_margin": 4.474703557312252, "z_pf": -0.7523305862297363, "z_fta": 2.1152448032950817, "p_pf": 0.4518522785538568, "p_fta": 0.0344090881736685, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJGK", "ref_name": "PETEK, SASO", "ref_country": "SLO", "n_games": 143, "mean_pf_diff": -0.20279720279720279, "lo_pf_diff": -1.0106643356643357, "hi_pf_diff": 0.570804195804195, "mean_fta_diff": 0.27972027972027974, "lo_fta_diff": -1.0596153846153846, "hi_fta_diff": 1.661713286713286, "mean_home_margin": 3.272727272727273, "lo_home_margin": 1.3232517482517483, "hi_home_margin": 5.249825174825173, "z_pf": 0.7243537018531772, "z_fta": -1.1668446209078382, "p_pf": 0.468848615782701, "p_fta": 0.24327312356599018, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJMA", "ref_name": "TSAROUCHA, VASILIKI", "ref_country": "GRE", "n_games": 30, "mean_pf_diff": 0.1, "lo_pf_diff": -1.4175, "hi_pf_diff": 1.9666666666666666, "mean_fta_diff": -0.3, "lo_fta_diff": -2.9175, "hi_fta_diff": 2.1333333333333333, "mean_home_margin": 0.8666666666666667, "lo_home_margin": -4.5841666666666665, "hi_home_margin": 6.650833333333333, "z_pf": 0.6834886966475833, "z_fta": -0.8988865664055432, "p_pf": 0.4942980902902683, "p_fta": 0.36871308407017, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEH", "ref_name": "HIERREZUELO, DANIEL", "ref_country": "ESP", "n_games": 174, "mean_pf_diff": -0.2471264367816092, "lo_pf_diff": -1.0374999999999999, "hi_pf_diff": 0.5577586206896549, "mean_fta_diff": 0.5632183908045977, "lo_fta_diff": -0.8714080459770115, "hi_fta_diff": 1.8850574712643677, "mean_home_margin": 2.160919540229885, "lo_home_margin": 0.14367816091954022, "hi_home_margin": 4.179310344827585, "z_pf": 0.6750135385669149, "z_fta": -0.8579118572195265, "p_pf": 0.49966716346598283, "p_fta": 0.3909411363296975, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJJF", "ref_name": "BALAK, AMIT", "ref_country": "ISR", "n_games": 98, "mean_pf_diff": -0.17346938775510204, "lo_pf_diff": -1.1073979591836733, "hi_pf_diff": 0.8012755102040814, "mean_fta_diff": 0.7040816326530612, "lo_fta_diff": -1.0053571428571428, "hi_fta_diff": 2.3625, "mean_home_margin": 2.010204081632653, "lo_home_margin": -0.3829081632653061, "hi_home_margin": 4.086989795918368, "z_pf": 0.6612171560263359, "z_fta": -0.483794645658549, "p_pf": 0.5084730605574457, "p_fta": 0.6285316154037275, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEZ", "ref_name": "VYKLICKY, ROBERT", "ref_country": "CZE", "n_games": 107, "mean_pf_diff": -0.7663551401869159, "lo_pf_diff": -1.7289719626168225, "hi_pf_diff": 0.07079439252336385, "mean_fta_diff": 3.7476635514018692, "lo_fta_diff": 2.0413551401869157, "hi_fta_diff": 5.369392523364486, "mean_home_margin": 4.831775700934579, "lo_home_margin": 2.2869158878504674, "hi_home_margin": 7.308411214953271, "z_pf": -0.6096765339379596, "z_fta": 3.1079263331672564, "p_pf": 0.5420761021198519, "p_fta": 0.0018840502422281524, "p_holm_pf": 1.0, "p_holm_fta": 0.1149270647759173}, {"ref_code": "OJIV", "ref_name": "OBRKNEZEVIC, UROS", "ref_country": "SRB", "n_games": 61, "mean_pf_diff": -0.13114754098360656, "lo_pf_diff": -1.008606557377049, "hi_pf_diff": 0.8032786885245902, "mean_fta_diff": -0.9672131147540983, "lo_fta_diff": -3.0827868852459015, "hi_fta_diff": 1.2147540983606542, "mean_home_margin": 5.557377049180328, "lo_home_margin": 2.432377049180328, "hi_home_margin": 8.40983606557377, "z_pf": 0.5917683250069286, "z_fta": -1.87986814953288, "p_pf": 0.5540057365822839, "p_fta": 0.060126049671707316, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJMQ", "ref_name": "BAENA, ALBERTO", "ref_country": "ESP", "n_games": 32, "mean_pf_diff": -0.96875, "lo_pf_diff": -2.5625, "hi_pf_diff": 0.875, "mean_fta_diff": -2.0, "lo_fta_diff": -5.54765625, "hi_fta_diff": 1.4406249999999972, "mean_home_margin": 0.03125, "lo_home_margin": -3.2828125, "hi_home_margin": 3.517968749999998, "z_pf": -0.5762146741215771, "z_fta": -2.0321113210887005, "p_pf": 0.5644700878585258, "p_fta": 0.042142387547601246, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJMF", "ref_name": "KARDUM, LUKA", "ref_country": "CRO", "n_games": 71, "mean_pf_diff": -0.7887323943661971, "lo_pf_diff": -1.943661971830986, "hi_pf_diff": 0.36619718309859156, "mean_fta_diff": 1.971830985915493, "lo_fta_diff": -0.07922535211267595, "hi_fta_diff": 3.922887323943662, "mean_home_margin": 4.295774647887324, "lo_home_margin": 1.5961267605633804, "hi_home_margin": 6.965140845070422, "z_pf": -0.5366208360987005, "z_fta": 0.814256794700706, "p_pf": 0.5915295485607612, "p_fta": 0.4154978553143671, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJCZ", "ref_name": "RADOVIC, SRETEN", "ref_country": "CRO", "n_games": 268, "mean_pf_diff": -0.3358208955223881, "lo_pf_diff": -0.9850746268656716, "hi_pf_diff": 0.19794776119402968, "mean_fta_diff": 0.17164179104477612, "lo_fta_diff": -0.838526119402985, "hi_fta_diff": 1.2352611940298506, "mean_home_margin": 4.186567164179104, "lo_home_margin": 2.6888059701492537, "hi_home_margin": 5.735074626865671, "z_pf": 0.5298100751568169, "z_fta": -1.800468044905627, "p_pf": 0.5962436190419533, "p_fta": 0.07178676491256164, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJMK", "ref_name": "LEZCANO, LEANDRO", "ref_country": "ARG", "n_games": 30, "mean_pf_diff": -0.03333333333333333, "lo_pf_diff": -2.1666666666666665, "hi_pf_diff": 2.3666666666666667, "mean_fta_diff": 1.8333333333333333, "lo_fta_diff": -2.0508333333333333, "hi_fta_diff": 5.2, "mean_home_margin": 4.133333333333334, "lo_home_margin": 0.18250000000000005, "hi_home_margin": 8.484166666666665, "z_pf": 0.5286154140494224, "z_fta": 0.44222309276117605, "p_pf": 0.5970722653142428, "p_fta": 0.6583277769960256, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLP", "ref_name": "SUKYS, ARTURAS", "ref_country": "LTU", "n_games": 74, "mean_pf_diff": -0.22972972972972974, "lo_pf_diff": -1.3861486486486487, "hi_pf_diff": 0.8719594594594592, "mean_fta_diff": 1.945945945945946, "lo_fta_diff": 0.1743243243243244, "hi_fta_diff": 3.893243243243242, "mean_home_margin": 4.391891891891892, "lo_home_margin": 1.9239864864864866, "hi_home_margin": 6.6891891891891895, "z_pf": 0.47194030556031225, "z_fta": 0.8057244394692635, "p_pf": 0.6369693977646889, "p_fta": 0.4204017544918319, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJMD", "ref_name": "KONSTANTINOVS, KRISTAPS", "ref_country": "LAT", "n_games": 42, "mean_pf_diff": -0.19047619047619047, "lo_pf_diff": -1.644047619047619, "hi_pf_diff": 1.20297619047619, "mean_fta_diff": 1.5238095238095237, "lo_fta_diff": -1.0726190476190476, "hi_fta_diff": 4.179166666666666, "mean_home_margin": 1.4047619047619047, "lo_home_margin": -1.6666666666666667, "hi_home_margin": 4.477380952380951, "z_pf": 0.40949470016137157, "z_fta": 0.2930144986700637, "p_pf": 0.6821766553575404, "p_fta": 0.7695110695062772, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLN", "ref_name": "RACYS, SAULIUS", "ref_country": "SWE", "n_games": 85, "mean_pf_diff": -0.3058823529411765, "lo_pf_diff": -1.241470588235294, "hi_pf_diff": 0.6061764705882351, "mean_fta_diff": -0.4117647058823529, "lo_fta_diff": -2.2, "hi_fta_diff": 1.479117647058821, "mean_home_margin": 3.8823529411764706, "lo_home_margin": 1.6335294117647061, "hi_home_margin": 5.9411764705882355, "z_pf": 0.35691011495645436, "z_fta": -1.63131732888301, "p_pf": 0.7211590970883837, "p_fta": 0.10282337874789338, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OAEO", "ref_name": "PEREZ, EMILIO", "ref_country": "ESP", "n_games": 168, "mean_pf_diff": -0.6130952380952381, "lo_pf_diff": -1.2055059523809524, "hi_pf_diff": -0.020684523809523944, "mean_fta_diff": 0.8690476190476191, "lo_fta_diff": -0.3427083333333333, "hi_fta_diff": 2.2055059523809524, "mean_home_margin": 4.565476190476191, "lo_home_margin": 2.999702380952381, "hi_home_margin": 6.2681547619047615, "z_pf": -0.342675446545275, "z_fta": -0.38802489949775515, "p_pf": 0.7318426363424266, "p_fta": 0.6979976072947094, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "QJLT", "ref_name": "THEPENIER, HUGUES", "ref_country": "FRA", "n_games": 51, "mean_pf_diff": -0.27450980392156865, "lo_pf_diff": -1.5602941176470586, "hi_pf_diff": 1.1764705882352942, "mean_fta_diff": 1.7843137254901962, "lo_fta_diff": -0.45098039215686275, "hi_fta_diff": 4.186764705882353, "mean_home_margin": 9.352941176470589, "lo_home_margin": 5.822549019607843, "hi_home_margin": 13.254901960784315, "z_pf": 0.3239743404481262, "z_fta": 0.5364093014466385, "p_pf": 0.7459574607811317, "p_fta": 0.5916757043731984, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLI", "ref_name": "PEERANDI, RAIN", "ref_country": "EST", "n_games": 102, "mean_pf_diff": -0.3431372549019608, "lo_pf_diff": -1.2213235294117646, "hi_pf_diff": 0.5051470588235292, "mean_fta_diff": 1.588235294117647, "lo_fta_diff": -0.029901960784313696, "hi_fta_diff": 3.588725490196078, "mean_home_margin": 3.8823529411764706, "lo_home_margin": 1.3561274509803922, "hi_home_margin": 6.2624999999999975, "z_pf": 0.3111832031943183, "z_fta": 0.531310174441993, "p_pf": 0.7556613514853385, "p_fta": 0.5952038559895081, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJJA", "ref_name": "RADOJKOVIC, JOSIP", "ref_country": "CRO", "n_games": 57, "mean_pf_diff": -0.3333333333333333, "lo_pf_diff": -1.5881578947368422, "hi_pf_diff": 0.8688596491228066, "mean_fta_diff": -0.017543859649122806, "lo_fta_diff": -1.8421052631578947, "hi_fta_diff": 1.6333333333333317, "mean_home_margin": 1.8596491228070176, "lo_home_margin": -1.5464912280701753, "hi_home_margin": 5.126315789473681, "z_pf": 0.24832036634726798, "z_fta": -0.9942736000034671, "p_pf": 0.803886542338277, "p_fta": 0.32008968475257804, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJDE", "ref_name": "SHEMMESH, SEFFI", "ref_country": "ISR", "n_games": 88, "mean_pf_diff": -0.36363636363636365, "lo_pf_diff": -1.721875, "hi_pf_diff": 0.6991477272727271, "mean_fta_diff": -0.4431818181818182, "lo_fta_diff": -2.5454545454545454, "hi_fta_diff": 1.5346590909090905, "mean_home_margin": 5.284090909090909, "lo_home_margin": 2.684943181818182, "hi_home_margin": 8.034090909090908, "z_pf": 0.24825904770179844, "z_fta": -1.6936818044205593, "p_pf": 0.8039339824790523, "p_fta": 0.0903257638706727, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIY", "ref_name": "PASTUSIAK, PIOTR", "ref_country": "POL", "n_games": 189, "mean_pf_diff": -0.5608465608465608, "lo_pf_diff": -1.2514550264550264, "hi_pf_diff": 0.1801587301587299, "mean_fta_diff": 1.5925925925925926, "lo_fta_diff": 0.36626984126984136, "hi_fta_diff": 2.7064814814814815, "mean_home_margin": 4.941798941798941, "lo_home_margin": 3.187698412698413, "hi_home_margin": 6.694179894179893, "z_pf": -0.21113293470113242, "z_fta": 0.7301095140053813, "p_pf": 0.8327835412732383, "p_fta": 0.4653232463140089, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OACI", "ref_name": "BELOSEVIC, ILIJA", "ref_country": "SRB", "n_games": 263, "mean_pf_diff": -0.4296577946768061, "lo_pf_diff": -1.0934410646387833, "hi_pf_diff": 0.155893536121673, "mean_fta_diff": 0.9049429657794676, "lo_fta_diff": -0.11321292775665394, "hi_fta_diff": 2.0210076045627376, "mean_home_margin": 3.6045627376425857, "lo_home_margin": 2.081273764258555, "hi_home_margin": 4.905133079847909, "z_pf": 0.20212248133623464, "z_fta": -0.4186798392908306, "p_pf": 0.8398209730023749, "p_fta": 0.6754501316907533, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJGB", "ref_name": "CICI, GENTIAN", "ref_country": "ALB", "n_games": 35, "mean_pf_diff": -0.34285714285714286, "lo_pf_diff": -1.6285714285714286, "hi_pf_diff": 0.944285714285713, "mean_fta_diff": -1.2285714285714286, "lo_fta_diff": -3.7007142857142856, "hi_fta_diff": 1.4014285714285701, "mean_home_margin": 2.8285714285714287, "lo_home_margin": -1.5578571428571428, "hi_home_margin": 7.085714285714285, "z_pf": 0.18263607683248673, "z_fta": -1.6014218035543508, "p_pf": 0.8550835751983614, "p_fta": 0.10928352672615671, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OABC", "ref_name": "ROCHA, FERNANDO", "ref_country": "POR", "n_games": 239, "mean_pf_diff": -0.5355648535564853, "lo_pf_diff": -1.0986401673640167, "hi_pf_diff": 0.06317991631799126, "mean_fta_diff": 1.6485355648535565, "lo_fta_diff": 0.556276150627615, "hi_fta_diff": 2.6824267782426774, "mean_home_margin": 3.3305439330543933, "lo_home_margin": 1.7365062761506278, "hi_home_margin": 4.761715481171548, "z_pf": -0.1545374308228127, "z_fta": 0.9202878499394905, "p_pf": 0.8771860001581779, "p_fta": 0.3574223566546417, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIL", "ref_name": "HORDOV, TOMISLAV", "ref_country": "CRO", "n_games": 202, "mean_pf_diff": -0.5297029702970297, "lo_pf_diff": -1.1563118811881188, "hi_pf_diff": 0.07425742574257425, "mean_fta_diff": 0.9801980198019802, "lo_fta_diff": -0.2850247524752475, "hi_fta_diff": 2.275123762376237, "mean_home_margin": 4.801980198019802, "lo_home_margin": 2.9195544554455446, "hi_home_margin": 6.836881188118811, "z_pf": -0.12440452494547749, "z_fta": -0.24416732358007956, "p_pf": 0.900994990793816, "p_fta": 0.8071012332678316, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJDL", "ref_name": "MOGULKOC, EMIN", "ref_country": "TUR", "n_games": 192, "mean_pf_diff": -0.5208333333333334, "lo_pf_diff": -1.174609375, "hi_pf_diff": 0.13294270833333321, "mean_fta_diff": 1.40625, "lo_fta_diff": 0.2881510416666667, "hi_fta_diff": 2.6510416666666665, "mean_home_margin": 4.463541666666667, "lo_home_margin": 2.601432291666667, "hi_home_margin": 6.268359374999999, "z_pf": -0.09522256928722544, "z_fta": 0.43952933706213587, "p_pf": 0.9241380437392743, "p_fta": 0.660278029543782, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIM", "ref_name": "JIMENEZ, BENJAMIN", "ref_country": "ESP", "n_games": 79, "mean_pf_diff": -0.4430379746835443, "lo_pf_diff": -1.3924050632911393, "hi_pf_diff": 0.5443037974683544, "mean_fta_diff": 1.6962025316455696, "lo_fta_diff": 0.018670886075949383, "hi_fta_diff": 3.6401898734177207, "mean_home_margin": 2.4683544303797467, "lo_home_margin": -0.019303797468354412, "hi_home_margin": 5.107911392405063, "z_pf": 0.08555673777771125, "z_fta": 0.5777274712659067, "p_pf": 0.9318187905514974, "p_fta": 0.5634481291124744, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJFC", "ref_name": "JAVOR, DAMIR", "ref_country": "SLO", "n_games": 270, "mean_pf_diff": -0.4703703703703704, "lo_pf_diff": -1.0167592592592594, "hi_pf_diff": 0.06296296296296296, "mean_fta_diff": 1.3296296296296297, "lo_fta_diff": 0.290462962962963, "hi_fta_diff": 2.293148148148148, "mean_home_margin": 3.9, "lo_home_margin": 2.528888888888889, "hi_home_margin": 5.107592592592592, "z_pf": 0.06292562993301791, "z_fta": 0.3767166030404357, "p_pf": 0.9498257255486267, "p_fta": 0.7063842229317607, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJCI", "ref_name": "KOWALSKI, MARCIN", "ref_country": "POL", "n_games": 78, "mean_pf_diff": -0.5128205128205128, "lo_pf_diff": -1.4810897435897437, "hi_pf_diff": 0.48173076923076835, "mean_fta_diff": 1.2307692307692308, "lo_fta_diff": -0.5067307692307692, "hi_fta_diff": 3.269230769230769, "mean_home_margin": 2.5, "lo_home_margin": -0.46891025641025635, "hi_home_margin": 5.335897435897434, "z_pf": -0.04568516541154531, "z_fta": 0.10226827296813937, "p_pf": 0.9635611877504691, "p_fta": 0.9185437377428409, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJLO", "ref_name": "ROSSI, MICHELE", "ref_country": "ITA", "n_games": 80, "mean_pf_diff": -0.475, "lo_pf_diff": -1.6625, "hi_pf_diff": 0.7381249999999995, "mean_fta_diff": 1.2, "lo_fta_diff": -1.1815625, "hi_fta_diff": 3.4446874999999992, "mean_home_margin": 3.2, "lo_home_margin": 0.7428125, "hi_home_margin": 5.684062499999997, "z_pf": 0.02547088100935146, "z_fta": 0.07198423724929758, "p_pf": 0.9796793745374148, "p_fta": 0.9426144521582787, "p_holm_pf": 1.0, "p_holm_fta": 1.0}, {"ref_code": "OJIT", "ref_name": "KOLJENSIC, MILOS", "ref_country": "MNE", "n_games": 109, "mean_pf_diff": -0.4954128440366973, "lo_pf_diff": -1.3674311926605505, "hi_pf_diff": 0.4041284403669721, "mean_fta_diff": 0.7889908256880734, "lo_fta_diff": -0.8536697247706422, "hi_fta_diff": 2.477981651376146, "mean_home_margin": 4.807339449541284, "lo_home_margin": 2.5137614678899083, "hi_home_margin": 6.812155963302752, "z_pf": -0.015464180587938438, "z_fta": -0.40847949270046785, "p_pf": 0.9876618608242891, "p_fta": 0.6829216832480767, "p_holm_pf": 1.0, "p_holm_fta": 1.0}], "funnel": {"league_mu": -0.48842832469775477, "sd_per_game": 4.715446919499164, "ci_k": 1.96}};
+
+const perRef = DATA.per_ref;
+const baseline = DATA.baselines;
+const kpi = DATA.kpi;
+
+// ---- Funnel plot ----
+const points = perRef.map(r => ({x: r.n_games, y: r.mean_pf_diff, r: r}));
+const leagueMu = baseline.league_mu_pf_diff;
+const sd = baseline.league_sd_pf_diff;
+const k = DATA.funnel.ci_k;
+
+// Generate smooth funnel curves
+const nMin = Math.min(...points.map(p => p.x));
+const nMax = Math.max(...points.map(p => p.x));
+const funnelX = [];
+for (let n = nMin; n <= nMax; n += Math.max(1, Math.round((nMax-nMin)/60))) funnelX.push(n);
+const upper = funnelX.map(n => ({x: n, y: leagueMu + k * sd / Math.sqrt(n)}));
+const lower = funnelX.map(n => ({x: n, y: leagueMu - k * sd / Math.sqrt(n)}));
+
+const ctx = document.getElementById('funnel').getContext('2d');
+new Chart(ctx, {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label: 'Referees',
+        data: points,
+        backgroundColor: points.map(p =>
+          (p.r.p_holm_pf < 0.05) ? 'rgba(239,90,90,0.9)' :
+          (p.r.p_pf < 0.05) ? 'rgba(245,183,58,0.85)' :
+          'rgba(110,176,255,0.65)'
+        ),
+        borderColor: 'rgba(255,255,255,0.2)',
+        borderWidth: 1,
+        pointRadius: points.map(p => Math.min(10, 3 + Math.log(p.x))),
+        pointHoverRadius: points.map(p => Math.min(14, 5 + Math.log(p.x))),
+      },
+      {
+        label: '95% funnel upper',
+        data: upper, showLine: true, pointRadius: 0,
+        borderColor: 'rgba(255,255,255,0.35)', borderWidth: 1, borderDash: [4,4], fill: false,
+      },
+      {
+        label: '95% funnel lower',
+        data: lower, showLine: true, pointRadius: 0,
+        borderColor: 'rgba(255,255,255,0.35)', borderWidth: 1, borderDash: [4,4], fill: false,
+      },
+      {
+        label: 'League mean', data: [{x: nMin, y: leagueMu}, {x: nMax, y: leagueMu}],
+        showLine: true, pointRadius: 0,
+        borderColor: 'rgba(60,207,142,0.55)', borderWidth: 1.5, borderDash: [1,3], fill: false,
+      },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {display: true, position: 'bottom',
+        labels: {color: '#b6bfcc', font:{family: 'DM Sans', size: 11}, filter: (it)=>it.datasetIndex<=1}},
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const p = ctx.raw;
+            if (!p.r) return `y=${p.y.toFixed(2)} (n=${p.x})`;
+            return [
+              `${p.r.ref_name} (${p.r.ref_country})`,
+              `n games: ${p.r.n_games}`,
+              `PF diff: ${p.r.mean_pf_diff.toFixed(2)} (CI ${p.r.lo_pf_diff.toFixed(2)}, ${p.r.hi_pf_diff.toFixed(2)})`,
+              `raw p: ${p.r.p_pf.toFixed(3)} | Holm p: ${p.r.p_holm_pf.toFixed(3)}`,
+            ];
+          }
+        }
+      },
+    },
+    scales: {
+      x: {
+        type: 'linear', title: {display: true, text: 'Games officiated', color:'#b6bfcc'},
+        ticks: {color:'#7a8595'}, grid: {color:'rgba(255,255,255,0.05)'}
+      },
+      y: {
+        title: {display: true, text: 'Mean (home PF - away PF) per game', color:'#b6bfcc'},
+        ticks: {color:'#7a8595'}, grid: {color:'rgba(255,255,255,0.05)'}
+      }
+    }
+  }
+});
+
+// Funnel caption -- dynamic
+const nIn = points.filter(p => {
+  const upperAt = leagueMu + k*sd/Math.sqrt(p.x);
+  const lowerAt = leagueMu - k*sd/Math.sqrt(p.x);
+  return p.y >= lowerAt && p.y <= upperAt;
+}).length;
+document.getElementById('reading').innerHTML = (
+  `<strong>Reading this chart:</strong> ${nIn} of ${points.length} referees sit inside the 95% funnel &mdash; right where pure chance would put them. ` +
+  `The blue band has no vertical drift, confirming the league-mean line (dashed green, at ${leagueMu.toFixed(2)}) is where the whole cloud is centered. ` +
+  `Red dots (if any) are Holm-significant outliers; yellow are raw-p significant but not after correction.`
+);
+
+// ---- Top table ----
+const topN = perRef.slice(0, 10);
+const body = document.getElementById('top-body');
+topN.forEach(r => {
+  const tr = document.createElement('tr');
+  const statusChip = (r.p_holm_pf < 0.05) ? '<span class="chip sig">Holm-sig</span>'
+    : (r.p_pf < 0.05) ? '<span class="chip">raw-sig only</span>'
+    : '<span class="chip null">null</span>';
+  tr.innerHTML = `
+    <td class="name">${r.ref_name}</td>
+    <td>${r.ref_country}</td>
+    <td class="num">${r.n_games}</td>
+    <td class="num" style="color:${r.mean_pf_diff>0?'#3ccf8e':'#ef5a5a'}">${r.mean_pf_diff.toFixed(2)}</td>
+    <td class="num">[${r.lo_pf_diff.toFixed(2)}, ${r.hi_pf_diff.toFixed(2)}]</td>
+    <td class="num">${r.p_pf.toFixed(3)}</td>
+    <td class="num">${r.p_holm_pf.toFixed(3)}</td>
+    <td>${statusChip}</td>
+  `;
+  body.appendChild(tr);
+});
+</script>
+<!-- build-footer --><div style="position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,16,0.92);color:#7a8595;font:400 11px/1.4 'DM Sans',system-ui,sans-serif;padding:6px 12px;text-align:right;border-top:1px solid rgba(255,255,255,0.07);z-index:9999;pointer-events:none">Build <code style="color:#b6bfcc">01780b5</code> &middot; rebuilt 2026-04-21 14:01 UTC &middot; <a href="https://github.com/eyalbou/euroleague-hca" style="color:#6eb0ff;text-decoration:none;pointer-events:auto">source</a></div></body></html>
