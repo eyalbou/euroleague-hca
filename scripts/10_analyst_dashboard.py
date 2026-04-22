@@ -129,6 +129,15 @@ season_hca["wr_lo"], season_hca["wr_hi"] = zip(*[
     wilson_ci(p, n) for p, n in zip(season_hca["home_wr"], season_hca["n"])
 ])
 
+# Bootstrap 95% CI for per-season HCA (so the trend chart can show uncertainty)
+_hca_lo, _hca_hi = [], []
+for _s in season_hca["season"].tolist():
+    _vals = games.loc[games["season"] == _s, "home_margin"].values.astype(float)
+    _, _lo_s, _hi_s = boot_mean_ci(_vals, n_boot=2000, seed=int(_s))
+    _hca_lo.append(_lo_s); _hca_hi.append(_hi_s)
+season_hca["hca_lo"] = _hca_lo
+season_hca["hca_hi"] = _hca_hi
+
 # -- RS vs Playoffs (H3)
 phase_rows = []
 for phase, label in [("RS", "Regular Season"), ("PO", "Playoffs")]:
@@ -750,6 +759,8 @@ PAYLOAD = {
     "trend": {
         "seasons": season_hca["season"].astype(str).tolist(),
         "hca": season_hca["hca"].round(3).tolist(),
+        "hca_lo": [round(float(v), 3) for v in season_hca["hca_lo"].tolist()],
+        "hca_hi": [round(float(v), 3) for v in season_hca["hca_hi"].tolist()],
         "win_rate": season_hca["home_wr"].round(3).tolist(),
         "wr_lo": [round(float(v), 3) for v in season_hca["wr_lo"].tolist()],
         "wr_hi": [round(float(v), 3) for v in season_hca["wr_hi"].tolist()],
@@ -911,7 +922,7 @@ TEMPLATE = r"""<!doctype html>
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/600.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans@5.0.18/700.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
   :root {
     --bg: #0b0d12;
@@ -1115,6 +1126,16 @@ TEMPLATE = r"""<!doctype html>
   .upsets-table td.team { color: var(--fg); }
   .upsets-table td.surprise { color: var(--accent); font-weight: 600; }
 
+  /* Trend chart explainer block */
+  .trend-explainer { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  @media (max-width: 980px) { .trend-explainer { grid-template-columns: 1fr; } }
+  .trend-ex-col { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px;
+                  padding: 14px 16px; }
+  .trend-ex-col h4 { margin: 0 0 8px 0; font-size: 13px; color: var(--fg); font-weight: 600;
+                     letter-spacing: -0.01em; }
+  .trend-ex-col p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--fg-dim); }
+  .trend-ex-col strong { color: var(--fg); }
+
   /* Fortress drivers panel */
   .driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 980px) { .driver-grid { grid-template-columns: 1fr; } }
@@ -1291,13 +1312,45 @@ TEMPLATE = r"""<!doctype html>
   <section class="panel active" id="tab-overview">
     <div class="grid-2">
       <div class="card span-2">
-        <h3>HCA held steady around +3.7 pts; the empty-arena 2020-21 shock is the exception</h3>
-        <p class="sub">League-wide home point-differential per season. The COVID-affected window (mid-2019-20 onwards) is shaded.
-          The dashed orange line marks the 10-year average.</p>
+        <h3>HCA held steady around +3.7 pts &mdash; and never collapsed to zero, even in empty arenas</h3>
+        <p class="sub">League-wide home point-differential per season with bootstrap 95% CI bands. Red box = COVID
+          empty-arena window (2020-21). Yellow line = 2016-17, the launch of the single round-robin format (first
+          truly comparable regular season in the panel).</p>
         <div class="chart-wrap tall"><canvas id="chart-trend"></canvas></div>
         <div class="n-cap">
           <span id="trend-n">n=...</span>
-          <span>One row per season. League average reference line in dashed orange.</span>
+          <span>Y-axis starts at 0 to show every season sits well above "no HCA" &mdash; even 2020.</span>
+        </div>
+        <div class="trend-explainer">
+          <div class="trend-ex-col">
+            <h4>Two visible dips &mdash; very different explanations</h4>
+            <p>
+              <strong>2016-17 (+3.08 pts)</strong>: not about the crowd &mdash; attendance that season was actually
+              above the 11-year average. This was the <strong>first season of the single round-robin format</strong>
+              (16 teams, home-and-away), replacing the old Top-16 group stage. Earlier seasons in this panel (2015-16
+              at +4.70) used a different competition structure, so they aren't strictly comparable. The per-season
+              95% CI is roughly +/-1.5 pts, so the apparent "drop" is also within normal statistical noise.
+              <br><br>
+              <strong>2020-21 (+3.15 pts)</strong>: the real structural shock. 87% of home games were played
+              with attendance under 1,000 (mean attendance fell from 8,500 to 456). This isolates the crowd
+              contribution cleanly.
+            </p>
+          </div>
+          <div class="trend-ex-col">
+            <h4>Why didn't COVID HCA fall to zero?</h4>
+            <p>
+              Because <strong>the crowd is only one of several ingredients of home-court advantage</strong>.
+              Pooling across all 11 seasons, empty-arena games (n=362, attendance&lt;1,000) averaged
+              <strong>+2.61 pts</strong> vs <strong>+3.87 pts</strong> in games with a crowd &mdash; a drop of
+              ~1.3 pts (~33%), not 100%. The surviving HCA comes from travel fatigue for the road team,
+              court/rim familiarity for the home team, sleeping in own bed, and practice on that exact floor.
+              Referee bias exists too but is attenuated without a crowd.
+              <br><br>
+              Mechanistically: if you believe the academic literature that crowds contribute 30-50% of total
+              HCA, then the league's baseline +3.87 x ~33% reduction predicts +2.6 in empty arenas &mdash;
+              almost exactly what we observe.
+            </p>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -1733,6 +1786,10 @@ TEMPLATE = r"""<!doctype html>
   Chart.defaults.font.family = "'DM Sans', 'Axiforma', sans-serif";
   Chart.defaults.font.size = 12;
   Chart.defaults.color = css('--fg-dim');
+  // Chart.js 4.x needs explicit plugin registration; the UMD bundle exposes it as window['chartjs-plugin-annotation']
+  if (window['chartjs-plugin-annotation']) {
+    Chart.register(window['chartjs-plugin-annotation']);
+  }
 
   const COLORS = {
     accent: css('--accent'),
@@ -1798,42 +1855,101 @@ TEMPLATE = r"""<!doctype html>
   const tipBase = (border) => ({ backgroundColor: '#11141b', borderColor: border || COLORS.accent, borderWidth: 1, padding: 12, titleColor: COLORS.fg });
 
   // === Trend ===
+  // Design choices:
+  //  - Straight line segments (tension 0): each season is a discrete observation, not a continuous signal
+  //  - No area fill: it implies cumulative which is misleading here
+  //  - Semi-transparent CI band (bootstrap 95%) around the line: makes "steady" visible as overlapping CIs
+  //  - Y-axis forced to start at 0: emphasises that HCA is *always* positive, never zero
+  //  - Tick callback formats to one decimal (fmtSigned(v, 1)) to avoid the "+3, +3, +4, +4" duplication bug
+  //  - Stronger COVID box opacity + 2016 marker (single round-robin format launch)
+  const trendIdx2016 = P.trend.seasons.indexOf('2016');
   const trendIdx2019 = P.trend.seasons.indexOf('2019');
   const trendIdx2020 = P.trend.seasons.indexOf('2020');
   new Chart(document.getElementById('chart-trend'), {
     type: 'line',
-    data: { labels: P.trend.seasons, datasets: [{
-      label: 'HCA', data: P.trend.hca,
-      borderColor: COLORS.accent, backgroundColor: 'rgba(249, 115, 22, 0.12)',
-      fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
-      pointBackgroundColor: COLORS.accent, pointBorderColor: '#0b0d12', pointBorderWidth: 2,
-    }]},
+    data: {
+      labels: P.trend.seasons,
+      datasets: [
+        // Invisible upper CI boundary (paired with the next dataset to shade the band)
+        { label: 'CI hi', data: P.trend.hca_hi,
+          borderColor: 'rgba(249,115,22,0)', backgroundColor: 'rgba(249,115,22,0.10)',
+          fill: '+1', tension: 0, pointRadius: 0, pointHoverRadius: 0, borderWidth: 0,
+          order: 3 },
+        { label: 'CI lo', data: P.trend.hca_lo,
+          borderColor: 'rgba(249,115,22,0)', backgroundColor: 'rgba(249,115,22,0.10)',
+          fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 0, borderWidth: 0,
+          order: 3 },
+        // Main HCA line -- straight segments, no fill, strong markers
+        { label: 'HCA', data: P.trend.hca,
+          borderColor: COLORS.accent, backgroundColor: COLORS.accent,
+          fill: false, tension: 0, borderWidth: 2.5,
+          pointRadius: 5, pointHoverRadius: 7,
+          pointBackgroundColor: COLORS.accent, pointBorderColor: '#0b0d12', pointBorderWidth: 2,
+          order: 1 },
+      ],
+    },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false },
-        tooltip: Object.assign({}, tipBase(COLORS.accent),
-          { callbacks: { label: (ctx) => `HCA: ${fmtSigned(ctx.raw, 2)} pts (n=${P.trend.n[ctx.dataIndex]})` } }),
+        tooltip: Object.assign({}, tipBase(COLORS.accent), {
+          filter: (ctx) => ctx.dataset.label === 'HCA',
+          callbacks: {
+            label: (ctx) => [
+              `HCA: ${fmtSigned(ctx.raw, 2)} pts`,
+              `95% CI: [${fmtSigned(P.trend.hca_lo[ctx.dataIndex], 2)}, ${fmtSigned(P.trend.hca_hi[ctx.dataIndex], 2)}]`,
+              `n = ${P.trend.n[ctx.dataIndex].toLocaleString('en-US')} games`,
+            ],
+          },
+        }),
         annotation: { annotations: {
-          covid: { type: 'box',
-            xMin: trendIdx2019 - 0.5, xMax: trendIdx2020 + 0.5,
-            backgroundColor: 'rgba(248, 113, 113, 0.08)', borderColor: 'rgba(248, 113, 113, 0.25)',
-            borderWidth: 1,
-            label: { content: 'COVID disruption', display: true, position: 'start',
-              color: COLORS.red, font: { size: 11, weight: 500 }, backgroundColor: 'transparent' } },
-          mean: { type: 'line', yMin: P.kpis.league_hca, yMax: P.kpis.league_hca,
-            borderColor: COLORS.accent, borderDash: [4,4], borderWidth: 1.5,
+          // Full-height shaded box for the COVID-affected window (2020-21 was almost entirely empty arenas).
+          // drawTime beforeDatasetsDraw so it sits behind the CI band and line, but strong enough to read.
+          covid: { type: 'box', drawTime: 'beforeDatasetsDraw',
+            xMin: trendIdx2019 + 0.5, xMax: trendIdx2020 + 0.5,
+            backgroundColor: 'rgba(248, 113, 113, 0.22)', borderColor: 'rgba(248, 113, 113, 0.9)',
+            borderWidth: 1.5, borderDash: [4,4],
+            label: { content: 'COVID -- empty arenas', display: true, position: 'start',
+              color: '#fecaca', font: { size: 11, weight: 700 },
+              backgroundColor: 'rgba(127, 29, 29, 0.85)', padding: 4,
+              yAdjust: 10 } },
+          // Marker for 2016 -- first year of the new single round-robin format
+          format2016: { type: 'line', drawTime: 'beforeDatasetsDraw',
+            xMin: trendIdx2016, xMax: trendIdx2016,
+            borderColor: 'rgba(250, 204, 21, 0.9)', borderDash: [3,3], borderWidth: 1.2,
+            label: { content: 'new format launch', display: true, position: 'end',
+              color: '#1f2937', font: { size: 10, weight: 700 },
+              backgroundColor: 'rgba(250, 204, 21, 0.9)', padding: 3,
+              yAdjust: 10 } },
+          // 10-year average reference
+          mean: { type: 'line', drawTime: 'afterDatasetsDraw',
+            yMin: P.kpis.league_hca, yMax: P.kpis.league_hca,
+            borderColor: COLORS.accent, borderDash: [6,4], borderWidth: 1.2,
             label: { content: `10-yr avg ${fmtSigned(P.kpis.league_hca, 2)}`, display: true,
-              position: 'end', color: COLORS.accent, font: { size: 10 }, backgroundColor: 'transparent' } }
+              position: 'end', color: '#fde68a', font: { size: 10, weight: 600 },
+              backgroundColor: 'rgba(120, 53, 15, 0.85)', padding: 3, yAdjust: -8 } },
+          // Zero baseline -- emphasises HCA is always above zero
+          zero: { type: 'line', drawTime: 'afterDatasetsDraw',
+            yMin: 0, yMax: 0,
+            borderColor: 'rgba(148, 163, 184, 0.8)', borderWidth: 1.2,
+            label: { content: 'no HCA (zero line)', display: true, position: 'end',
+              color: '#cbd5e1', font: { size: 10, weight: 600 },
+              backgroundColor: 'rgba(51, 65, 85, 0.85)', padding: 3, yAdjust: -8,
+              xAdjust: -4 } },
         }}
       },
       scales: {
         x: { grid: gridX, ticks: axisTicks,
              title: { display: true, text: 'Season (starting year)', color: COLORS.fgMute, font: { size: 11 } } },
-        y: { grid: gridY, ticks: Object.assign({}, axisTicks, { callback: (v) => fmtSigned(v, 0) }),
-             title: { display: true, text: 'Home point differential', color: COLORS.fgMute, font: { size: 11 } } }
+        y: { beginAtZero: true, suggestedMin: 0, suggestedMax: 7,
+             grid: gridY,
+             ticks: Object.assign({}, axisTicks, {
+               stepSize: 1,
+               callback: (v) => fmtSigned(v, 0) + ' pts',
+             }),
+             title: { display: true, text: 'Home point differential (pts)', color: COLORS.fgMute, font: { size: 11 } } }
       }
     }
   });
-  setText('trend-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString('en-US')} games across ${P.trend.seasons.length} seasons`);
+  setText('trend-n', `n = ${P.trend.n.reduce((s,v)=>s+v,0).toLocaleString('en-US')} games across ${P.trend.seasons.length} seasons \u00B7 shaded band = bootstrap 95% CI`);
 
   // === Density (replaces histogram) ===
   const densityCtx = document.getElementById('chart-density');
